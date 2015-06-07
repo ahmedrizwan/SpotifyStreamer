@@ -27,8 +27,6 @@ public class MainActivity extends AppCompatActivity {
                 Log.e("Artist", artist.name);
             }
         }).start();
-
-
     }
 
 

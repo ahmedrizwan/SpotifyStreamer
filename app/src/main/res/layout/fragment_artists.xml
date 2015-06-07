@@ -1,0 +1,66 @@
+<?xml version="1.0" encoding="utf-8"?>
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+              xmlns:app="http://schemas.android.com/apk/res-auto"
+              android:layout_width="0dp"
+              android:layout_weight="2"
+              android:layout_height="match_parent"
+              android:focusableInTouchMode="true"
+              android:orientation="vertical">
+
+    <android.support.v7.widget.Toolbar
+        android:id="@+id/secondary_toolbar"
+        android:layout_width="match_parent"
+        android:layout_height="?attr/actionBarSize"
+        android:background="?attr/colorPrimary"
+        app:popupTheme="@style/ThemeOverlay.AppCompat.Light"
+        >
+
+        <ImageView
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_margin="6sp"
+            android:src="@drawable/ic_search"/>
+
+        <FrameLayout
+            android:layout_width="fill_parent"
+            android:layout_height="wrap_content"
+            >
+
+            <android.support.design.widget.TextInputLayout
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                app:theme="@style/AppTheme.WhiteAccent"
+                android:layout_marginRight="6sp"
+                >
+
+                <EditText
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:textColor="@android:color/white"
+                    android:textColorHint="@android:color/white"
+                    android:fontFamily="sans-serif-light"
+                    android:singleLine="true"
+                    android:hint="Search Artists"
+                    android:id="@+id/editTextSearch"/>
+
+            </android.support.design.widget.TextInputLayout>
+
+            <ImageButton
+                android:id="@+id/button_clear"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_marginRight="10dp"
+                android:scaleType="fitCenter"
+                android:layout_gravity="right|center_vertical"
+                android:src="@drawable/ic_clear"
+                android:padding="6sp"
+                android:visibility="gone"
+                android:background="@android:color/transparent"
+                />
+
+        </FrameLayout>
+
+        </android.support.v7.widget.Toolbar>
+
+
+</LinearLayout>
