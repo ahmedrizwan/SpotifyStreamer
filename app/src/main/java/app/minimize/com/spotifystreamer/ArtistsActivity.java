@@ -3,6 +3,7 @@ package app.minimize.com.spotifystreamer;
 import android.os.Bundle;
 import android.support.v7.app.AppCompatActivity;
 import android.support.v7.widget.Toolbar;
+import android.view.Menu;
 
 
 public class ArtistsActivity extends AppCompatActivity {
@@ -30,12 +31,16 @@ public class ArtistsActivity extends AppCompatActivity {
 //                    .findFragmentById(R.id.artists_list))
 //                    .setActivateOnItemClick(true);
         }
-
         // TODO: If exposing deep links into your app, handle intents here.
     }
 
+    @Override
+    public boolean onCreateOptionsMenu(final Menu menu) {
+        getMenuInflater().inflate(R.menu.menu_main, menu);
+        return true;
+    }
 
-//    @Override
+    //    @Override
 //    public void onItemSelected(String id) {
 //        if (mTwoPane) {
 //            // In two-pane mode, show the detail view in this activity by
