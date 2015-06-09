@@ -17,21 +17,15 @@ public class ArtistsActivity extends AppCompatActivity {
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
-        setContentView(R.layout.activity_item_list);
+        setContentView(R.layout.activity_artists);
         Toolbar toolbar = (Toolbar) findViewById(R.id.main_toolbar);
         setSupportActionBar(toolbar);
         setTitle(getString(R.string.app_name));
 
-        if (findViewById(R.id.item_detail_container) != null) {
-
+        if (findViewById(R.id.tracks_container) != null) {
             mTwoPane = true;
-            // In two-pane mode, list items should be given the
-            // 'activated' state when touched.
-//            ((ArtistsFragment) getSupportFragmentManager()
-//                    .findFragmentById(R.id.artists_list))
-//                    .setActivateOnItemClick(true);
+
         }
-        // TODO: If exposing deep links into your app, handle intents here.
     }
 
     @Override
@@ -40,6 +34,9 @@ public class ArtistsActivity extends AppCompatActivity {
         return true;
     }
 
+    public boolean isTwoPane(){
+        return mTwoPane;
+    }
     //    @Override
 //    public void onItemSelected(String id) {
 //        if (mTwoPane) {

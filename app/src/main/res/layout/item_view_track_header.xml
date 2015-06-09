@@ -1,0 +1,30 @@
+<?xml version="1.0" encoding="utf-8"?>
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+              android:orientation="vertical"
+              android:background="@android:color/black"
+              android:layout_width="match_parent"
+              android:layout_height="wrap_content"
+              android:padding="@dimen/default_margin">
+
+    <ImageView
+        android:id="@+id/imageViewArtist"
+        android:layout_width="@dimen/iv_artists_large"
+        android:layout_height="@dimen/iv_artists_large"
+        android:layout_margin="@dimen/default_margin"
+        android:src="@drawable/ic_not_available"
+        android:layout_gravity="center"
+        android:scaleType="centerCrop"
+        android:transitionName="@string/artists_image_transition"
+        />
+
+        <TextView
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:textSize="32sp"
+            android:fontFamily="sans-serif-light"
+            android:text="Amr Diab"
+            android:layout_gravity="center"
+            android:transitionName="@string/artists_image_transition"
+            android:id="@+id/textViewArtistName"/>
+
+</LinearLayout>

@@ -12,6 +12,7 @@
         android:layout_height="?attr/actionBarSize"
         android:background="?attr/colorPrimary"
         />
+
     <fragment
         android:id="@+id/artists_list"
         android:name="app.minimize.com.spotifystreamer.ArtistsFragment"
