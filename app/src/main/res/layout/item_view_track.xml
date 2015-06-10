@@ -7,22 +7,20 @@
                 android:focusable="true"
                >
 
-
-
     <ImageView
         android:id="@+id/imageViewAlbum"
-        android:layout_width="72sp"
-        android:layout_height="72sp"
-        android:layout_margin="16sp"
+        android:layout_width="@dimen/iv_list_large"
+        android:layout_height="@dimen/iv_list_large"
+        android:layout_margin="@dimen/default_margin"
         android:transitionName="@string/artists_image_transition"
         android:scaleType="centerCrop"
-        />
+        android:contentDescription="@string/description_album_image"/>
 
     <LinearLayout
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:orientation="vertical"
-        android:layout_marginRight="16sp"
+        android:layout_marginRight="@dimen/default_margin"
         android:layout_toRightOf="@id/imageViewAlbum"
         android:layout_centerVertical="true">
         <TextView
@@ -31,7 +29,7 @@
             android:layout_height="wrap_content"
             android:fontFamily="sans-serif-light"
             android:transitionName="@string/artists_image_transition"
-            android:textSize="22sp"
+            android:textSize="@dimen/tv_large"
             />
 
         <TextView
@@ -40,16 +38,17 @@
             android:layout_height="wrap_content"
             android:fontFamily="sans-serif-light"
             android:transitionName="@string/artists_image_transition"
-            android:textSize="16sp"
+            android:textSize="@dimen/tv_small"
             />
     </LinearLayout>
 
-
+    <!-- Divider -->
     <View
         android:layout_width="match_parent"
-        android:layout_height="1sp"
+        android:layout_height="@dimen/divider"
         android:layout_below="@id/imageViewArtist"
-        android:alpha="0.3"
+        android:alpha="@dimen/divider_alpha"
         android:background="@android:color/darker_gray"
         />
+
 </RelativeLayout>
