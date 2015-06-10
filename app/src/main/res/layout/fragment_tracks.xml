@@ -11,5 +11,8 @@
         android:id="@+id/recyclerViewTracks"
         />
 
+
+    <include layout="@layout/include_progress"/>
+
 </RelativeLayout>
 

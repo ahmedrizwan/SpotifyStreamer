@@ -162,7 +162,7 @@ public class ArtistsFragment extends Fragment implements ArtistsAdapter.ArtistsE
 
     @Override
     public void artistClicked(final Artist artistModel, final RecyclerViewHolderArtists holder) {
-        //Start Activity
+        //Start Activity with sharedElement transition on >=5.0
         Intent intent = new Intent(getActivity(), TracksActivity.class);
         // Pass data object in the bundle and populate details activity.
         if (artistModel.images.size() > 0)
