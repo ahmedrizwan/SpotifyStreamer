@@ -15,5 +15,8 @@
     <string name="tv_no_artists">Oops… No artists found!</string>
     <string name="network_error">Oops... Network Error!</string>
     <string name="search_artists_begin">Search artists to begin!</string>
+    <string name="about_message">Spotify Streamer - Android NanoDegree!</string>
     <item name="divider_alpha" format="float" type="dimen">0.3</item>
+    <string name="title_activity_container_ativity">ContainerAtivity</string>
+    <string name="tv_no_tracks">Oops... No tracks found!</string>
 </resources>

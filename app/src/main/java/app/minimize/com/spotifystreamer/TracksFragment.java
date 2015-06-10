@@ -1,19 +1,20 @@
 package app.minimize.com.spotifystreamer;
 
 import android.content.Context;
-import android.content.Intent;
 import android.os.Bundle;
 import android.support.v4.app.Fragment;
 import android.support.v7.app.AppCompatActivity;
 import android.support.v7.widget.LinearLayoutManager;
 import android.support.v7.widget.RecyclerView;
-import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
+import android.widget.ImageView;
 import android.widget.ProgressBar;
 import android.widget.TextView;
 import android.widget.Toast;
+
+import com.squareup.picasso.Picasso;
 
 import java.util.ArrayList;
 import java.util.Collections;
@@ -41,21 +42,29 @@ public class TracksFragment extends Fragment implements TracksAdapter.TracksEven
     @Override
     public View onCreateView(LayoutInflater inflater, ViewGroup container,
                              Bundle savedInstanceState) {
-        View rootView = inflater.inflate(R.layout.fragment_tracks, container, false);
+        View rootView = inflater.inflate(R.layout.tracks, container, false);
+        ((AppCompatActivity) getActivity()).getSupportActionBar()
+                .setTitle(getString(R.string.activity_tracks_title));
         //ProgressBar
         mProgressBar = (ProgressBar) rootView.findViewById(R.id.progressBar);
         mProgressBar.setVisibility(View.VISIBLE);
         //TextView Error Message
         mTextViewError = (TextView) rootView.findViewById(R.id.textViewError);
-
         //Get Artist info from the parent activity
-        Intent activityIntent = getActivity().getIntent();
-        mUrl = activityIntent.getStringExtra(TracksActivity.IMAGE_URL);
-        mName = activityIntent.getStringExtra(TracksActivity.ARTIST_NAME);
-        mId = activityIntent.getStringExtra(TracksActivity.ARTIST_ID);
+        Bundle activityIntent = getArguments();
+        mUrl = activityIntent.getString(TracksActivity.IMAGE_URL);
+        mName = activityIntent.getString(TracksActivity.ARTIST_NAME);
+        mId = activityIntent.getString(TracksActivity.ARTIST_ID);
+
+        ImageView imageView = (ImageView) rootView.findViewById(R.id.imageViewArtist);
+        if (mUrl != null)
+            Picasso.with(getActivity())
+                    .load(mUrl)
+                    .into(imageView);
 
         //Recycler View init
         mRecyclerViewTracks = (RecyclerView) rootView.findViewById(R.id.recyclerViewTracks);
+        mRecyclerViewTracks.hasFixedSize();
         mRecyclerViewTracks.setLayoutManager(new LinearLayoutManager(getActivity()));
         if (mUrl == null)
             mUrl = "";
@@ -77,10 +86,14 @@ public class TracksFragment extends Fragment implements TracksAdapter.TracksEven
                 public void success(final Tracks tracks, final Response response) {
                     mData = new ArrayList<Track>();
                     for (Track track : tracks.tracks) {
-                        Log.e("Track", track.name);
                         mData.add(track);
                     }
                     Utility.runOnUiThread(((AppCompatActivity) getActivity()), () -> {
+                        if(mData.size()==0){
+                            mTextViewError.setText(getString(R.string.tv_no_tracks));
+                            mTextViewError.setVisibility(View.VISIBLE);
+                        }
+
                         mProgressBar.setVisibility(View.GONE);
                         ((TracksAdapter) mRecyclerViewTracks.getAdapter()).updateList(mData);
                         return null;

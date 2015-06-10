@@ -24,6 +24,6 @@
         android:layout_gravity="center"
         android:fontFamily="sans-serif-light"
         android:textSize="@dimen/tv_extra_large"
-        android:transitionName="@string/artists_image_transition"/>
+        android:transitionName="@string/artists_text_transition"/>
 
 </LinearLayout>

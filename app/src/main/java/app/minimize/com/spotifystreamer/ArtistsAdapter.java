@@ -1,10 +1,12 @@
 package app.minimize.com.spotifystreamer;
 
 import android.content.Context;
+import android.os.Build;
 import android.support.v7.widget.RecyclerView;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
+import android.widget.ImageView;
 
 import com.squareup.picasso.Picasso;
 
@@ -36,7 +38,7 @@ public class ArtistsAdapter extends RecyclerView.Adapter<RecyclerViewHolderArtis
 
     @Override
     public RecyclerViewHolderArtists onCreateViewHolder(final ViewGroup parent,
-                                                 final int viewType) {
+                                                        final int viewType) {
         View view = LayoutInflater.from(parent.getContext())
                 .inflate(R.layout.item_view_artist, parent, false);
         return new RecyclerViewHolderArtists(view);
@@ -48,22 +50,25 @@ public class ArtistsAdapter extends RecyclerView.Adapter<RecyclerViewHolderArtis
         holder.textViewArtistName.setText(artistModel.name);
         int images = artistModel.images.size();
         //if there are images available
-        if (images>0) {
+        if (images > 0) {
             //first cancel the previous request
             Picasso.with(context)
                     .cancelRequest(holder.imageViewArtist);
             //request the smallest image
             Picasso.with(context)
-                    .load(artistModel.images.get(images-1).url)
+                    .load(artistModel.images.get(images - 1).url)
                     .into(holder.imageViewArtist);
         } else {
-
-            holder.imageViewArtist.setImageDrawable(context.getResources()
-                    .getDrawable(R.drawable.ic_not_available));
+            if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.LOLLIPOP)
+                holder.imageViewArtist.setImageDrawable(context.getResources()
+                        .getDrawable(R.drawable.ic_not_available, null));
+            else
+                holder.imageViewArtist.setImageDrawable(context.getResources()
+                        .getDrawable(R.drawable.ic_not_available));
         }
 
         holder.itemView.setOnClickListener(view -> {
-            artistsEventListener.artistClicked(artistModel, holder);
+            artistsEventListener.artistClicked(artistModel, holder, holder.imageViewArtist);
         });
     }
 
@@ -73,10 +78,10 @@ public class ArtistsAdapter extends RecyclerView.Adapter<RecyclerViewHolderArtis
     }
 
 
-
     //Interface for events
-    public static interface ArtistsEventListener{
-        public void artistClicked(Artist artistModel, RecyclerViewHolderArtists holder);
+    public static interface ArtistsEventListener {
+        public void artistClicked(Artist artistModel, RecyclerViewHolderArtists holder, ImageView imageView);
+
         public Context getContext();
     }
 

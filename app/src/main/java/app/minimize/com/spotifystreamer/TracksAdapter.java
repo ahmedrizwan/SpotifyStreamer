@@ -44,23 +44,14 @@ public class TracksAdapter extends RecyclerView.Adapter<RecyclerView.ViewHolder>
     @Override
     public RecyclerView.ViewHolder onCreateViewHolder(final ViewGroup parent,
                                                  final int viewType) {
-        if (viewType == TYPE_ITEM) {
             View view = LayoutInflater.from(parent.getContext())
                     .inflate(R.layout.item_view_track, parent, false);
             return new RecyclerViewHolderTracks(view);
-        } else if (viewType == TYPE_HEADER) {
-            View view = LayoutInflater.from(parent.getContext())
-                    .inflate(R.layout.item_view_track_header, parent, false);
-            return new RecyclerViewHolderArtists(view);
-        }
-
-        throw new RuntimeException("ViewType Incorrect");
     }
 
     @Override
     public void onBindViewHolder(final RecyclerView.ViewHolder holder, final int position) {
-        if(holder instanceof RecyclerViewHolderTracks) {
-            Track track = (Track) mData.get(position-1);
+            Track track = (Track) mData.get(position);
             ((RecyclerViewHolderTracks) holder).textViewTrackName.setText(track.name);
             ((RecyclerViewHolderTracks) holder).textViewTrackAlbum.setText(track.album.name);
             int images = track.album.images.size();
@@ -81,38 +72,14 @@ public class TracksAdapter extends RecyclerView.Adapter<RecyclerView.ViewHolder>
             holder.itemView.setOnClickListener(view -> {
                 tracksEventListener.trackClicked(track, ((RecyclerViewHolderTracks) holder));
             });
-
-        } else {
-            //header
-            ((RecyclerViewHolderArtists) holder).textViewArtistName.setText(artistName);
-            //if there are images available
-            if (!artistUrl.equals("")) {
-                //first cancel the previous request
-                Picasso.with(context)
-                        .cancelRequest(((RecyclerViewHolderArtists) holder).imageViewArtist);
-                //request the smallest image
-                Picasso.with(context)
-                        .load(artistUrl)
-                        .into(((RecyclerViewHolderArtists) holder).imageViewArtist);
-            } else {
-                ((RecyclerViewHolderArtists) holder).imageViewArtist.setImageDrawable(context.getResources()
-                        .getDrawable(R.drawable.ic_not_available));
-            }
-        }
     }
 
     @Override
     public int getItemCount() {
         //return size of items + 1 header
-        return mData.size()+1;
+        return mData.size();
     }
 
-    @Override
-    public int getItemViewType(final int position) {
-        if(position==0)
-            return TYPE_HEADER;
-        return TYPE_ITEM;
-    }
 
     //Interface for events
     public static interface TracksEventListener{

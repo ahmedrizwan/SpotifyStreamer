@@ -27,9 +27,9 @@ public class ArtistsActivity extends AppCompatActivity {
 
     @Override
     public boolean onOptionsItemSelected(final MenuItem item) {
-        if(item.getItemId() == R.id.action_about){
+        if(item.getItemId() == R.id.action_settings){
             AlertDialog.Builder builder = new AlertDialog.Builder(this);
-            builder.setMessage("Spotify Streamer - Android NanoDegree!");
+            builder.setMessage(getString(R.string.about_message));
             builder.setCancelable(true);
             builder.setPositiveButton(getString(R.string.close), (dialogInterface, i) -> dialogInterface.dismiss());
 

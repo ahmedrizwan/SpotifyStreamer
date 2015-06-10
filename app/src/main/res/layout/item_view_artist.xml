@@ -16,6 +16,7 @@
         android:scaleType="centerCrop"
         android:contentDescription="@string/description_artist_image"/>
 
+
     <TextView
         android:id="@+id/textViewArtistName"
         android:layout_width="match_parent"
@@ -24,7 +25,7 @@
         android:layout_marginRight="@dimen/default_margin"
         android:layout_toRightOf="@id/imageViewArtist"
         android:fontFamily="sans-serif-light"
-        android:transitionName="@string/artists_image_transition"
+        android:transitionName="@string/artists_text_transition"
         android:textSize="@dimen/tv_large"
         />
 
