@@ -7,34 +7,34 @@
                 android:focusable="true"
                 android:orientation="horizontal">
 
-
-
     <ImageView
         android:id="@+id/imageViewArtist"
-        android:layout_width="72sp"
-        android:layout_height="72sp"
-        android:layout_margin="16sp"
+        android:layout_width="@dimen/iv_list_large"
+        android:layout_height="@dimen/iv_list_large"
+        android:layout_margin="@dimen/default_margin"
         android:transitionName="@string/artists_image_transition"
         android:scaleType="centerCrop"
-        />
+        android:contentDescription="@string/description_artist_image"/>
 
     <TextView
         android:id="@+id/textViewArtistName"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
         android:layout_centerVertical="true"
-        android:layout_marginRight="16sp"
+        android:layout_marginRight="@dimen/default_margin"
         android:layout_toRightOf="@id/imageViewArtist"
         android:fontFamily="sans-serif-light"
         android:transitionName="@string/artists_image_transition"
-        android:textSize="20sp"
+        android:textSize="@dimen/tv_large"
         />
 
+    <!-- Divider -->
     <View
         android:layout_width="match_parent"
-        android:layout_height="1sp"
+        android:layout_height="@dimen/divider"
         android:layout_below="@id/imageViewArtist"
-        android:alpha="0.3"
+        android:alpha="@dimen/divider_alpha"
         android:background="@android:color/darker_gray"
         />
+
 </RelativeLayout>

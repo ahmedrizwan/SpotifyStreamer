@@ -11,11 +11,7 @@ import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
-import android.widget.ImageView;
-import android.widget.TextView;
 import android.widget.Toast;
-
-import com.squareup.picasso.Picasso;
 
 import java.util.ArrayList;
 import java.util.Collections;
@@ -40,23 +36,16 @@ public class TracksFragment extends Fragment implements TracksAdapter.TracksEven
     public View onCreateView(LayoutInflater inflater, ViewGroup container,
                              Bundle savedInstanceState) {
         View rootView = inflater.inflate(R.layout.fragment_tracks, container, false);
-        ImageView imageViewArtist = (ImageView) rootView.findViewById(R.id.imageViewArtist);
-        TextView textViewName = (TextView) rootView.findViewById(R.id.textViewArtistName);
 
         Intent activityIntent = getActivity().getIntent();
         mUrl = activityIntent.getStringExtra(TracksActivity.IMAGE_URL);
         mName = activityIntent.getStringExtra(TracksActivity.ARTIST_NAME);
         mId = activityIntent.getStringExtra(TracksActivity.ARTIST_ID);
 
-        if (mUrl != null && !mUrl.equals(""))
-            Picasso.with(getActivity())
-                    .load(mUrl)
-                    .into(imageViewArtist);
-        if (mName != null)
-            textViewName.setText(mName);
-
         mRecyclerViewTracks = (RecyclerView) rootView.findViewById(R.id.recyclerViewTracks);
         mRecyclerViewTracks.setLayoutManager(new LinearLayoutManager(getActivity()));
+        if(mUrl==null)
+            mUrl = "";
         mTracksAdapter = new TracksAdapter(this, mData, mName, mUrl);
         mRecyclerViewTracks.setAdapter(mTracksAdapter);
         loadTracks();
@@ -69,7 +58,7 @@ public class TracksFragment extends Fragment implements TracksAdapter.TracksEven
             SpotifyApi spotifyApi = new SpotifyApi();
             SpotifyService spotifyService = spotifyApi.getService();
             Map<String, Object> options = new HashMap<>();
-            options.put("country", "US");
+            options.put(SpotifyService.COUNTRY, "US");
             Tracks tracks = spotifyService.getArtistTopTrack(mId, options);
             mData = new ArrayList<Track>();
             for (Track track : tracks.tracks) {
@@ -81,7 +70,6 @@ public class TracksFragment extends Fragment implements TracksAdapter.TracksEven
                 ((TracksAdapter) mRecyclerViewTracks.getAdapter()).updateList(mData);
                 return null;
             });
-
 
             return null;
         });

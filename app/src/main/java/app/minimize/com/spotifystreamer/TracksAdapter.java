@@ -60,7 +60,7 @@ public class TracksAdapter extends RecyclerView.Adapter<RecyclerView.ViewHolder>
     @Override
     public void onBindViewHolder(final RecyclerView.ViewHolder holder, final int position) {
         if(holder instanceof RecyclerViewHolderTracks) {
-            Track track = (Track) mData.get(position);
+            Track track = (Track) mData.get(position-1);
             ((RecyclerViewHolderTracks) holder).textViewTrackName.setText(track.name);
             ((RecyclerViewHolderTracks) holder).textViewTrackAlbum.setText(track.album.name);
             int images = track.album.images.size();
@@ -81,6 +81,7 @@ public class TracksAdapter extends RecyclerView.Adapter<RecyclerView.ViewHolder>
             holder.itemView.setOnClickListener(view -> {
                 tracksEventListener.trackClicked(track, ((RecyclerViewHolderTracks) holder));
             });
+
         } else {
             //header
             ((RecyclerViewHolderArtists) holder).textViewArtistName.setText(artistName);
@@ -102,7 +103,8 @@ public class TracksAdapter extends RecyclerView.Adapter<RecyclerView.ViewHolder>
 
     @Override
     public int getItemCount() {
-        return mData.size();
+        //return size of items + 1 header
+        return mData.size()+1;
     }
 
     @Override
