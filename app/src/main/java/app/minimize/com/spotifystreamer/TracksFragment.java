@@ -58,8 +58,10 @@ public class TracksFragment extends Fragment implements TracksAdapter.TracksEven
         //ActionBar
         ((AppCompatActivity) getActivity()).setTitle(getString(R.string.activity_tracks_title));
         ActionBar actionBar = ((AppCompatActivity) getActivity()).getSupportActionBar();
-        actionBar.setDisplayHomeAsUpEnabled(true);
-        actionBar.setSubtitle(mName);
+        if (actionBar != null) {
+            actionBar.setDisplayHomeAsUpEnabled(true);
+            actionBar.setSubtitle(mName);
+        }
 
         //ProgressBar
         mProgressBar = (ProgressBar) rootView.findViewById(R.id.progressBar);
@@ -80,7 +82,7 @@ public class TracksFragment extends Fragment implements TracksAdapter.TracksEven
             mName = savedInstanceState.getString(ARTIST_NAME);
             mId = savedInstanceState.getString(ARTIST_ID);
             mData = savedInstanceState.getParcelableArrayList(TRACKS);
-            if((mData != null ? mData.size() : 0) ==0)
+            if ((mData != null ? mData.size() : 0) == 0)
                 mTextViewError.setVisibility(View.VISIBLE);
         } else {
             //Get Artist info from the arguments
@@ -104,7 +106,7 @@ public class TracksFragment extends Fragment implements TracksAdapter.TracksEven
         if (mUrl == null)
             mUrl = "";
 
-        mTracksAdapter = new TracksAdapter(this,mData);
+        mTracksAdapter = new TracksAdapter(this, mData);
         mRecyclerViewTracks.setAdapter(mTracksAdapter);
         return rootView;
     }
