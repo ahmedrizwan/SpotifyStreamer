@@ -1,9 +1,6 @@
 <resources>
     <string name="app_name">Spotify Streamer</string>
-    <string name="hello_world">Hello world!</string>
     <string name="action_settings">Settings</string>
-    <string name="title_item_list">Items</string>
-    <string name="title_item_detail">Item Detail</string>
     <string name="artists_image_transition">artistsImageTransition</string>
     <string name="artists_text_transition">artistsTextTransition</string>
     <string name="activity_tracks_title">Top Ten Tracks</string>
@@ -13,10 +10,10 @@
     <string name="description_album_image">Album Image</string>
     <string name="search_artists">Search Artists</string>
     <string name="tv_no_artists">Oops… No artists found!</string>
-    <string name="network_error">Oops... Network Error!</string>
+    <string name="network_error">Oops… Network Error!</string>
     <string name="search_artists_begin">Search artists to begin!</string>
     <string name="about_message">Spotify Streamer - Android NanoDegree!</string>
     <item name="divider_alpha" format="float" type="dimen">0.3</item>
-    <string name="title_activity_container_ativity">ContainerAtivity</string>
-    <string name="tv_no_tracks">Oops... No tracks found!</string>
+    <item name="parallax_multiplier" format="float" type="dimen">0.7</item>
+    <string name="tv_no_tracks">Oops… No tracks found!</string>
 </resources>

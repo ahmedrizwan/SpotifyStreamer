@@ -22,7 +22,6 @@ public class ContainerActivity extends AppCompatActivity {
                     .add(R.id.container, new ArtistsFragment())
                     .commit();
         }
-
     }
 
     @Override

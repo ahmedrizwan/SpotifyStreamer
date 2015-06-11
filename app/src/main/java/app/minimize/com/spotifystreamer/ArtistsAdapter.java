@@ -15,25 +15,23 @@ import com.squareup.picasso.Picasso;
 import java.util.Collections;
 import java.util.List;
 
-import kaaes.spotify.webapi.android.models.Artist;
-
 /**
  * Created by ahmedrizwan on 6/8/15.
  */
 public class ArtistsAdapter extends RecyclerView.Adapter<ArtistsAdapter.RecyclerViewHolderArtists> {
 
     private Context context;
-    private List<Artist> mData = Collections.emptyList();
+    private List<ArtistParcelable> mData = Collections.emptyList();
 
     private ArtistsEventListener artistsEventListener;
 
-    public ArtistsAdapter(ArtistsEventListener artistsEventListener, List<Artist> data) {
+    public ArtistsAdapter(ArtistsEventListener artistsEventListener, List<ArtistParcelable> data) {
         this.artistsEventListener = artistsEventListener;
         this.context = artistsEventListener.getContext();
         mData = data;
     }
 
-    public void updateList(List<Artist> data) {
+    public void updateList(List<ArtistParcelable> data) {
         mData = data;
         notifyDataSetChanged();
     }
@@ -49,17 +47,17 @@ public class ArtistsAdapter extends RecyclerView.Adapter<ArtistsAdapter.Recycler
     @TargetApi(Build.VERSION_CODES.LOLLIPOP)
     @Override
     public void onBindViewHolder(final RecyclerViewHolderArtists holder, final int position) {
-        Artist artistModel = (Artist) mData.get(position);
+        ArtistParcelable artistModel = (ArtistParcelable) mData.get(position);
         holder.textViewArtistName.setText(artistModel.name);
-        int images = artistModel.images.size();
-        //if there are images available
+        int images = artistModel.artistImageUrls.size();
+        //if there are artistImageUrls available
         if (images > 0) {
             //first cancel the previous request
             Picasso.with(context)
                     .cancelRequest(holder.imageViewArtist);
             //request the smallest image
             Picasso.with(context)
-                    .load(artistModel.images.get(images - 1).url)
+                    .load(artistModel.artistImageUrls.get(images - 1))
                     .into(holder.imageViewArtist);
         } else {
             if (Utility.isVersionLollipopAndAbove())
@@ -97,7 +95,7 @@ public class ArtistsAdapter extends RecyclerView.Adapter<ArtistsAdapter.Recycler
 
     //Interface for events
     public static interface ArtistsEventListener {
-        public void artistClicked(Artist artistModel, RecyclerViewHolderArtists holder);
+        public void artistClicked(ArtistParcelable artistModel, RecyclerViewHolderArtists holder);
 
         public Context getContext();
     }

@@ -13,21 +13,19 @@ import com.squareup.picasso.Picasso;
 import java.util.Collections;
 import java.util.List;
 
-import kaaes.spotify.webapi.android.models.Track;
-
 /**
  * Created by ahmedrizwan on 6/9/15.
  */
 public class TracksAdapter extends RecyclerView.Adapter<TracksAdapter.RecyclerViewHolderTracks> {
 
     private Context context;
-    private List<Track> mData = Collections.emptyList();
+    private List<TrackParcelable> mData = Collections.emptyList();
 
     private TracksEventListener tracksEventListener;
     private String artistName;
     private String artistUrl;
 
-    public TracksAdapter(TracksEventListener tracksEventListener, List<Track> data, String artistName, String artistUrl) {
+    public TracksAdapter(TracksEventListener tracksEventListener, List<TrackParcelable> data) {
         this.tracksEventListener = tracksEventListener;
         this.artistName = artistName;
         this.artistUrl = artistUrl;
@@ -35,7 +33,7 @@ public class TracksAdapter extends RecyclerView.Adapter<TracksAdapter.RecyclerVi
         mData = data;
     }
 
-    public void updateList(List<Track> data) {
+    public void updateList(List<TrackParcelable> data) {
         mData = data;
         notifyDataSetChanged();
     }
@@ -50,18 +48,18 @@ public class TracksAdapter extends RecyclerView.Adapter<TracksAdapter.RecyclerVi
 
     @Override
     public void onBindViewHolder(final RecyclerViewHolderTracks holder, final int position) {
-            Track track = (Track) mData.get(position);
-            holder.textViewTrackName.setText(track.name);
-            holder.textViewTrackAlbum.setText(track.album.name);
-            int images = track.album.images.size();
-            //if there are images available
+            TrackParcelable track = (TrackParcelable) mData.get(position);
+            holder.textViewTrackName.setText(track.songName);
+            holder.textViewTrackAlbum.setText(track.albumName);
+            int images = track.albumImageUrls.size();
+            //if there are artistImageUrls available
             if (images > 0) {
                 //first cancel the previous request
                 Picasso.with(context)
                         .cancelRequest((holder).imageViewAlbum);
                 //request the smallest image
                 Picasso.with(context)
-                        .load(track.album.images.get(images - 1).url)
+                        .load(track.albumImageUrls.get(images - 1))
                         .into((holder).imageViewAlbum);
             } else {
                 (holder).imageViewAlbum.setImageDrawable(context.getResources()
@@ -82,7 +80,7 @@ public class TracksAdapter extends RecyclerView.Adapter<TracksAdapter.RecyclerVi
 
     //Interface for events
     public static interface TracksEventListener{
-        public void trackClicked(Track track, RecyclerViewHolderTracks holder);
+        public void trackClicked(TrackParcelable track, RecyclerViewHolderTracks holder);
         public Context getContext();
     }
 
