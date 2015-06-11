@@ -1,5 +1,6 @@
 package app.minimize.com.spotifystreamer;
 
+import android.annotation.TargetApi;
 import android.content.Context;
 import android.os.Build;
 import android.support.v7.widget.RecyclerView;
@@ -7,6 +8,7 @@ import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.ImageView;
+import android.widget.TextView;
 
 import com.squareup.picasso.Picasso;
 
@@ -18,7 +20,7 @@ import kaaes.spotify.webapi.android.models.Artist;
 /**
  * Created by ahmedrizwan on 6/8/15.
  */
-public class ArtistsAdapter extends RecyclerView.Adapter<RecyclerViewHolderArtists> {
+public class ArtistsAdapter extends RecyclerView.Adapter<ArtistsAdapter.RecyclerViewHolderArtists> {
 
     private Context context;
     private List<Artist> mData = Collections.emptyList();
@@ -40,10 +42,11 @@ public class ArtistsAdapter extends RecyclerView.Adapter<RecyclerViewHolderArtis
     public RecyclerViewHolderArtists onCreateViewHolder(final ViewGroup parent,
                                                         final int viewType) {
         View view = LayoutInflater.from(parent.getContext())
-                .inflate(R.layout.item_view_artist, parent, false);
+                .inflate(R.layout.item_view_artist, null);
         return new RecyclerViewHolderArtists(view);
     }
 
+    @TargetApi(Build.VERSION_CODES.LOLLIPOP)
     @Override
     public void onBindViewHolder(final RecyclerViewHolderArtists holder, final int position) {
         Artist artistModel = (Artist) mData.get(position);
@@ -59,7 +62,7 @@ public class ArtistsAdapter extends RecyclerView.Adapter<RecyclerViewHolderArtis
                     .load(artistModel.images.get(images - 1).url)
                     .into(holder.imageViewArtist);
         } else {
-            if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.LOLLIPOP)
+            if (Utility.isVersionLollipopAndAbove())
                 holder.imageViewArtist.setImageDrawable(context.getResources()
                         .getDrawable(R.drawable.ic_not_available, null));
             else
@@ -67,8 +70,13 @@ public class ArtistsAdapter extends RecyclerView.Adapter<RecyclerViewHolderArtis
                         .getDrawable(R.drawable.ic_not_available));
         }
 
+        if(Utility.isVersionLollipopAndAbove()) {
+            holder.imageViewArtist.setTransitionName(context.getString(R.string.artists_image_transition) + position);
+            holder.textViewArtistName.setTransitionName(context.getString(R.string.artists_text_transition) + position);
+        }
+
         holder.itemView.setOnClickListener(view -> {
-            artistsEventListener.artistClicked(artistModel, holder, holder.imageViewArtist);
+            artistsEventListener.artistClicked(artistModel, holder);
         });
     }
 
@@ -77,12 +85,22 @@ public class ArtistsAdapter extends RecyclerView.Adapter<RecyclerViewHolderArtis
         return mData.size();
     }
 
+    public class RecyclerViewHolderArtists extends RecyclerView.ViewHolder {
+        TextView textViewArtistName;
+        ImageView imageViewArtist;
+        public RecyclerViewHolderArtists(final View itemView) {
+            super(itemView);
+            textViewArtistName = (TextView) itemView.findViewById(R.id.textViewArtistName);
+            imageViewArtist = (ImageView) itemView.findViewById(R.id.imageViewArtist);
+        }
+    }
 
     //Interface for events
     public static interface ArtistsEventListener {
-        public void artistClicked(Artist artistModel, RecyclerViewHolderArtists holder, ImageView imageView);
+        public void artistClicked(Artist artistModel, RecyclerViewHolderArtists holder);
 
         public Context getContext();
     }
+
 
 }

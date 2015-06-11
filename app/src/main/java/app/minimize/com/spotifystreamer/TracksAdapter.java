@@ -5,6 +5,8 @@ import android.support.v7.widget.RecyclerView;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
+import android.widget.ImageView;
+import android.widget.TextView;
 
 import com.squareup.picasso.Picasso;
 
@@ -16,10 +18,7 @@ import kaaes.spotify.webapi.android.models.Track;
 /**
  * Created by ahmedrizwan on 6/9/15.
  */
-public class TracksAdapter extends RecyclerView.Adapter<RecyclerView.ViewHolder> {
-
-    private static final int TYPE_HEADER = 0;
-    private static final int TYPE_ITEM = 1;
+public class TracksAdapter extends RecyclerView.Adapter<TracksAdapter.RecyclerViewHolderTracks> {
 
     private Context context;
     private List<Track> mData = Collections.emptyList();
@@ -42,7 +41,7 @@ public class TracksAdapter extends RecyclerView.Adapter<RecyclerView.ViewHolder>
     }
 
     @Override
-    public RecyclerView.ViewHolder onCreateViewHolder(final ViewGroup parent,
+    public RecyclerViewHolderTracks onCreateViewHolder(final ViewGroup parent,
                                                  final int viewType) {
             View view = LayoutInflater.from(parent.getContext())
                     .inflate(R.layout.item_view_track, parent, false);
@@ -50,27 +49,27 @@ public class TracksAdapter extends RecyclerView.Adapter<RecyclerView.ViewHolder>
     }
 
     @Override
-    public void onBindViewHolder(final RecyclerView.ViewHolder holder, final int position) {
+    public void onBindViewHolder(final RecyclerViewHolderTracks holder, final int position) {
             Track track = (Track) mData.get(position);
-            ((RecyclerViewHolderTracks) holder).textViewTrackName.setText(track.name);
-            ((RecyclerViewHolderTracks) holder).textViewTrackAlbum.setText(track.album.name);
+            holder.textViewTrackName.setText(track.name);
+            holder.textViewTrackAlbum.setText(track.album.name);
             int images = track.album.images.size();
             //if there are images available
             if (images > 0) {
                 //first cancel the previous request
                 Picasso.with(context)
-                        .cancelRequest(((RecyclerViewHolderTracks) holder).imageViewAlbum);
+                        .cancelRequest((holder).imageViewAlbum);
                 //request the smallest image
                 Picasso.with(context)
                         .load(track.album.images.get(images - 1).url)
-                        .into(((RecyclerViewHolderTracks) holder).imageViewAlbum);
+                        .into((holder).imageViewAlbum);
             } else {
-                ((RecyclerViewHolderTracks) holder).imageViewAlbum.setImageDrawable(context.getResources()
+                (holder).imageViewAlbum.setImageDrawable(context.getResources()
                         .getDrawable(R.drawable.ic_not_available));
             }
 
             holder.itemView.setOnClickListener(view -> {
-                tracksEventListener.trackClicked(track, ((RecyclerViewHolderTracks) holder));
+                tracksEventListener.trackClicked(track, (holder));
             });
     }
 
@@ -87,4 +86,17 @@ public class TracksAdapter extends RecyclerView.Adapter<RecyclerView.ViewHolder>
         public Context getContext();
     }
 
+    public class RecyclerViewHolderTracks extends RecyclerView.ViewHolder {
+
+        TextView textViewTrackName;
+        TextView textViewTrackAlbum;
+        ImageView imageViewAlbum;
+
+        public RecyclerViewHolderTracks(final View itemView) {
+            super(itemView);
+            textViewTrackName = (TextView) itemView.findViewById(R.id.textViewTrackName);
+            textViewTrackAlbum = (TextView) itemView.findViewById(R.id.textViewTrackAlbum);
+            imageViewAlbum = (ImageView) itemView.findViewById(R.id.imageViewAlbum);
+        }
+    }
 }

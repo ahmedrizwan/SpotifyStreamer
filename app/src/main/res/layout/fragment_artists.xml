@@ -6,6 +6,7 @@
               android:focusableInTouchMode="true"
               android:orientation="vertical">
 
+
     <android.support.v7.widget.Toolbar
         android:id="@+id/secondaryToolbar"
         android:layout_width="match_parent"
@@ -71,6 +72,6 @@
         android:layout_below="@id/secondaryToolbar"
         />
 
-    <include layout="@layout/include_progress"/>
+    <include layout="@layout/include_progress" />
 
 </RelativeLayout>

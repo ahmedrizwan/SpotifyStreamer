@@ -1,5 +1,6 @@
 package app.minimize.com.spotifystreamer;
 
+import android.os.Build;
 import android.support.v7.app.AppCompatActivity;
 import android.util.Log;
 
@@ -30,5 +31,9 @@ public class Utility {
                 }
             }
         }).start();
+    }
+
+    public static boolean isVersionLollipopAndAbove() {
+        return Build.VERSION.SDK_INT >= Build.VERSION_CODES.LOLLIPOP;
     }
 }

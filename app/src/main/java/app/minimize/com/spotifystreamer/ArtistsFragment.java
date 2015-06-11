@@ -1,7 +1,9 @@
 package app.minimize.com.spotifystreamer;
 
+import android.annotation.TargetApi;
 import android.app.Activity;
 import android.content.Context;
+import android.os.Build;
 import android.os.Bundle;
 import android.support.annotation.Nullable;
 import android.support.v4.app.Fragment;
@@ -20,7 +22,6 @@ import android.view.View;
 import android.view.ViewGroup;
 import android.widget.EditText;
 import android.widget.ImageButton;
-import android.widget.ImageView;
 import android.widget.ProgressBar;
 import android.widget.TextView;
 
@@ -52,6 +53,9 @@ public class ArtistsFragment extends Fragment implements ArtistsAdapter.ArtistsE
     public View onCreateView(final LayoutInflater inflater, final ViewGroup container, final Bundle savedInstanceState) {
         View rootView = inflater.inflate(R.layout.fragment_artists, container, false);
 
+        ((AppCompatActivity) getActivity()).setTitle(getString(R.string.app_name));
+        ((AppCompatActivity) getActivity()).getSupportActionBar()
+                .setDisplayHomeAsUpEnabled(false);
         //Clear Button
         mImageButtonClear = (ImageButton) rootView.findViewById(R.id.imageButtonClear);
 
@@ -165,35 +169,55 @@ public class ArtistsFragment extends Fragment implements ArtistsAdapter.ArtistsE
         super.onDetach();
     }
 
+    @TargetApi(Build.VERSION_CODES.LOLLIPOP)
     @Override
-    public void artistClicked(final Artist artistModel, final RecyclerViewHolderArtists holder,ImageView imageView) {
-        final TransitionSet transitionSet = new TransitionSet();
-        transitionSet.addTransition(new ChangeImageTransform());
-        transitionSet.addTransition(new ChangeBounds());
-        transitionSet.addTransition(new ChangeTransform());
-        transitionSet.setDuration(300);
+    public void artistClicked(final Artist artistModel, final ArtistsAdapter.RecyclerViewHolderArtists holder) {
+        if (Utility.isVersionLollipopAndAbove()) {
+            final TransitionSet transitionSet = new TransitionSet();
+            transitionSet.addTransition(new ChangeImageTransform());
+            transitionSet.addTransition(new ChangeBounds());
+            transitionSet.addTransition(new ChangeTransform());
+            transitionSet.setDuration(300);
 
-        setSharedElementReturnTransition(transitionSet);
-        setSharedElementEnterTransition(transitionSet);
+            setSharedElementReturnTransition(transitionSet);
+            setSharedElementEnterTransition(transitionSet);
 
-        Fragment fragment = new TracksFragment();
-        fragment.setSharedElementEnterTransition(transitionSet);
-        Bundle bundle = new Bundle();
+            TracksFragment tracksFragment = new TracksFragment();
+            tracksFragment.setImageTransitionName(holder.imageViewArtist.getTransitionName());
+            tracksFragment.setTextTransitionName(holder.textViewArtistName.getTransitionName());
+            tracksFragment.setSharedElementEnterTransition(transitionSet);
+            Bundle bundle = new Bundle();
 
-        if (artistModel.images.size() > 0)
-            bundle.putString(TracksActivity.IMAGE_URL, artistModel.images.get(artistModel.images.size() - 2).url);
-        bundle.putString(TracksActivity.ARTIST_NAME, artistModel.name);
-        bundle.putString(TracksActivity.ARTIST_ID, artistModel.id);
-        fragment.setArguments(bundle);
+            if (artistModel.images.size() > 0)
+                bundle.putString(TracksFragment.IMAGE_URL, artistModel.images.get(artistModel.images.size() - 2).url);
+            bundle.putString(TracksFragment.ARTIST_NAME, artistModel.name);
+            bundle.putString(TracksFragment.ARTIST_ID, artistModel.id);
+            tracksFragment.setArguments(bundle);
 
-        fragment.setSharedElementEnterTransition(transitionSet);
+            tracksFragment.setSharedElementEnterTransition(transitionSet);
 
-        FragmentTransaction trans = getActivity().getSupportFragmentManager()
-                .beginTransaction();
-        trans.replace(R.id.container, fragment);
-        trans.addToBackStack(null);
-        trans.addSharedElement(imageView, getString(R.string.artists_image_transition));
-        trans.commit();
+            FragmentTransaction fragmentTransaction = getActivity().getSupportFragmentManager()
+                    .beginTransaction();
+            fragmentTransaction.replace(R.id.container, tracksFragment)
+                    .addToBackStack(null)
+                    .addSharedElement(holder.imageViewArtist, holder.imageViewArtist.getTransitionName())
+                    .addSharedElement(holder.textViewArtistName,
+                            holder.textViewArtistName.getTransitionName())
+                    .commit();
+        } else {
+            TracksFragment fragment = new TracksFragment();
+            Bundle bundle = new Bundle();
+            if (artistModel.images.size() > 0)
+                bundle.putString(TracksFragment.IMAGE_URL, artistModel.images.get(artistModel.images.size() - 2).url);
+            bundle.putString(TracksFragment.ARTIST_NAME, artistModel.name);
+            bundle.putString(TracksFragment.ARTIST_ID, artistModel.id);
+            fragment.setArguments(bundle);
+            FragmentTransaction trans = getActivity().getSupportFragmentManager()
+                    .beginTransaction();
+            trans.replace(R.id.container, fragment);
+            trans.addToBackStack(null);
+            trans.commit();
+        }
     }
 
     @Override
@@ -208,12 +232,13 @@ public class ArtistsFragment extends Fragment implements ArtistsAdapter.ArtistsE
 
     @Override
     public void onTextChanged(final CharSequence charSequence, final int i, final int i1, final int i2) {
-        searchForArtists(charSequence.toString());
+
     }
 
     @Override
     public void afterTextChanged(final Editable editable) {
-
+        searchForArtists(mEditTextSearch.getText()
+                .toString());
     }
 
 

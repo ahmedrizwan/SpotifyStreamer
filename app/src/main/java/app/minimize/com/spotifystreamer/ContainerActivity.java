@@ -1,34 +1,28 @@
 package app.minimize.com.spotifystreamer;
 
 import android.os.Bundle;
-import android.support.annotation.Nullable;
-import android.support.v4.app.Fragment;
-import android.support.v4.app.FragmentTransaction;
+import android.support.v7.app.AlertDialog;
 import android.support.v7.app.AppCompatActivity;
 import android.support.v7.widget.Toolbar;
-import android.transition.ChangeBounds;
-import android.transition.ChangeImageTransform;
-import android.transition.ChangeTransform;
-import android.transition.TransitionSet;
-import android.view.LayoutInflater;
 import android.view.Menu;
 import android.view.MenuItem;
-import android.view.View;
-import android.view.ViewGroup;
 
 public class ContainerActivity extends AppCompatActivity {
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
-        setContentView(R.layout.container_activity);
+        setContentView(R.layout.activity_container);
         Toolbar toolbar = (Toolbar) findViewById(R.id.mainToolbar);
         setSupportActionBar(toolbar);
-        setTitle(getString(R.string.app_name));
+
         //make transaction for the artists fragment
-        getSupportFragmentManager().beginTransaction()
-                .add(R.id.container, new TestFragmentOne())
-                .commit();
+        if(savedInstanceState == null) {
+            getSupportFragmentManager().beginTransaction()
+                    .add(R.id.container, new ArtistsFragment())
+                    .commit();
+        }
+
     }
 
     @Override
@@ -46,49 +40,23 @@ public class ContainerActivity extends AppCompatActivity {
         int id = item.getItemId();
 
         //noinspection SimplifiableIfStatement
-        if (id == R.id.action_settings) {
+        if (id == R.id.action_about) {
+            AlertDialog.Builder builder = new AlertDialog.Builder(this);
+            builder.setMessage(getString(R.string.about_message));
+            builder.setCancelable(true);
+            builder.setPositiveButton(getString(R.string.close), (dialogInterface, i) -> dialogInterface.dismiss());
+
+            AlertDialog dialog = builder.create();
+            dialog.show();
+            dialog.getButton(AlertDialog.BUTTON_POSITIVE).setTextColor(getResources().getColor(R.color.color_primary));
             return true;
+        } else if(id== android.R.id.home) {
+            getSupportFragmentManager().popBackStack();
         }
 
         return super.onOptionsItemSelected(item);
     }
 
-    public static class TestFragmentOne extends Fragment{
-        @Nullable
-        @Override
-        public View onCreateView(final LayoutInflater inflater, final ViewGroup container, final Bundle savedInstanceState) {
-            View rootView = inflater.inflate(R.layout.test_one,container,false);
-            rootView.findViewById(R.id.imageViewArtist).setOnClickListener(view -> {
-                final TransitionSet transitionSet = new TransitionSet();
-                transitionSet.addTransition(new ChangeImageTransform());
-                transitionSet.addTransition(new ChangeBounds());
-                transitionSet.addTransition(new ChangeTransform());
-                transitionSet.setDuration(300);
-
-                setSharedElementReturnTransition(transitionSet);
-
-                Fragment fragment = new TestFragmentTwo();
-                fragment.setSharedElementEnterTransition(transitionSet);
-
-                FragmentTransaction trans = getActivity().getSupportFragmentManager().beginTransaction();
-                trans.replace(R.id.container, fragment);
-                trans.addToBackStack(null);
-                trans.addSharedElement(rootView.findViewById(R.id.imageViewArtist), getString(R.string.artists_image_transition));
-                trans.commit();
-            });
 
 
-            return rootView;
-        }
-    }
-
-    public static class TestFragmentTwo extends Fragment{
-        @Nullable
-        @Override
-        public View onCreateView(final LayoutInflater inflater, final ViewGroup container, final Bundle savedInstanceState) {
-            View rootView = inflater.inflate(R.layout.test_two,container,false);
-
-            return rootView;
-        }
-    }
 }
