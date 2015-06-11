@@ -1,8 +1,12 @@
 package app.minimize.com.spotifystreamer;
 
+import android.annotation.TargetApi;
 import android.content.Context;
+import android.os.Build;
 import android.os.Bundle;
+import android.os.Parcelable;
 import android.support.v4.app.Fragment;
+import android.support.v7.app.ActionBar;
 import android.support.v7.app.AppCompatActivity;
 import android.support.v7.widget.LinearLayoutManager;
 import android.support.v7.widget.RecyclerView;
@@ -32,47 +36,86 @@ import retrofit.client.Response;
 
 public class TracksFragment extends Fragment implements TracksAdapter.TracksEventListener {
 
+    public static final String IMAGE_URL = "ImageUrl";
+    public static final String ARTIST_NAME = "ArtistName";
+    public static final String ARTIST_ID = "ArtistId";
+    private static final String TRACKS = "Tracks";
+
     private String mUrl, mName, mId;
     private RecyclerView mRecyclerViewTracks;
     private TracksAdapter mTracksAdapter;
-    private List<Track> mData = Collections.emptyList();
+    private List<TrackParcelable> mData = Collections.emptyList();
     private ProgressBar mProgressBar;
     private TextView mTextViewError;
+    private String imageTransitionName;
+    private String textTransitionName;
 
+    @TargetApi(Build.VERSION_CODES.LOLLIPOP)
     @Override
     public View onCreateView(LayoutInflater inflater, ViewGroup container,
                              Bundle savedInstanceState) {
-        View rootView = inflater.inflate(R.layout.tracks, container, false);
-        ((AppCompatActivity) getActivity()).getSupportActionBar()
-                .setTitle(getString(R.string.activity_tracks_title));
+        View rootView = inflater.inflate(R.layout.fragment_tracks, container, false);
+        //ActionBar
+        ((AppCompatActivity) getActivity()).setTitle(getString(R.string.activity_tracks_title));
+        ActionBar actionBar = ((AppCompatActivity) getActivity()).getSupportActionBar();
+        actionBar.setDisplayHomeAsUpEnabled(true);
+        actionBar.setSubtitle(mName);
+
         //ProgressBar
         mProgressBar = (ProgressBar) rootView.findViewById(R.id.progressBar);
-        mProgressBar.setVisibility(View.VISIBLE);
+
         //TextView Error Message
         mTextViewError = (TextView) rootView.findViewById(R.id.textViewError);
-        //Get Artist info from the parent activity
-        Bundle activityIntent = getArguments();
-        mUrl = activityIntent.getString(TracksActivity.IMAGE_URL);
-        mName = activityIntent.getString(TracksActivity.ARTIST_NAME);
-        mId = activityIntent.getString(TracksActivity.ARTIST_ID);
 
         ImageView imageView = (ImageView) rootView.findViewById(R.id.imageViewArtist);
-        if (mUrl != null)
-            Picasso.with(getActivity())
-                    .load(mUrl)
-                    .into(imageView);
 
         //Recycler View init
         mRecyclerViewTracks = (RecyclerView) rootView.findViewById(R.id.recyclerViewTracks);
         mRecyclerViewTracks.hasFixedSize();
         mRecyclerViewTracks.setLayoutManager(new LinearLayoutManager(getActivity()));
+
+        //Restore state
+        if (savedInstanceState != null) {
+            mUrl = savedInstanceState.getString(IMAGE_URL);
+            mName = savedInstanceState.getString(ARTIST_NAME);
+            mId = savedInstanceState.getString(ARTIST_ID);
+            mData = savedInstanceState.getParcelableArrayList(TRACKS);
+            if((mData != null ? mData.size() : 0) ==0)
+                mTextViewError.setVisibility(View.VISIBLE);
+        } else {
+            //Get Artist info from the arguments
+            Bundle activityIntent = getArguments();
+            mUrl = activityIntent.getString(IMAGE_URL);
+            mName = activityIntent.getString(ARTIST_NAME);
+            mId = activityIntent.getString(ARTIST_ID);
+            mProgressBar.setVisibility(View.VISIBLE);
+            loadTracks();
+        }
+
+        if (Utility.isVersionLollipopAndAbove()) {
+            imageView.setTransitionName(imageTransitionName);
+        }
+
+        if (mUrl != null && !mUrl.equals(""))
+            Picasso.with(getActivity())
+                    .load(mUrl)
+                    .into(imageView);
+
         if (mUrl == null)
             mUrl = "";
 
-        mTracksAdapter = new TracksAdapter(this, mData, mName, mUrl);
+        mTracksAdapter = new TracksAdapter(this,mData);
         mRecyclerViewTracks.setAdapter(mTracksAdapter);
-        loadTracks();
         return rootView;
+    }
+
+    @Override
+    public void onSaveInstanceState(final Bundle outState) {
+        super.onSaveInstanceState(outState);
+        outState.putString(IMAGE_URL, mUrl);
+        outState.putString(ARTIST_ID, mId);
+        outState.putString(ARTIST_NAME, mName);
+        outState.putParcelableArrayList(TRACKS, (ArrayList<? extends Parcelable>) mData);
     }
 
     private void loadTracks() {
@@ -84,12 +127,12 @@ public class TracksFragment extends Fragment implements TracksAdapter.TracksEven
             spotifyService.getArtistTopTrack(mId, options, new Callback<Tracks>() {
                 @Override
                 public void success(final Tracks tracks, final Response response) {
-                    mData = new ArrayList<Track>();
+                    mData = new ArrayList<TrackParcelable>();
                     for (Track track : tracks.tracks) {
-                        mData.add(track);
+                        mData.add(new TrackParcelable(track.name, track.album.name, track.album.images));
                     }
                     Utility.runOnUiThread(((AppCompatActivity) getActivity()), () -> {
-                        if(mData.size()==0){
+                        if (mData.size() == 0) {
                             mTextViewError.setText(getString(R.string.tv_no_tracks));
                             mTextViewError.setVisibility(View.VISIBLE);
                         }
@@ -118,13 +161,21 @@ public class TracksFragment extends Fragment implements TracksAdapter.TracksEven
     }
 
     @Override
-    public void trackClicked(final Track track, final RecyclerViewHolderTracks holder) {
-        Toast.makeText(getActivity(), "Track Clicked!", Toast.LENGTH_SHORT)
+    public void trackClicked(final TrackParcelable track, final TracksAdapter.RecyclerViewHolderTracks holder) {
+        Toast.makeText(getActivity(), track.songName + " Clicked!", Toast.LENGTH_SHORT)
                 .show();
     }
 
     @Override
     public Context getContext() {
         return getActivity();
+    }
+
+    public void setImageTransitionName(final String imageTransitionName) {
+        this.imageTransitionName = imageTransitionName;
+    }
+
+    public void setTextTransitionName(final String textTransitionName) {
+        this.textTransitionName = textTransitionName;
     }
 }
