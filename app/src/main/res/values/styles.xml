@@ -6,7 +6,6 @@
         <item name="colorPrimary">@color/color_primary</item>
         <item name="colorPrimaryDark">@color/color_primary_dark</item>
         <item name="colorAccent">@color/color_accent</item>
-
         <item name="android:windowContentTransitions">true</item>
     </style>
 
@@ -14,7 +13,17 @@
         <item name="colorAccent">#FFFFFF</item>
     </style>
 
-    <color name="color_primary">#FF9800</color>
-    <color name="color_primary_dark">#F57C00</color>
-    <color name="color_accent">#ff0057</color>
+    <!-- Base application theme. -->
+    <style name="AppTheme.Light" parent="Theme.AppCompat.Light.NoActionBar">
+        <!-- Customize your theme here. -->
+        <item name="colorPrimary">@color/color_primary</item>
+        <item name="colorPrimaryDark">@color/color_primary_dark</item>
+        <item name="colorAccent">@color/color_accent</item>
+        <item name="android:windowContentTransitions">true</item>
+    </style>
+
+
+    <color name="color_primary">#ff0048</color>
+    <color name="color_primary_dark">#c80044</color>
+    <color name="color_accent">#ff8d10</color>
 </resources>

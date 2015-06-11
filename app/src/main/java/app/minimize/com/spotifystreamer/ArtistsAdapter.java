@@ -96,9 +96,7 @@ public class ArtistsAdapter extends RecyclerView.Adapter<ArtistsAdapter.Recycler
     //Interface for events
     public static interface ArtistsEventListener {
         public void artistClicked(ArtistParcelable artistModel, RecyclerViewHolderArtists holder);
-
         public Context getContext();
     }
-
 
 }

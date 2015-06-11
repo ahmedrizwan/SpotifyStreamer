@@ -19,9 +19,14 @@ import android.transition.ChangeBounds;
 import android.transition.ChangeImageTransform;
 import android.transition.ChangeTransform;
 import android.transition.TransitionSet;
+import android.view.KeyEvent;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
+import android.view.animation.Animation;
+import android.view.animation.BounceInterpolator;
+import android.view.animation.ScaleAnimation;
+import android.view.inputmethod.InputMethodManager;
 import android.widget.EditText;
 import android.widget.ImageButton;
 import android.widget.ProgressBar;
@@ -50,14 +55,13 @@ public class ArtistsFragment extends Fragment implements ArtistsAdapter.ArtistsE
     private TextView mTextViewError;
     private EditText mEditTextSearch;
 
-    private String mArtistName = "";
-
     @Nullable
     @Override
     public View onCreateView(final LayoutInflater inflater, final ViewGroup container, final Bundle savedInstanceState) {
         View rootView = inflater.inflate(R.layout.fragment_artists, container, false);
         ((AppCompatActivity) getActivity()).setTitle(getString(R.string.app_name));
         ActionBar actionBar = ((AppCompatActivity) getActivity()).getSupportActionBar();
+
         if (actionBar != null) {
             actionBar.setDisplayHomeAsUpEnabled(false);
             //Clear the subtitle, as I'm re-using the actionBar for both fragments
@@ -65,13 +69,13 @@ public class ArtistsFragment extends Fragment implements ArtistsAdapter.ArtistsE
         }
 
         if (savedInstanceState != null) {
-            mArtistName = savedInstanceState.getString(TracksFragment.ARTIST_NAME);
             mArtists = savedInstanceState.getParcelableArrayList(ARTIST);
             //RecyclerView
             mArtistsAdapter = new ArtistsAdapter(this, mArtists);
         } else {
             mArtistsAdapter = new ArtistsAdapter(this, mArtists);
         }
+
         //Clear Button
         mImageButtonClear = (ImageButton) rootView.findViewById(R.id.imageButtonClear);
 
@@ -87,26 +91,46 @@ public class ArtistsFragment extends Fragment implements ArtistsAdapter.ArtistsE
         //EditText
         mEditTextSearch = (EditText) rootView.findViewById(R.id.editTextSearch);
 
+        mEditTextSearch.setOnKeyListener((v, keyCode, event) -> {
+            // If the event is a key-down event on the "enter" button
+            if ((event.getAction() == KeyEvent.ACTION_DOWN) &&
+                    (keyCode == KeyEvent.KEYCODE_ENTER)) {
+                // Perform action on key press
+                searchForArtists(mEditTextSearch.getText()
+                        .toString());
+                // code to hide the soft keyboard
+                InputMethodManager inputMethodManager = (InputMethodManager) getActivity().getSystemService(
+                        Context.INPUT_METHOD_SERVICE);
+                inputMethodManager.hideSoftInputFromWindow(mEditTextSearch.getApplicationWindowToken(), 0);
+                return true;
+            }
+            return false;
+        });
+
         mEditTextSearch.addTextChangedListener(this);
 
         mImageButtonClear.setOnClickListener(view -> {
             //clear the editText
             mEditTextSearch.setText("");
             mImageButtonClear.setVisibility(View.GONE);
+            mArtists = new ArrayList<ArtistParcelable>();
+            mArtistsAdapter.updateList(mArtists);
+            mTextViewError.setText(getString(R.string.search_artists_begin));
+            mTextViewError.setVisibility(View.VISIBLE);
         });
 
         recyclerView.setLayoutManager(new LinearLayoutManager(getActivity()));
 
         recyclerView.setAdapter(mArtistsAdapter);
 
-        searchArtistsInitialMessage();
+        showTextViewSearchArtists();
 
         setRetainInstance(true);
         return rootView;
     }
 
-    private void searchArtistsInitialMessage() {
-        if(mArtists.size()==0) {
+    private void showTextViewSearchArtists() {
+        if (mArtists.size() == 0) {
             mTextViewError.setText(getString(R.string.search_artists_begin));
             mTextViewError.setVisibility(View.VISIBLE);
         }
@@ -119,7 +143,7 @@ public class ArtistsFragment extends Fragment implements ArtistsAdapter.ArtistsE
             mArtists = new ArrayList<>();
             mArtistsAdapter.updateList(mArtists);
             mProgressBar.setVisibility(View.GONE);
-            searchArtistsInitialMessage();
+            showTextViewSearchArtists();
         } else {
             mImageButtonClear.setVisibility(View.VISIBLE);
             mProgressBar.setVisibility(View.VISIBLE);
@@ -198,6 +222,7 @@ public class ArtistsFragment extends Fragment implements ArtistsAdapter.ArtistsE
     @TargetApi(Build.VERSION_CODES.LOLLIPOP)
     @Override
     public void artistClicked(final ArtistParcelable artistModel, final ArtistsAdapter.RecyclerViewHolderArtists holder) {
+        //Shared Element transition using fragments if lollipop and above
         if (Utility.isVersionLollipopAndAbove()) {
             final TransitionSet transitionSet = new TransitionSet();
             transitionSet.addTransition(new ChangeImageTransform());
@@ -252,32 +277,59 @@ public class ArtistsFragment extends Fragment implements ArtistsAdapter.ArtistsE
     }
 
     @Override
+    public void onSaveInstanceState(final Bundle outState) {
+        super.onSaveInstanceState(outState);
+        //save artist name for orientation change, so that the app doesn't do search again
+        outState.putParcelableArrayList(ARTIST, (ArrayList<? extends Parcelable>) mArtists);
+    }
+
+    @Override
     public void beforeTextChanged(final CharSequence charSequence, final int i, final int i1, final int i2) {
 
     }
 
     @Override
     public void onTextChanged(final CharSequence charSequence, final int i, final int i1, final int i2) {
+        //show clear button if there is text in EditText
+        if (mEditTextSearch.getText()
+                .length() > 0 && mImageButtonClear.getVisibility() == View.GONE) {
+            ScaleAnimation animation = new ScaleAnimation(0, 1, 0, 1, Animation.RELATIVE_TO_SELF,
+                    (float) 0.5, Animation.RELATIVE_TO_SELF, (float) 0.5);
+            animation.setInterpolator(new BounceInterpolator());
+            animation.setDuration(500);
+            mImageButtonClear.setVisibility(View.VISIBLE);
+            mImageButtonClear.startAnimation(animation);
+        }
+        else if(mEditTextSearch.getText()
+                .length() == 0 ) {
+            ScaleAnimation animation = new ScaleAnimation(1, 0, 1, 0, Animation.RELATIVE_TO_SELF,
+                    (float) 0.5, Animation.RELATIVE_TO_SELF, (float) 0.5);
+            animation.setInterpolator(new BounceInterpolator());
+            animation.setDuration(500);
+            mImageButtonClear.setVisibility(View.VISIBLE);
+            mImageButtonClear.startAnimation(animation);
+            animation.setAnimationListener(new Animation.AnimationListener() {
+                @Override
+                public void onAnimationStart(final Animation animation) {
 
-    }
+                }
 
-    @Override
-    public void afterTextChanged(final Editable editable) {
-        if (!mArtistName.equals(mEditTextSearch.getText()
-                .toString())) {
+                @Override
+                public void onAnimationEnd(final Animation animation) {
+                    mImageButtonClear.setVisibility(View.GONE);
+                }
 
-            searchForArtists(mEditTextSearch.getText()
-                    .toString());
+                @Override
+                public void onAnimationRepeat(final Animation animation) {
+
+                }
+            });
 
         }
     }
 
     @Override
-    public void onSaveInstanceState(final Bundle outState) {
-        super.onSaveInstanceState(outState);
-        //save artist name for orientation change, so that the app doesn't do search again
-        outState.putString(TracksFragment.ARTIST_NAME, mEditTextSearch.getText()
-                .toString());
-        outState.putParcelableArrayList(ARTIST, (ArrayList<? extends Parcelable>) mArtists);
+    public void afterTextChanged(final Editable editable) {
+
     }
 }
