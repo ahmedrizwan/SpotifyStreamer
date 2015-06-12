@@ -24,6 +24,7 @@ public class ArtistParcelable implements Parcelable {
         for(Image image:images){
             this.artistImageUrls.add(image.url);
         }
+
     }
 
     @Override

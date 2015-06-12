@@ -16,11 +16,16 @@ public class ContainerActivity extends AppCompatActivity {
         Toolbar toolbar = (Toolbar) findViewById(R.id.mainToolbar);
         setSupportActionBar(toolbar);
 
-        //make transaction for the artists fragment
-        if(savedInstanceState == null) {
-            getSupportFragmentManager().beginTransaction()
-                    .add(R.id.container, new ArtistsFragment())
-                    .commit();
+        if(findViewById(R.id.tracksContainer)!=null){
+
+
+        } else {
+            //make transaction for the artists fragment
+            if (savedInstanceState == null) {
+                getSupportFragmentManager().beginTransaction()
+                        .add(R.id.container, new ArtistsFragment())
+                        .commit();
+            }
         }
     }
 
