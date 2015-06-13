@@ -21,14 +21,11 @@ public class Utility {
     }
 
     public static void runOnWorkerThread(Callable callable) {
-        new Thread(new Runnable() {
-            @Override
-            public void run() {
-                try {
-                    callable.call();
-                } catch (Exception e) {
-                    Log.e("Exception(WorkerThread)", e.toString());
-                }
+        new Thread(() -> {
+            try {
+                callable.call();
+            } catch (Exception e) {
+                Log.e("Exception(WorkerThread)", e.toString());
             }
         }).start();
     }

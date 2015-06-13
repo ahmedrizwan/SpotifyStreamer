@@ -5,6 +5,9 @@ import android.content.Context;
 import android.os.Build;
 import android.os.Bundle;
 import android.os.Parcelable;
+import android.support.design.widget.AppBarLayout;
+import android.support.design.widget.CollapsingToolbarLayout;
+import android.support.design.widget.CoordinatorLayout;
 import android.support.v4.app.Fragment;
 import android.support.v7.app.ActionBar;
 import android.support.v7.app.AppCompatActivity;
@@ -26,6 +29,8 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
+import butterknife.ButterKnife;
+import butterknife.InjectView;
 import kaaes.spotify.webapi.android.SpotifyApi;
 import kaaes.spotify.webapi.android.SpotifyService;
 import kaaes.spotify.webapi.android.models.Track;
@@ -41,12 +46,24 @@ public class TracksFragment extends Fragment implements TracksAdapter.TracksEven
     public static final String ARTIST_ID = "ArtistId";
     private static final String TRACKS = "Tracks";
 
+    @InjectView(R.id.recyclerViewTracks)
+    RecyclerView recyclerViewTracks;
+    @InjectView(R.id.progressBar)
+    ProgressBar progressBar;
+    @InjectView(R.id.textViewError)
+    TextView textViewError;
+    @InjectView(R.id.imageViewArtist)
+    ImageView imageViewArtist;
+    @InjectView(R.id.collapsingToolbarLayout)
+    CollapsingToolbarLayout collapsingToolbarLayout;
+    @InjectView(R.id.appbar)
+    AppBarLayout appbar;
+    @InjectView(R.id.main_content)
+    CoordinatorLayout mainContent;
+
     private String mUrl, mName, mId;
-    private RecyclerView mRecyclerViewTracks;
     private TracksAdapter mTracksAdapter;
     private List<TrackParcelable> mData = Collections.emptyList();
-    private ProgressBar mProgressBar;
-    private TextView mTextViewError;
     private String imageTransitionName;
     private String textTransitionName;
 
@@ -63,18 +80,8 @@ public class TracksFragment extends Fragment implements TracksAdapter.TracksEven
             actionBar.setSubtitle(mName);
         }
 
-        //ProgressBar
-        mProgressBar = (ProgressBar) rootView.findViewById(R.id.progressBar);
-
-        //TextView Error Message
-        mTextViewError = (TextView) rootView.findViewById(R.id.textViewError);
-
-        ImageView imageView = (ImageView) rootView.findViewById(R.id.imageViewArtist);
-
-        //Recycler View init
-        mRecyclerViewTracks = (RecyclerView) rootView.findViewById(R.id.recyclerViewTracks);
-        mRecyclerViewTracks.hasFixedSize();
-        mRecyclerViewTracks.setLayoutManager(new LinearLayoutManager(getActivity()));
+        recyclerViewTracks.hasFixedSize();
+        recyclerViewTracks.setLayoutManager(new LinearLayoutManager(getActivity()));
 
         //Restore state
         if (savedInstanceState != null) {
@@ -83,31 +90,32 @@ public class TracksFragment extends Fragment implements TracksAdapter.TracksEven
             mId = savedInstanceState.getString(ARTIST_ID);
             mData = savedInstanceState.getParcelableArrayList(TRACKS);
             if ((mData != null ? mData.size() : 0) == 0)
-                mTextViewError.setVisibility(View.VISIBLE);
+                textViewError.setVisibility(View.VISIBLE);
         } else {
             //Get Artist info from the arguments
             Bundle activityIntent = getArguments();
             mUrl = activityIntent.getString(IMAGE_URL);
             mName = activityIntent.getString(ARTIST_NAME);
             mId = activityIntent.getString(ARTIST_ID);
-            mProgressBar.setVisibility(View.VISIBLE);
+            progressBar.setVisibility(View.VISIBLE);
             loadTracks();
         }
 
         if (Utility.isVersionLollipopAndAbove()) {
-            imageView.setTransitionName(imageTransitionName);
+            imageViewArtist.setTransitionName(imageTransitionName);
         }
 
         if (mUrl != null && !mUrl.equals(""))
             Picasso.with(getActivity())
                     .load(mUrl)
-                    .into(imageView);
+                    .into(imageViewArtist);
 
         if (mUrl == null)
             mUrl = "";
 
         mTracksAdapter = new TracksAdapter(this, mData);
-        mRecyclerViewTracks.setAdapter(mTracksAdapter);
+        recyclerViewTracks.setAdapter(mTracksAdapter);
+        ButterKnife.inject(this, rootView);
         return rootView;
     }
 
@@ -135,12 +143,12 @@ public class TracksFragment extends Fragment implements TracksAdapter.TracksEven
                     }
                     Utility.runOnUiThread(((AppCompatActivity) getActivity()), () -> {
                         if (mData.size() == 0) {
-                            mTextViewError.setText(getString(R.string.tv_no_tracks));
-                            mTextViewError.setVisibility(View.VISIBLE);
+                            textViewError.setText(getString(R.string.tv_no_tracks));
+                            textViewError.setVisibility(View.VISIBLE);
                         }
 
-                        mProgressBar.setVisibility(View.GONE);
-                        ((TracksAdapter) mRecyclerViewTracks.getAdapter()).updateList(mData);
+                        progressBar.setVisibility(View.GONE);
+                        ((TracksAdapter) recyclerViewTracks.getAdapter()).updateList(mData);
                         return null;
                     });
                 }
@@ -150,9 +158,9 @@ public class TracksFragment extends Fragment implements TracksAdapter.TracksEven
                     Utility.runOnUiThread(((AppCompatActivity) getActivity()), () -> {
                         //Handle network error
                         if (error.getKind() == RetrofitError.Kind.NETWORK) {
-                            mTextViewError.setText(getString(R.string.network_error));
-                            mTextViewError.setVisibility(View.VISIBLE);
-                            mProgressBar.setVisibility(View.GONE);
+                            textViewError.setText(getString(R.string.network_error));
+                            textViewError.setVisibility(View.VISIBLE);
+                            progressBar.setVisibility(View.GONE);
                         }
                         return null;
                     });
@@ -179,5 +187,11 @@ public class TracksFragment extends Fragment implements TracksAdapter.TracksEven
 
     public void setTextTransitionName(final String textTransitionName) {
         this.textTransitionName = textTransitionName;
+    }
+
+    @Override
+    public void onDestroyView() {
+        super.onDestroyView();
+        ButterKnife.reset(this);
     }
 }

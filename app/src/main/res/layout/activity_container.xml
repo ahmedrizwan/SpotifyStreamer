@@ -13,8 +13,8 @@
         android:layout_height="?attr/actionBarSize"
         android:background="?attr/colorPrimary"
         android:id="@+id/mainToolbar"
-
         />
+
 
 </LinearLayout>
 
