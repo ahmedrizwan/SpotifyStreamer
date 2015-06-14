@@ -22,8 +22,8 @@ public class ArtistsAdapter extends RecyclerView.Adapter<ArtistsAdapter.Recycler
 
     private Context context;
     private List<ArtistParcelable> mData = Collections.emptyList();
-
     private ArtistsEventListener artistsEventListener;
+    private String selectedArtist;
 
     public ArtistsAdapter(ArtistsEventListener artistsEventListener, List<ArtistParcelable> data) {
         this.artistsEventListener = artistsEventListener;
@@ -68,14 +68,18 @@ public class ArtistsAdapter extends RecyclerView.Adapter<ArtistsAdapter.Recycler
                         .getDrawable(R.drawable.ic_not_available));
         }
 
-        if(Utility.isVersionLollipopAndAbove()) {
+        if (Utility.isVersionLollipopAndAbove()) {
             holder.imageViewArtist.setTransitionName(context.getString(R.string.artists_image_transition) + position);
             holder.textViewArtistName.setTransitionName(context.getString(R.string.artists_text_transition) + position);
         }
 
         holder.itemView.setOnClickListener(view -> {
+            selectedArtist = artistModel.id;
+            notifyDataSetChanged();
             artistsEventListener.artistClicked(artistModel, holder);
         });
+
+        holder.itemView.setSelected(artistModel.id.equals(selectedArtist));
     }
 
     @Override
@@ -86,6 +90,7 @@ public class ArtistsAdapter extends RecyclerView.Adapter<ArtistsAdapter.Recycler
     public class RecyclerViewHolderArtists extends RecyclerView.ViewHolder {
         TextView textViewArtistName;
         ImageView imageViewArtist;
+
         public RecyclerViewHolderArtists(final View itemView) {
             super(itemView);
             textViewArtistName = (TextView) itemView.findViewById(R.id.textViewArtistName);
@@ -96,6 +101,7 @@ public class ArtistsAdapter extends RecyclerView.Adapter<ArtistsAdapter.Recycler
     //Interface for events
     public static interface ArtistsEventListener {
         public void artistClicked(ArtistParcelable artistModel, RecyclerViewHolderArtists holder);
+
         public Context getContext();
     }
 
