@@ -72,6 +72,7 @@ public class TracksFragment extends Fragment implements TracksAdapter.TracksEven
     public View onCreateView(LayoutInflater inflater, ViewGroup container,
                              Bundle savedInstanceState) {
         View rootView = inflater.inflate(R.layout.fragment_tracks, container, false);
+        ButterKnife.inject(this, rootView);
         //ActionBar
         ((AppCompatActivity) getActivity()).setTitle(getString(R.string.activity_tracks_title));
         ActionBar actionBar = ((AppCompatActivity) getActivity()).getSupportActionBar();
@@ -115,7 +116,7 @@ public class TracksFragment extends Fragment implements TracksAdapter.TracksEven
 
         mTracksAdapter = new TracksAdapter(this, mData);
         recyclerViewTracks.setAdapter(mTracksAdapter);
-        ButterKnife.inject(this, rootView);
+
         return rootView;
     }
 

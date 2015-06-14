@@ -9,6 +9,7 @@ import android.view.MenuItem;
 
 public class ContainerActivity extends AppCompatActivity {
 
+    boolean mTwoPane;
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
@@ -17,8 +18,7 @@ public class ContainerActivity extends AppCompatActivity {
         setSupportActionBar(toolbar);
 
         if(findViewById(R.id.tracksContainer)!=null){
-
-
+            mTwoPane = true;
         } else {
             //make transaction for the artists fragment
             if (savedInstanceState == null) {
@@ -27,6 +27,10 @@ public class ContainerActivity extends AppCompatActivity {
                         .commit();
             }
         }
+    }
+
+    public boolean isTwoPane(){
+        return mTwoPane;
     }
 
     @Override
