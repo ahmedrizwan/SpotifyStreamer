@@ -73,7 +73,7 @@ public class ArtistsFragment extends Fragment implements ArtistsAdapter.ArtistsE
     ArtistsAdapter mArtistsAdapter;
 
     @OnClick(R.id.imageButtonClear)
-    public void imageButtonClearOnClick(){
+    public void imageButtonClearOnClick() {
         editTextSearch.setText("");
         imageButtonClear.setVisibility(View.GONE);
         mArtists = new ArrayList<ArtistParcelable>();
@@ -87,6 +87,7 @@ public class ArtistsFragment extends Fragment implements ArtistsAdapter.ArtistsE
     @Override
     public View onCreateView(final LayoutInflater inflater, final ViewGroup container, final Bundle savedInstanceState) {
         View rootView = inflater.inflate(R.layout.fragment_artists, container, false);
+        ButterKnife.inject(this, rootView);
         ((AppCompatActivity) getActivity()).setTitle(getString(R.string.app_name));
         ActionBar actionBar = ((AppCompatActivity) getActivity()).getSupportActionBar();
 
@@ -128,8 +129,7 @@ public class ArtistsFragment extends Fragment implements ArtistsAdapter.ArtistsE
 
         showTextViewSearchArtists();
 
-        setRetainInstance(true);
-        ButterKnife.inject(this, rootView);
+
 
         return rootView;
     }
@@ -227,8 +227,7 @@ public class ArtistsFragment extends Fragment implements ArtistsAdapter.ArtistsE
     @TargetApi(Build.VERSION_CODES.LOLLIPOP)
     @Override
     public void artistClicked(final ArtistParcelable artistModel, final ArtistsAdapter.RecyclerViewHolderArtists holder) {
-        //Shared Element transition using fragments if lollipop and above
-        if (Utility.isVersionLollipopAndAbove()) {
+        if (((ContainerActivity) getActivity()).isTwoPane()) {
             final TransitionSet transitionSet = new TransitionSet();
             transitionSet.addTransition(new ChangeImageTransform());
             transitionSet.addTransition(new ChangeBounds());
@@ -254,25 +253,60 @@ public class ArtistsFragment extends Fragment implements ArtistsAdapter.ArtistsE
 
             FragmentTransaction fragmentTransaction = getActivity().getSupportFragmentManager()
                     .beginTransaction();
-            fragmentTransaction.replace(R.id.container, tracksFragment)
+            fragmentTransaction.replace(R.id.tracksContainer, tracksFragment)
                     .addToBackStack(null)
                     .addSharedElement(holder.imageViewArtist, holder.imageViewArtist.getTransitionName())
                     .addSharedElement(holder.textViewArtistName,
                             holder.textViewArtistName.getTransitionName())
                     .commit();
         } else {
-            TracksFragment fragment = new TracksFragment();
-            Bundle bundle = new Bundle();
-            if (artistModel.artistImageUrls.size() > 0)
-                bundle.putString(TracksFragment.IMAGE_URL, artistModel.artistImageUrls.get(artistModel.artistImageUrls.size() - 2));
-            bundle.putString(TracksFragment.ARTIST_NAME, artistModel.name);
-            bundle.putString(TracksFragment.ARTIST_ID, artistModel.id);
-            fragment.setArguments(bundle);
-            FragmentTransaction trans = getActivity().getSupportFragmentManager()
-                    .beginTransaction();
-            trans.replace(R.id.container, fragment);
-            trans.addToBackStack(null);
-            trans.commit();
+            //Shared Element transition using fragments if lollipop and above
+            if (Utility.isVersionLollipopAndAbove()) {
+                final TransitionSet transitionSet = new TransitionSet();
+                transitionSet.addTransition(new ChangeImageTransform());
+                transitionSet.addTransition(new ChangeBounds());
+                transitionSet.addTransition(new ChangeTransform());
+                transitionSet.setDuration(300);
+
+                setSharedElementReturnTransition(transitionSet);
+                setSharedElementEnterTransition(transitionSet);
+
+                TracksFragment tracksFragment = new TracksFragment();
+                tracksFragment.setImageTransitionName(holder.imageViewArtist.getTransitionName());
+                tracksFragment.setTextTransitionName(holder.textViewArtistName.getTransitionName());
+                tracksFragment.setSharedElementEnterTransition(transitionSet);
+                Bundle bundle = new Bundle();
+
+                if (artistModel.artistImageUrls.size() > 0)
+                    bundle.putString(TracksFragment.IMAGE_URL, artistModel.artistImageUrls.get(artistModel.artistImageUrls.size() - 2));
+                bundle.putString(TracksFragment.ARTIST_NAME, artistModel.name);
+                bundle.putString(TracksFragment.ARTIST_ID, artistModel.id);
+                tracksFragment.setArguments(bundle);
+
+                tracksFragment.setSharedElementEnterTransition(transitionSet);
+
+                FragmentTransaction fragmentTransaction = getActivity().getSupportFragmentManager()
+                        .beginTransaction();
+                fragmentTransaction.replace(R.id.container, tracksFragment)
+                        .addToBackStack(null)
+                        .addSharedElement(holder.imageViewArtist, holder.imageViewArtist.getTransitionName())
+                        .addSharedElement(holder.textViewArtistName,
+                                holder.textViewArtistName.getTransitionName())
+                        .commit();
+            } else {
+                TracksFragment fragment = new TracksFragment();
+                Bundle bundle = new Bundle();
+                if (artistModel.artistImageUrls.size() > 0)
+                    bundle.putString(TracksFragment.IMAGE_URL, artistModel.artistImageUrls.get(artistModel.artistImageUrls.size() - 2));
+                bundle.putString(TracksFragment.ARTIST_NAME, artistModel.name);
+                bundle.putString(TracksFragment.ARTIST_ID, artistModel.id);
+                fragment.setArguments(bundle);
+                FragmentTransaction trans = getActivity().getSupportFragmentManager()
+                        .beginTransaction();
+                trans.replace(R.id.container, fragment);
+                trans.addToBackStack(null);
+                trans.commit();
+            }
         }
     }
 
