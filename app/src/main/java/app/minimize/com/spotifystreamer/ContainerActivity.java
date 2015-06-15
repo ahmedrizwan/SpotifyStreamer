@@ -20,6 +20,8 @@ public class ContainerActivity extends AppCompatActivity {
         if(findViewById(R.id.tracksContainer)!=null){
             mTwoPane = true;
         } else {
+            mTwoPane = false;
+
             //make transaction for the artists fragment
             if (savedInstanceState == null) {
                 getSupportFragmentManager().beginTransaction()

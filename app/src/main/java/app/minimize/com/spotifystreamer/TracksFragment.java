@@ -123,10 +123,14 @@ public class TracksFragment extends Fragment implements TracksAdapter.TracksEven
     @Override
     public void onSaveInstanceState(final Bundle outState) {
         super.onSaveInstanceState(outState);
-        outState.putString(IMAGE_URL, mUrl);
-        outState.putString(ARTIST_ID, mId);
-        outState.putString(ARTIST_NAME, mName);
-        outState.putParcelableArrayList(TRACKS, (ArrayList<? extends Parcelable>) mData);
+        try {
+            outState.putString(IMAGE_URL, mUrl);
+            outState.putString(ARTIST_ID, mId);
+            outState.putString(ARTIST_NAME, mName);
+            outState.putParcelableArrayList(TRACKS, (ArrayList<? extends Parcelable>) mData);
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
     }
 
     private void loadTracks() {

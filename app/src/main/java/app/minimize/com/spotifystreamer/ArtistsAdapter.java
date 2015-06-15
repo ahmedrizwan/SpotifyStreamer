@@ -87,6 +87,14 @@ public class ArtistsAdapter extends RecyclerView.Adapter<ArtistsAdapter.Recycler
         return mData.size();
     }
 
+    public String getSelectedArtist() {
+        return selectedArtist;
+    }
+
+    public void setSelectedArtist(final String selectedArtist) {
+        this.selectedArtist = selectedArtist;
+    }
+
     public class RecyclerViewHolderArtists extends RecyclerView.ViewHolder {
         TextView textViewArtistName;
         ImageView imageViewArtist;
