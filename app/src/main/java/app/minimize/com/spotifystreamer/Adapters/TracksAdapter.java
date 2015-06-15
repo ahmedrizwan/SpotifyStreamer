@@ -1,4 +1,4 @@
-package app.minimize.com.spotifystreamer;
+package app.minimize.com.spotifystreamer.Adapters;
 
 import android.content.Context;
 import android.support.v7.widget.RecyclerView;
@@ -12,6 +12,9 @@ import com.squareup.picasso.Picasso;
 
 import java.util.Collections;
 import java.util.List;
+
+import app.minimize.com.spotifystreamer.Parcelables.TrackParcelable;
+import app.minimize.com.spotifystreamer.R;
 
 /**
  * Created by ahmedrizwan on 6/9/15.

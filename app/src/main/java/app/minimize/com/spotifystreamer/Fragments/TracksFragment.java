@@ -1,4 +1,4 @@
-package app.minimize.com.spotifystreamer;
+package app.minimize.com.spotifystreamer.Fragments;
 
 import android.annotation.TargetApi;
 import android.content.Context;
@@ -28,6 +28,10 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
+import app.minimize.com.spotifystreamer.Adapters.TracksAdapter;
+import app.minimize.com.spotifystreamer.Parcelables.TrackParcelable;
+import app.minimize.com.spotifystreamer.R;
+import app.minimize.com.spotifystreamer.Utility;
 import butterknife.ButterKnife;
 import butterknife.InjectView;
 import kaaes.spotify.webapi.android.SpotifyApi;
@@ -72,6 +76,7 @@ public class TracksFragment extends Fragment implements TracksAdapter.TracksEven
                              Bundle savedInstanceState) {
         View rootView = inflater.inflate(R.layout.fragment_tracks, container, false);
         ButterKnife.inject(this, rootView);
+
         //ActionBar
         ((AppCompatActivity) getActivity()).setTitle(getString(R.string.activity_tracks_title));
         ActionBar actionBar = ((AppCompatActivity) getActivity()).getSupportActionBar();
@@ -176,10 +181,9 @@ public class TracksFragment extends Fragment implements TracksAdapter.TracksEven
 
     @Override
     public void trackClicked(final TrackParcelable track, final TracksAdapter.RecyclerViewHolderTracks holder) {
-       //Launch a dialogFragment with playback controls
-
-
-
+        //Launch a dialogFragment with playback controls
+        PlayerDialogFragment playerDialogFragment = PlayerDialogFragment.getInstance(this);
+        Utility.launchFragment(((AppCompatActivity) getActivity()), R.id.container, playerDialogFragment);
     }
 
     @Override

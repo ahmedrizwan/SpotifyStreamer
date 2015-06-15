@@ -1,4 +1,4 @@
-package app.minimize.com.spotifystreamer;
+package app.minimize.com.spotifystreamer.Fragments;
 
 import android.annotation.TargetApi;
 import android.app.Activity;
@@ -39,6 +39,11 @@ import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
 
+import app.minimize.com.spotifystreamer.Activities.ContainerActivity;
+import app.minimize.com.spotifystreamer.Adapters.ArtistsAdapter;
+import app.minimize.com.spotifystreamer.Parcelables.ArtistParcelable;
+import app.minimize.com.spotifystreamer.R;
+import app.minimize.com.spotifystreamer.Utility;
 import butterknife.ButterKnife;
 import butterknife.InjectView;
 import butterknife.OnClick;
@@ -76,12 +81,17 @@ public class ArtistsFragment extends Fragment implements ArtistsAdapter.ArtistsE
 
     @OnClick(R.id.imageButtonClear)
     public void imageButtonClearOnClick() {
+        clearState();
+    }
+
+    private void clearState() {
         editTextSearch.setText("");
         imageButtonClear.setVisibility(View.GONE);
         mArtists = new ArrayList<ArtistParcelable>();
         mArtistsAdapter.updateList(mArtists);
         textViewError.setText(getString(R.string.search_artists_begin));
         textViewError.setVisibility(View.VISIBLE);
+        progressBar.setVisibility(View.GONE);
     }
 
 
@@ -277,6 +287,7 @@ public class ArtistsFragment extends Fragment implements ArtistsAdapter.ArtistsE
                     .addSharedElement(holder.textViewArtistName,
                             holder.textViewArtistName.getTransitionName())
                     .commit();
+
         } else {
             TracksFragment fragment = new TracksFragment();
             Bundle bundle = new Bundle();
@@ -324,6 +335,7 @@ public class ArtistsFragment extends Fragment implements ArtistsAdapter.ArtistsE
             animation.setDuration(500);
             imageButtonClear.setVisibility(View.VISIBLE);
             imageButtonClear.startAnimation(animation);
+
             animation.setAnimationListener(new Animation.AnimationListener() {
                 @Override
                 public void onAnimationStart(final Animation animation) {
@@ -354,4 +366,5 @@ public class ArtistsFragment extends Fragment implements ArtistsAdapter.ArtistsE
         super.onDestroyView();
         ButterKnife.reset(this);
     }
+
 }

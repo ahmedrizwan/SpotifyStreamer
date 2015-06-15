@@ -1,0 +1,91 @@
+<?xml version="1.0" encoding="utf-8"?>
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+              xmlns:app="http://schemas.android.com/apk/res-auto"
+              android:orientation="vertical"
+              android:layout_width="match_parent"
+              android:layout_height="match_parent"
+              android:background="@android:color/holo_orange_dark"
+              app:theme="@style/Theme.AppCompat.Light">
+
+    <ImageView
+        android:layout_width="match_parent"
+        android:layout_height="0dp"
+        android:layout_weight="1"
+        android:src="@drawable/ic_not_available"/>
+
+    <RelativeLayout
+        android:layout_width="match_parent"
+        android:layout_height="200sp"
+        android:background="@android:color/white">
+
+        <TextView
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:textSize="@dimen/tv_large"
+            android:layout_margin="@dimen/default_margin"
+            android:text="Hello"
+            android:layout_centerHorizontal="true"
+            android:id="@+id/textViewTrackName"/>
+
+        <SeekBar
+            android:layout_width="match_parent"
+            android:layout_height="15sp"
+            android:layout_below="@id/textViewTrackName"
+            android:max="100"
+            android:progress="0"
+            android:layout_gravity="center"
+            android:progressDrawable="@drawable/progressbar"
+            android:secondaryProgress="0"
+            android:thumb="@android:color/transparent"
+            android:id="@+id/seekBarPlayer"/>
+
+        <TextView
+            android:id="@+id/textViewStartTime"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="00:00"
+            android:layout_below="@id/seekBarPlayer"
+            android:layout_marginLeft="@dimen/default_margin"/>
+
+        <TextView
+            android:id="@+id/textViewEndTime"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="00:00"
+            android:layout_below="@id/seekBarPlayer"
+            android:layout_alignParentRight="true"
+            android:layout_marginRight="@dimen/default_margin"/>
+
+
+        <app.minimize.com.spotifystreamer.Views.PlayButton
+            android:layout_width="@dimen/iv_play"
+            android:layout_height="@dimen/iv_play"
+            android:layout_below="@id/textViewStartTime"
+            android:layout_margin="@dimen/default_margin"
+            android:layout_centerHorizontal="true"
+            android:id="@+id/imageViewPlay"
+            />
+        <app.minimize.com.spotifystreamer.Views.PreviousButton
+            android:layout_width="@dimen/iv_previous_next"
+            android:layout_height="@dimen/iv_previous_next"
+            android:layout_toLeftOf="@id/imageViewPlay"
+            android:layout_below="@id/textViewStartTime"
+            android:layout_margin="@dimen/default_margin"
+            android:id="@+id/imageViewPrevious"
+            />
+
+        <app.minimize.com.spotifystreamer.Views.NextButton
+            android:layout_width="@dimen/iv_previous_next"
+            android:layout_height="@dimen/iv_previous_next"
+            android:layout_below="@id/textViewStartTime"
+            android:layout_margin="@dimen/default_margin"
+            android:layout_toRightOf="@id/imageViewPlay"
+            android:id="@+id/imageViewNext"
+            />
+
+
+
+    </RelativeLayout>
+
+
+</LinearLayout>

@@ -5,7 +5,7 @@
     android:layout_width="match_parent"
     android:layout_height="match_parent"
     android:orientation="vertical"
-    tools:context="app.minimize.com.spotifystreamer.ContainerActivity"
+    tools:context="app.minimize.com.spotifystreamer.Activities.ContainerActivity"
     android:background="@android:color/white">
 
     <android.support.v7.widget.Toolbar

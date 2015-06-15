@@ -1,4 +1,4 @@
-package app.minimize.com.spotifystreamer;
+package app.minimize.com.spotifystreamer.Activities;
 
 import android.os.Bundle;
 import android.support.v7.app.AlertDialog;
@@ -6,6 +6,9 @@ import android.support.v7.app.AppCompatActivity;
 import android.support.v7.widget.Toolbar;
 import android.view.Menu;
 import android.view.MenuItem;
+
+import app.minimize.com.spotifystreamer.Fragments.ArtistsFragment;
+import app.minimize.com.spotifystreamer.R;
 
 public class ContainerActivity extends AppCompatActivity {
 
