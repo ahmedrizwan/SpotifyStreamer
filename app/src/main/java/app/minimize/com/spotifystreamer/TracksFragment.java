@@ -19,7 +19,6 @@ import android.view.ViewGroup;
 import android.widget.ImageView;
 import android.widget.ProgressBar;
 import android.widget.TextView;
-import android.widget.Toast;
 
 import com.squareup.picasso.Picasso;
 
@@ -177,8 +176,10 @@ public class TracksFragment extends Fragment implements TracksAdapter.TracksEven
 
     @Override
     public void trackClicked(final TrackParcelable track, final TracksAdapter.RecyclerViewHolderTracks holder) {
-        Toast.makeText(getActivity(), track.songName + " Clicked!", Toast.LENGTH_SHORT)
-                .show();
+       //Launch a dialogFragment with playback controls
+
+
+
     }
 
     @Override

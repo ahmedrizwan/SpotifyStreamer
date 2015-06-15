@@ -101,9 +101,12 @@ public class ArtistsFragment extends Fragment implements ArtistsAdapter.ArtistsE
 
         if (savedInstanceState != null) {
             mArtists = savedInstanceState.getParcelableArrayList(ARTIST);
+            if (mArtists == null)
+                mArtists = Collections.emptyList();
             //RecyclerView
             mArtistsAdapter = new ArtistsAdapter(this, mArtists);
-            mArtistsAdapter.setSelectedArtist(savedInstanceState.getString(SELECTED_ARTIST));
+            if (((ContainerActivity) getActivity()).isTwoPane())
+                mArtistsAdapter.setSelectedArtist(savedInstanceState.getString(SELECTED_ARTIST));
         } else {
             mArtistsAdapter = new ArtistsAdapter(this, mArtists);
         }
@@ -138,9 +141,13 @@ public class ArtistsFragment extends Fragment implements ArtistsAdapter.ArtistsE
     @Override
     public void onSaveInstanceState(final Bundle outState) {
         super.onSaveInstanceState(outState);
-        //save artist name for orientation change, so that the app doesn't do search again
-        outState.putParcelableArrayList(ARTIST, (ArrayList<? extends Parcelable>) mArtists);
-        outState.putString(SELECTED_ARTIST, mArtistsAdapter.getSelectedArtist());
+        try {
+            //save artist name for orientation change, so that the app doesn't do search again
+            outState.putParcelableArrayList(ARTIST, (ArrayList<? extends Parcelable>) mArtists);
+            outState.putString(SELECTED_ARTIST, mArtistsAdapter.getSelectedArtist());
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
     }
 
     private void showTextViewSearchArtists() {
@@ -236,7 +243,7 @@ public class ArtistsFragment extends Fragment implements ArtistsAdapter.ArtistsE
     @TargetApi(Build.VERSION_CODES.LOLLIPOP)
     @Override
     public void artistClicked(final ArtistParcelable artistModel, final ArtistsAdapter.RecyclerViewHolderArtists holder) {
-        int container = ((ContainerActivity) getActivity()).isTwoPane()?R.id.tracksContainer:R.id.container;
+        int container = ((ContainerActivity) getActivity()).isTwoPane() ? R.id.tracksContainer : R.id.container;
         //Shared Element transition using fragments if lollipop and above
         if (Utility.isVersionLollipopAndAbove()) {
             final TransitionSet transitionSet = new TransitionSet();
@@ -291,7 +298,6 @@ public class ArtistsFragment extends Fragment implements ArtistsAdapter.ArtistsE
     public Context getContext() {
         return getActivity();
     }
-
 
 
     @Override
