@@ -47,6 +47,7 @@
                 app:theme="@style/AppTheme.WhiteAccent"
                 android:layout_toRightOf="@id/imageViewSearch"
                 android:layout_toLeftOf="@id/imageButtonClear"
+                android:id="@+id/textInputLayout"
                 >
 
                 <EditText

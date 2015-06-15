@@ -1,4 +1,4 @@
-package app.minimize.com.spotifystreamer;
+package app.minimize.com.spotifystreamer.Adapters;
 
 import android.annotation.TargetApi;
 import android.content.Context;
@@ -14,6 +14,10 @@ import com.squareup.picasso.Picasso;
 
 import java.util.Collections;
 import java.util.List;
+
+import app.minimize.com.spotifystreamer.Parcelables.ArtistParcelable;
+import app.minimize.com.spotifystreamer.R;
+import app.minimize.com.spotifystreamer.Utility;
 
 /**
  * Created by ahmedrizwan on 6/8/15.
@@ -87,9 +91,17 @@ public class ArtistsAdapter extends RecyclerView.Adapter<ArtistsAdapter.Recycler
         return mData.size();
     }
 
+    public String getSelectedArtist() {
+        return selectedArtist;
+    }
+
+    public void setSelectedArtist(final String selectedArtist) {
+        this.selectedArtist = selectedArtist;
+    }
+
     public class RecyclerViewHolderArtists extends RecyclerView.ViewHolder {
-        TextView textViewArtistName;
-        ImageView imageViewArtist;
+        public TextView textViewArtistName;
+        public ImageView imageViewArtist;
 
         public RecyclerViewHolderArtists(final View itemView) {
             super(itemView);

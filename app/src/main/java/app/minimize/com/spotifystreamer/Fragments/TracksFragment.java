@@ -1,4 +1,4 @@
-package app.minimize.com.spotifystreamer;
+package app.minimize.com.spotifystreamer.Fragments;
 
 import android.annotation.TargetApi;
 import android.content.Context;
@@ -19,7 +19,6 @@ import android.view.ViewGroup;
 import android.widget.ImageView;
 import android.widget.ProgressBar;
 import android.widget.TextView;
-import android.widget.Toast;
 
 import com.squareup.picasso.Picasso;
 
@@ -29,6 +28,10 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
+import app.minimize.com.spotifystreamer.Adapters.TracksAdapter;
+import app.minimize.com.spotifystreamer.Parcelables.TrackParcelable;
+import app.minimize.com.spotifystreamer.R;
+import app.minimize.com.spotifystreamer.Utility;
 import butterknife.ButterKnife;
 import butterknife.InjectView;
 import kaaes.spotify.webapi.android.SpotifyApi;
@@ -73,6 +76,7 @@ public class TracksFragment extends Fragment implements TracksAdapter.TracksEven
                              Bundle savedInstanceState) {
         View rootView = inflater.inflate(R.layout.fragment_tracks, container, false);
         ButterKnife.inject(this, rootView);
+
         //ActionBar
         ((AppCompatActivity) getActivity()).setTitle(getString(R.string.activity_tracks_title));
         ActionBar actionBar = ((AppCompatActivity) getActivity()).getSupportActionBar();
@@ -123,10 +127,14 @@ public class TracksFragment extends Fragment implements TracksAdapter.TracksEven
     @Override
     public void onSaveInstanceState(final Bundle outState) {
         super.onSaveInstanceState(outState);
-        outState.putString(IMAGE_URL, mUrl);
-        outState.putString(ARTIST_ID, mId);
-        outState.putString(ARTIST_NAME, mName);
-        outState.putParcelableArrayList(TRACKS, (ArrayList<? extends Parcelable>) mData);
+        try {
+            outState.putString(IMAGE_URL, mUrl);
+            outState.putString(ARTIST_ID, mId);
+            outState.putString(ARTIST_NAME, mName);
+            outState.putParcelableArrayList(TRACKS, (ArrayList<? extends Parcelable>) mData);
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
     }
 
     private void loadTracks() {
@@ -173,8 +181,9 @@ public class TracksFragment extends Fragment implements TracksAdapter.TracksEven
 
     @Override
     public void trackClicked(final TrackParcelable track, final TracksAdapter.RecyclerViewHolderTracks holder) {
-        Toast.makeText(getActivity(), track.songName + " Clicked!", Toast.LENGTH_SHORT)
-                .show();
+        //Launch a dialogFragment with playback controls
+        PlayerDialogFragment playerDialogFragment = PlayerDialogFragment.getInstance(this);
+        Utility.launchFragment(((AppCompatActivity) getActivity()), R.id.container, playerDialogFragment);
     }
 
     @Override

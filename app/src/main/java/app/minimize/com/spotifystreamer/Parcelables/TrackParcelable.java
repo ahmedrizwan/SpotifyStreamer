@@ -1,4 +1,4 @@
-package app.minimize.com.spotifystreamer;
+package app.minimize.com.spotifystreamer.Parcelables;
 
 import android.os.Parcel;
 import android.os.Parcelable;

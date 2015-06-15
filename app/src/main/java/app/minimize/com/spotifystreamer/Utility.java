@@ -1,6 +1,7 @@
 package app.minimize.com.spotifystreamer;
 
 import android.os.Build;
+import android.support.v4.app.Fragment;
 import android.support.v7.app.AppCompatActivity;
 import android.util.Log;
 
@@ -32,5 +33,16 @@ public class Utility {
 
     public static boolean isVersionLollipopAndAbove() {
         return Build.VERSION.SDK_INT >= Build.VERSION_CODES.LOLLIPOP;
+    }
+
+    public static void launchFragment(final AppCompatActivity activity, int containerId, final Fragment fragment) {
+        activity.getSupportFragmentManager()
+                .beginTransaction()
+                .replace(containerId, fragment)
+                .commit();
+    }
+
+    public static void launchFragmentWithSharedElements(final Fragment fromFragment, final Fragment toFragment) {
+
     }
 }

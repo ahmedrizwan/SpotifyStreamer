@@ -13,4 +13,6 @@
     <dimen name="progress_margin_bottom">200sp</dimen>
     <dimen name="parallax_large">250sp</dimen>
     <dimen name="parallax_small">150sp</dimen>
+    <dimen name="iv_previous_next">46sp</dimen>
+    <dimen name="iv_play">56sp</dimen>
 </resources>
