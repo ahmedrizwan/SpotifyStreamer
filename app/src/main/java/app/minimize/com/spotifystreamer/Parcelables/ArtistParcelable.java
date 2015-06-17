@@ -7,6 +7,7 @@ import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
 
+import kaaes.spotify.webapi.android.models.Artist;
 import kaaes.spotify.webapi.android.models.Image;
 
 /**
@@ -14,17 +15,16 @@ import kaaes.spotify.webapi.android.models.Image;
  */
 public class ArtistParcelable implements Parcelable {
     public String id;
-    public String name;
+    public String artistName;
     public List<String> artistImageUrls = Collections.emptyList();
 
-    public ArtistParcelable(final String id, final String name, final List<Image> images) {
+    public ArtistParcelable(Artist artist) {
         this.artistImageUrls = new ArrayList<>();
-        this.id = id;
-        this.name = name;
-        for(Image image:images){
+        this.id = artist.id;
+        this.artistName = artist.name;
+        for (Image image : artist.images) {
             this.artistImageUrls.add(image.url);
         }
-
     }
 
     @Override
@@ -35,7 +35,7 @@ public class ArtistParcelable implements Parcelable {
     @Override
     public void writeToParcel(Parcel dest, int flags) {
         dest.writeString(this.id);
-        dest.writeString(this.name);
+        dest.writeString(this.artistName);
         dest.writeStringList(this.artistImageUrls);
     }
 
@@ -44,7 +44,7 @@ public class ArtistParcelable implements Parcelable {
 
     protected ArtistParcelable(Parcel in) {
         this.id = in.readString();
-        this.name = in.readString();
+        this.artistName = in.readString();
         this.artistImageUrls = in.createStringArrayList();
     }
 

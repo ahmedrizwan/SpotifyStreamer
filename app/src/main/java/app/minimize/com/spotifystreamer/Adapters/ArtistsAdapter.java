@@ -52,7 +52,7 @@ public class ArtistsAdapter extends RecyclerView.Adapter<ArtistsAdapter.Recycler
     @Override
     public void onBindViewHolder(final RecyclerViewHolderArtists holder, final int position) {
         ArtistParcelable artistModel = (ArtistParcelable) mData.get(position);
-        holder.textViewArtistName.setText(artistModel.name);
+        holder.textViewArtistName.setText(artistModel.artistName);
         int images = artistModel.artistImageUrls.size();
         //if there are artistImageUrls available
         if (images > 0) {

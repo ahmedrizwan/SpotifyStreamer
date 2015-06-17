@@ -4,7 +4,6 @@
               android:orientation="vertical"
               android:layout_width="match_parent"
               android:layout_height="match_parent"
-              android:background="@android:color/holo_orange_dark"
               app:theme="@style/Theme.AppCompat.Light">
 
     <ImageView
@@ -15,7 +14,7 @@
 
     <RelativeLayout
         android:layout_width="match_parent"
-        android:layout_height="200sp"
+        android:layout_height="wrap_content"
         android:background="@android:color/white">
 
         <TextView
@@ -27,17 +26,17 @@
             android:layout_centerHorizontal="true"
             android:id="@+id/textViewTrackName"/>
 
+
         <SeekBar
-            android:layout_width="match_parent"
-            android:layout_height="15sp"
+            android:id="@+id/seekBarPlayer"
+            android:layout_width="fill_parent"
+            android:layout_height="wrap_content"
             android:layout_below="@id/textViewTrackName"
-            android:max="100"
-            android:progress="0"
+            android:layout_centerVertical="true"
             android:layout_gravity="center"
-            android:progressDrawable="@drawable/progressbar"
-            android:secondaryProgress="0"
-            android:thumb="@android:color/transparent"
-            android:id="@+id/seekBarPlayer"/>
+            android:layout_marginLeft="5dp"
+            android:layout_marginRight="5dp"
+            />
 
         <TextView
             android:id="@+id/textViewStartTime"
@@ -57,35 +56,31 @@
             android:layout_marginRight="@dimen/default_margin"/>
 
 
-        <app.minimize.com.spotifystreamer.Views.PlayButton
-            android:layout_width="@dimen/iv_play"
-            android:layout_height="@dimen/iv_play"
-            android:layout_below="@id/textViewStartTime"
-            android:layout_margin="@dimen/default_margin"
-            android:layout_centerHorizontal="true"
-            android:id="@+id/imageViewPlay"
-            />
-        <app.minimize.com.spotifystreamer.Views.PreviousButton
-            android:layout_width="@dimen/iv_previous_next"
-            android:layout_height="@dimen/iv_previous_next"
-            android:layout_toLeftOf="@id/imageViewPlay"
-            android:layout_below="@id/textViewStartTime"
-            android:layout_margin="@dimen/default_margin"
-            android:id="@+id/imageViewPrevious"
-            />
+        <LinearLayout
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:orientation="horizontal"
+            android:gravity="center"
+            android:layout_below="@id/textViewStartTime">
 
-        <app.minimize.com.spotifystreamer.Views.NextButton
-            android:layout_width="@dimen/iv_previous_next"
-            android:layout_height="@dimen/iv_previous_next"
-            android:layout_below="@id/textViewStartTime"
-            android:layout_margin="@dimen/default_margin"
-            android:layout_toRightOf="@id/imageViewPlay"
-            android:id="@+id/imageViewNext"
-            />
-
-
+            <app.minimize.com.spotifystreamer.Views.PreviousButton
+                android:layout_width="@dimen/iv_previous_next"
+                android:layout_height="@dimen/iv_previous_next"
+                android:id="@+id/imageViewPrevious"
+                />
+            <app.minimize.com.spotifystreamer.Views.PlayButton
+                android:layout_width="@dimen/iv_play"
+                android:layout_height="@dimen/iv_play"
+                android:background="@android:color/white"
+                android:id="@+id/imageViewPlay"
+                />
+            <app.minimize.com.spotifystreamer.Views.NextButton
+                android:layout_width="@dimen/iv_previous_next"
+                android:layout_height="@dimen/iv_previous_next"
+                android:id="@+id/imageViewNext"
+                />
+        </LinearLayout>
 
     </RelativeLayout>
-
 
 </LinearLayout>

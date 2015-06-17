@@ -12,7 +12,6 @@ import android.graphics.drawable.StateListDrawable;
 import android.graphics.drawable.shapes.OvalShape;
 import android.os.Build;
 import android.util.AttributeSet;
-import android.util.Log;
 import android.widget.ImageView;
 
 import app.minimize.com.spotifystreamer.R;
@@ -29,33 +28,33 @@ public class EmptyButton extends ImageView {
 
     public EmptyButton(Context context, AttributeSet attrs) {
         super(context, attrs);
-        int buttonColor;
-        try {
-            String background = attrs.getAttributeValue("http://schemas.android.com/apk/res/android", "background");
-            background = background.replaceAll("\\D+", "");
-            Log.e("Background", background + "  " + R.attr.colorPrimary);
-            if (Integer.parseInt(background) == (R.attr.colorPrimary)) {
-                buttonColor = (getPrimaryColorFromSelectedTheme(context));
-            } else
-                buttonColor = getResources().getColor(Integer.parseInt(background));
-        } catch (Exception e) {
-            buttonColor = Color.BLACK;
-        }
-        setButtonBackgroundColor(context, buttonColor);
+//        int buttonColor;
+//        try {
+//            String background = attrs.getAttributeValue("http://schemas.android.com/apk/res/android", "background");
+//            background = background.replaceAll("\\D+", "");
+////            Log.e("Background", background + "  " + R.attr.colorPrimary);
+//            if (Integer.parseInt(background) == (R.attr.colorPrimary)) {
+//                buttonColor = (getPrimaryColorFromSelectedTheme(context));
+//            } else
+//                buttonColor = getResources().getColor(Integer.parseInt(background));
+//        } catch (Exception e) {
+//            buttonColor = Color.BLACK;
+//        }
+//        setButtonBackgroundColor(context, buttonColor);
 
     }
 
     public void setButtonBackgroundColor(Context context, int buttonColor) {
-        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.LOLLIPOP) {
-            setBackground(getRippleCircularButton(context, buttonColor));
-
-        } else if (Build.VERSION.SDK_INT > Build.VERSION_CODES.ICE_CREAM_SANDWICH_MR1) {
-            setBackground(getCircularButton(buttonColor,
-                    darker(buttonColor, 2)));
-        } else {
-            setBackgroundDrawable(getCircularButton(buttonColor,
-                    darker(buttonColor, 2)));
-        }
+//        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.LOLLIPOP) {
+//            setBackground(getRippleCircularButton(context, buttonColor));
+//
+//        } else if (Build.VERSION.SDK_INT > Build.VERSION_CODES.ICE_CREAM_SANDWICH_MR1) {
+//            setBackground(getCircularButton(buttonColor,
+//                    darker(buttonColor, 2)));
+//        } else {
+//            setBackgroundDrawable(getCircularButton(buttonColor,
+//                    darker(buttonColor, 2)));
+//        }
     }
 
     //
@@ -74,7 +73,7 @@ public class EmptyButton extends ImageView {
     public static int getPrimaryColorDarkFromSelectedTheme(Context context) {
         int[] attrs = {R.attr.colorPrimary, R.attr.colorPrimaryDark};
         TypedArray ta = context.getTheme().obtainStyledAttributes(attrs);
-        int primaryColorDark = ta.getColor(1, Color.BLACK);
+        int primaryColorDark = ta.getColor(1, Color.WHITE);
         ta.recycle();
         return primaryColorDark;
     }
@@ -83,7 +82,7 @@ public class EmptyButton extends ImageView {
         // Parse MyCustomStyle, using Context.obtainStyledAttributes()
         int[] attrs = {R.attr.colorPrimary, R.attr.colorPrimaryDark};
         TypedArray ta = context.getTheme().obtainStyledAttributes(attrs);
-        int primaryColor = ta.getColor(0, Color.BLACK);
+        int primaryColor = ta.getColor(0, Color.YELLOW);
         ta.recycle();
         return primaryColor;
     }

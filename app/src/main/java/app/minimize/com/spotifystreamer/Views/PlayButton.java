@@ -2,10 +2,10 @@ package app.minimize.com.spotifystreamer.Views;
 
 import android.content.Context;
 import android.graphics.Canvas;
-import android.graphics.Color;
 import android.graphics.Paint;
 import android.graphics.Path;
 import android.util.AttributeSet;
+import android.util.Log;
 
 import app.minimize.com.spotifystreamer.R;
 
@@ -18,6 +18,8 @@ public class PlayButton extends EmptyButton {
     Paint mPaintLine;
     Path mPath;
     float point1x, point1y, point2x, point2y, point3x, point3y;
+    int widthHeight;
+    boolean pauseMode = false;
 
     public PlayButton(Context context) {
         super(context);
@@ -27,15 +29,16 @@ public class PlayButton extends EmptyButton {
         super(context, attrs);
         mPaint = new Paint();
         mPaint.setStyle(Paint.Style.FILL);
-//        mPaint.setColor(GlobalOperations.getPrimaryColorFromSelectedTheme(getContext()));
-        mPaint.setColor(Color.WHITE);
+//        mPaint.setColor(getResources().getColor(R.color.color_primary));
+        Log.e("Primary Color", getPrimaryColorFromSelectedTheme(context)+"");
+        mPaint.setColor(getPrimaryColorFromSelectedTheme(context));
         mPaint.setStrokeWidth(3.0f);
         mPaint.setAntiAlias(true);
 
         mPaintLine = new Paint();
         mPaintLine.setStyle(Paint.Style.FILL);
         mPaintLine.setAntiAlias(true);
-        mPaintLine.setColor(getPrimaryColorFromSelectedTheme(getContext()));
+        mPaintLine.setColor(getResources().getColor(R.color.color_primary));
 //        mPaintLine.setColor(Color.BLACK);
         mPaintLine.setStrokeWidth(3.0f);
 
@@ -56,15 +59,11 @@ public class PlayButton extends EmptyButton {
         mPath.close();
     }
 
-    int widthHeight;
 
-    boolean pauseMode = false;
 
     @Override
     protected void onDraw(Canvas canvas) {
         super.onDraw(canvas);
-//        canvas.drawCircle(getWidth() / 2, getHeight() / 2, (getWidth() / 2) - getWidth() / 12,
-//                mPaintLine);
         if (!pauseMode) {
             canvas.drawPath(mPath, mPaint);
         } else {

@@ -7,7 +7,7 @@ import android.support.v7.widget.Toolbar;
 import android.view.Menu;
 import android.view.MenuItem;
 
-import app.minimize.com.spotifystreamer.Fragments.ArtistsFragment;
+import app.minimize.com.spotifystreamer.Fragments.PlayerDialogFragment;
 import app.minimize.com.spotifystreamer.R;
 
 public class ContainerActivity extends AppCompatActivity {
@@ -15,7 +15,9 @@ public class ContainerActivity extends AppCompatActivity {
     boolean mTwoPane;
     @Override
     protected void onCreate(Bundle savedInstanceState) {
+        setTheme(R.style.AppTheme_Orange);
         super.onCreate(savedInstanceState);
+
         setContentView(R.layout.activity_container);
         Toolbar toolbar = (Toolbar) findViewById(R.id.mainToolbar);
         setSupportActionBar(toolbar);
@@ -28,7 +30,7 @@ public class ContainerActivity extends AppCompatActivity {
             //make transaction for the artists fragment
             if (savedInstanceState == null) {
                 getSupportFragmentManager().beginTransaction()
-                        .add(R.id.container, new ArtistsFragment())
+                        .add(R.id.container, new PlayerDialogFragment())
                         .commit();
             }
         }
