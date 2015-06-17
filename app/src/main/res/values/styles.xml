@@ -33,4 +33,44 @@
     <color name="color_primary">#ff0048</color>
     <color name="color_primary_dark">#c80044</color>
     <color name="color_accent">#ff8d10</color>
+
+
+
+    <!--Green Colors-->
+    <color name="green">#4CAF50</color>
+    <color name="greenDark">#388E3C</color>
+
+    <style name="AppTheme.GreenTheme" parent="Theme.AppCompat.NoActionBar">
+        <item name="colorPrimary">@color/green</item>
+        <item name="colorPrimaryDark">@color/greenDark</item>
+        <item name="colorAccent">@color/green</item>
+        <item name="actionModeBackground">@color/green</item>
+        <item name="android:alertDialogTheme">@style/AppTheme.GreenTheme.Dialog</item>
+    </style>
+
+    <style name="AppTheme.GreenTheme.Dialog" parent="Theme.AppCompat.Light.Dialog">
+        <item name="android:windowMinWidthMajor">@android:dimen/dialog_min_width_major</item>
+        <item name="android:windowMinWidthMinor">@android:dimen/dialog_min_width_minor</item>
+        <item name="colorAccent">@color/green</item>
+    </style>
+
+
+    <!--Blue Colors-->
+    <color name="blue">#2196F3</color>
+    <color name="blueDark">#1976D2</color>
+
+    <style name="AppTheme.BlueTheme" parent="Theme.AppCompat.NoActionBar">
+        <item name="colorPrimary">@color/blue</item>
+        <item name="colorPrimaryDark">@color/blueDark</item>
+        <item name="colorAccent">@color/blue</item>
+        <item name="actionModeBackground">@color/blue</item>
+        <item name="android:alertDialogTheme">@style/AppTheme.BlueTheme.Dialog</item>
+    </style>
+
+    <style name="AppTheme.BlueTheme.Dialog" parent="Theme.AppCompat.Light.Dialog">
+        <item name="android:windowMinWidthMajor">@android:dimen/dialog_min_width_major</item>
+        <item name="android:windowMinWidthMinor">@android:dimen/dialog_min_width_minor</item>
+        <item name="colorAccent">@color/blue</item>
+    </style>
+
 </resources>

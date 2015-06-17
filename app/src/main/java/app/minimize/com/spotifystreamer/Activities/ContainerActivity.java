@@ -15,7 +15,7 @@ public class ContainerActivity extends AppCompatActivity {
     boolean mTwoPane;
     @Override
     protected void onCreate(Bundle savedInstanceState) {
-        setTheme(R.style.AppTheme_Orange);
+        setTheme(R.style.AppTheme_GreenTheme);
         super.onCreate(savedInstanceState);
 
         setContentView(R.layout.activity_container);

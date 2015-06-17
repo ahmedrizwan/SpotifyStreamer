@@ -9,6 +9,7 @@ import android.graphics.Rect;
 import android.util.AttributeSet;
 
 import app.minimize.com.spotifystreamer.R;
+import app.minimize.com.spotifystreamer.Utility;
 
 
 /**
@@ -38,7 +39,7 @@ public class PreviousButton extends EmptyButton {
         mPaintLine = new Paint();
         mPaintLine.setStyle(Paint.Style.FILL);
         mPaintLine.setAntiAlias(true);
-        mPaintLine.setColor(getPrimaryColorFromSelectedTheme(getContext()));
+        mPaintLine.setColor(Utility.getPrimaryColorFromSelectedTheme(getContext()));
 //        mPaintLine.setColor(Color.BLACK);
         mPaintLine.setStrokeWidth(3.0f);
 

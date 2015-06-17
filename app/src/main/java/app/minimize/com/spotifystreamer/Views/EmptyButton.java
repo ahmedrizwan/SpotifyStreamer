@@ -2,7 +2,6 @@ package app.minimize.com.spotifystreamer.Views;
 
 import android.annotation.TargetApi;
 import android.content.Context;
-import android.content.res.TypedArray;
 import android.graphics.Color;
 import android.graphics.PorterDuff;
 import android.graphics.drawable.Drawable;
@@ -70,22 +69,7 @@ public class EmptyButton extends ImageView {
                 Math.max((int) (b * factor), 0));
     }
 
-    public static int getPrimaryColorDarkFromSelectedTheme(Context context) {
-        int[] attrs = {R.attr.colorPrimary, R.attr.colorPrimaryDark};
-        TypedArray ta = context.getTheme().obtainStyledAttributes(attrs);
-        int primaryColorDark = ta.getColor(1, Color.WHITE);
-        ta.recycle();
-        return primaryColorDark;
-    }
 
-    public static int getPrimaryColorFromSelectedTheme(Context context) {
-        // Parse MyCustomStyle, using Context.obtainStyledAttributes()
-        int[] attrs = {R.attr.colorPrimary, R.attr.colorPrimaryDark};
-        TypedArray ta = context.getTheme().obtainStyledAttributes(attrs);
-        int primaryColor = ta.getColor(0, Color.YELLOW);
-        ta.recycle();
-        return primaryColor;
-    }
 
     //
     @TargetApi(Build.VERSION_CODES.LOLLIPOP)

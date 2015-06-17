@@ -5,9 +5,9 @@ import android.graphics.Canvas;
 import android.graphics.Paint;
 import android.graphics.Path;
 import android.util.AttributeSet;
-import android.util.Log;
 
 import app.minimize.com.spotifystreamer.R;
+import app.minimize.com.spotifystreamer.Utility;
 
 
 /**
@@ -30,8 +30,7 @@ public class PlayButton extends EmptyButton {
         mPaint = new Paint();
         mPaint.setStyle(Paint.Style.FILL);
 //        mPaint.setColor(getResources().getColor(R.color.color_primary));
-        Log.e("Primary Color", getPrimaryColorFromSelectedTheme(context)+"");
-        mPaint.setColor(getPrimaryColorFromSelectedTheme(context));
+        mPaint.setColor(Utility.getPrimaryColorFromSelectedTheme(context));
         mPaint.setStrokeWidth(3.0f);
         mPaint.setAntiAlias(true);
 

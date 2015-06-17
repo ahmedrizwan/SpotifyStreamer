@@ -3,6 +3,7 @@ package app.minimize.com.spotifystreamer.Fragments;
 import android.os.Bundle;
 import android.support.annotation.Nullable;
 import android.support.v4.app.DialogFragment;
+import android.support.v4.graphics.drawable.DrawableCompat;
 import android.support.v7.app.AppCompatActivity;
 import android.view.LayoutInflater;
 import android.view.View;
@@ -12,6 +13,7 @@ import android.widget.TextView;
 
 import app.minimize.com.spotifystreamer.Parcelables.TrackParcelable;
 import app.minimize.com.spotifystreamer.R;
+import app.minimize.com.spotifystreamer.Utility;
 import app.minimize.com.spotifystreamer.Views.NextButton;
 import app.minimize.com.spotifystreamer.Views.PlayButton;
 import app.minimize.com.spotifystreamer.Views.PreviousButton;
@@ -50,7 +52,7 @@ public class PlayerDialogFragment extends DialogFragment {
     @Override
     public View onCreateView(final LayoutInflater inflater, final ViewGroup container, final Bundle savedInstanceState) {
         View rootView = inflater.inflate(R.layout.fragment_player, container, false);
-//        ButterKnife.inject(this, rootView);
+        ButterKnife.inject(this, rootView);
         try {
             //get the toolBar
             ((AppCompatActivity) tracksFragment.getActivity()).getSupportActionBar()
@@ -68,12 +70,9 @@ public class PlayerDialogFragment extends DialogFragment {
 
         } catch (Exception e) {
         }
-
-//        seekBarPlayer.getThumb()
-//                .setColorFilter(Color.YELLOW, PorterDuff.Mode.MULTIPLY);
-//        seekBarPlayer.getProgressDrawable()
-//                .setColorFilter(getResources().getColor(R.color.color_accent), PorterDuff.Mode.MULTIPLY);
-
+        int colorPrimary = Utility.getPrimaryColorFromSelectedTheme(getActivity());
+        DrawableCompat.setTint(seekBarPlayer.getThumb(), colorPrimary);
+        DrawableCompat.setTint(seekBarPlayer.getProgressDrawable(), colorPrimary);
         return rootView;
     }
 
