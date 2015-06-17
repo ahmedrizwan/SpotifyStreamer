@@ -1,5 +1,8 @@
 package app.minimize.com.spotifystreamer;
 
+import android.content.Context;
+import android.content.res.TypedArray;
+import android.graphics.Color;
 import android.os.Build;
 import android.support.v4.app.Fragment;
 import android.support.v7.app.AppCompatActivity;
@@ -44,5 +47,22 @@ public class Utility {
 
     public static void launchFragmentWithSharedElements(final Fragment fromFragment, final Fragment toFragment) {
 
+    }
+
+    public static int getPrimaryColorDarkFromSelectedTheme(Context context) {
+        int[] attrs = {R.attr.colorPrimary, R.attr.colorPrimaryDark};
+        TypedArray ta = context.getTheme().obtainStyledAttributes(attrs);
+        int primaryColorDark = ta.getColor(1, Color.WHITE);
+        ta.recycle();
+        return primaryColorDark;
+    }
+
+    public static int getPrimaryColorFromSelectedTheme(Context context) {
+        // Parse MyCustomStyle, using Context.obtainStyledAttributes()
+        int[] attrs = {R.attr.colorPrimary, R.attr.colorPrimaryDark};
+        TypedArray ta = context.getTheme().obtainStyledAttributes(attrs);
+        int primaryColor = ta.getColor(0, Color.YELLOW);
+        ta.recycle();
+        return primaryColor;
     }
 }

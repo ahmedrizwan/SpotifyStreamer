@@ -148,7 +148,7 @@ public class TracksFragment extends Fragment implements TracksAdapter.TracksEven
                 public void success(final Tracks tracks, final Response response) {
                     mData = new ArrayList<TrackParcelable>();
                     for (Track track : tracks.tracks) {
-                        mData.add(new TrackParcelable(track.name, track.album.name, track.album.images));
+                        mData.add(new TrackParcelable(track));
                     }
                     Utility.runOnUiThread(((AppCompatActivity) getActivity()), () -> {
                         if (mData.size() == 0) {
@@ -181,8 +181,11 @@ public class TracksFragment extends Fragment implements TracksAdapter.TracksEven
 
     @Override
     public void trackClicked(final TrackParcelable track, final TracksAdapter.RecyclerViewHolderTracks holder) {
-        //Launch a dialogFragment with playback controls
+        //Launch the dialogFragment from here
         PlayerDialogFragment playerDialogFragment = PlayerDialogFragment.getInstance(this);
+        Bundle bundle = new Bundle();
+        bundle.putParcelable(getString(R.string.key_tracks_parcelable), track);
+        playerDialogFragment.setArguments(bundle);
         Utility.launchFragment(((AppCompatActivity) getActivity()), R.id.container, playerDialogFragment);
     }
 

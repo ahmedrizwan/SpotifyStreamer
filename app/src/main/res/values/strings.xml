@@ -16,4 +16,5 @@
     <item name="divider_alpha" format="float" type="dimen">0.3</item>
     <item name="parallax_multiplier" format="float" type="dimen">0.7</item>
     <string name="tv_no_tracks">Oops… No tracks found!</string>
+    <string name="key_tracks_parcelable">TrackParcelable</string>
 </resources>

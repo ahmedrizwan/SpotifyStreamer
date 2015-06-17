@@ -11,6 +11,7 @@ import android.os.Build;
 import android.util.AttributeSet;
 
 import app.minimize.com.spotifystreamer.R;
+import app.minimize.com.spotifystreamer.Utility;
 
 
 /**
@@ -35,14 +36,14 @@ public class NextButton extends EmptyButton {
         super(context, attrs);
         mPaint = new Paint();
         mPaint.setStyle(Paint.Style.FILL);
-        mPaint.setColor(Color.WHITE);
+        mPaint.setColor(Color.BLACK);
         mPaint.setStrokeWidth(3.0f);
         mPaint.setAntiAlias(true);
 
         mPaintLine = new Paint();
         mPaintLine.setStyle(Paint.Style.FILL);
         mPaintLine.setAntiAlias(true);
-        mPaintLine.setColor(getPrimaryColorFromSelectedTheme(getContext()));
+        mPaintLine.setColor(Utility.getPrimaryColorFromSelectedTheme(getContext()));
         mPaintLine.setStrokeWidth(3.0f);
 
         mPath = new Path();

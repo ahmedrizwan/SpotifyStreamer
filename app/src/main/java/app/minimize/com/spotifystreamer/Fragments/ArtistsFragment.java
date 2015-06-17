@@ -214,7 +214,7 @@ public class ArtistsFragment extends Fragment implements ArtistsAdapter.ArtistsE
         mArtists = new ArrayList<ArtistParcelable>();
         //iterate and save in the list
         for (Artist artist : artistsPager.artists.items) {
-            mArtists.add(new ArtistParcelable(artist.id, artist.name, artist.images));
+            mArtists.add(new ArtistParcelable(artist));
         }
         //update the adapter
         Utility.runOnUiThread(((AppCompatActivity) getActivity()), () -> {
@@ -273,7 +273,7 @@ public class ArtistsFragment extends Fragment implements ArtistsAdapter.ArtistsE
 
             if (artistModel.artistImageUrls.size() > 0)
                 bundle.putString(TracksFragment.IMAGE_URL, artistModel.artistImageUrls.get(0));
-            bundle.putString(TracksFragment.ARTIST_NAME, artistModel.name);
+            bundle.putString(TracksFragment.ARTIST_NAME, artistModel.artistName);
             bundle.putString(TracksFragment.ARTIST_ID, artistModel.id);
             tracksFragment.setArguments(bundle);
 
@@ -293,7 +293,7 @@ public class ArtistsFragment extends Fragment implements ArtistsAdapter.ArtistsE
             Bundle bundle = new Bundle();
             if (artistModel.artistImageUrls.size() > 0)
                 bundle.putString(TracksFragment.IMAGE_URL, artistModel.artistImageUrls.get(artistModel.artistImageUrls.size() - 2));
-            bundle.putString(TracksFragment.ARTIST_NAME, artistModel.name);
+            bundle.putString(TracksFragment.ARTIST_NAME, artistModel.artistName);
             bundle.putString(TracksFragment.ARTIST_ID, artistModel.id);
             fragment.setArguments(bundle);
             FragmentTransaction trans = getActivity().getSupportFragmentManager()
