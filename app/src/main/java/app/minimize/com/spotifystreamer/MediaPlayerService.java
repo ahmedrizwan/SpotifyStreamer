@@ -101,6 +101,10 @@ public class MediaPlayerService extends Service implements MediaPlayerInterface 
             if (null != intent.getParcelableExtra(Keys.KEY_PLAYER_RECEIVER)) {
                 mResultReceiver = intent.getParcelableExtra(Keys.KEY_PLAYER_RECEIVER);
                 playTrack(intent);
+
+
+
+
                 return true;
             }
         } catch (NullPointerException e) {

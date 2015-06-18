@@ -28,11 +28,11 @@ public class ContainerActivity extends AppCompatActivity {
 
     boolean mTwoPane;
 
-    public PlayerReceiver getPlayerReceiver() {
-        return mPlayerReceiver;
+    public NowPlayingReceiver getNowPlayingReceiver() {
+        return mNowPlayingReceiver;
     }
 
-    PlayerReceiver mPlayerReceiver;
+    NowPlayingReceiver mNowPlayingReceiver;
 
     @InjectView(R.id.mainToolbar)
     Toolbar mainToolbar;
@@ -76,9 +76,9 @@ public class ContainerActivity extends AppCompatActivity {
     private void startServiceForStatusRetrieval() {
         Intent intent = new Intent(this,
                 MediaPlayerService.class);
-        mPlayerReceiver = new PlayerReceiver(null);
+        mNowPlayingReceiver = new NowPlayingReceiver(null);
         intent.putExtra(Keys.KEY_GET_STATUS,
-                mPlayerReceiver);
+                mNowPlayingReceiver);
         startService(intent);
     }
 
@@ -120,9 +120,9 @@ public class ContainerActivity extends AppCompatActivity {
     }
 
 
-    public class PlayerReceiver extends ResultReceiver {
+    public class NowPlayingReceiver extends ResultReceiver {
 
-        public PlayerReceiver(final Handler handler) {
+        public NowPlayingReceiver(final Handler handler) {
             super(handler);
         }
 
@@ -132,8 +132,6 @@ public class ContainerActivity extends AppCompatActivity {
             try {
                 if (resultCode == Keys.KEY_STATUS_CODE) {
                     handleStatusReceiver(resultData);
-                } else if (resultCode == Keys.KEY_PLAYER_CODE) {
-                    handlePlayerReceiver(resultData);
                 }
             } catch (NullPointerException e) {
                 Log.e("Container Activity", e.toString());

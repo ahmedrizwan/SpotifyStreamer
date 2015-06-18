@@ -123,6 +123,7 @@ public class MediaPlayerHandler implements AudioManager.OnAudioFocusChangeListen
                 mMediaPlayer.stop();
                 mMediaPlayer.release();
             }
+
             mMediaPlayer.setAudioStreamType(AudioManager.STREAM_MUSIC);
             mMediaPlayer.setDataSource(mContext, Uri.parse(mTrackUrl));
 
