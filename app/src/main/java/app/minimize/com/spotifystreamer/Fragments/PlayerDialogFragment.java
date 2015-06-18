@@ -1,5 +1,6 @@
 package app.minimize.com.spotifystreamer.Fragments;
 
+import android.content.Intent;
 import android.os.Bundle;
 import android.support.annotation.Nullable;
 import android.support.v4.app.DialogFragment;
@@ -12,6 +13,9 @@ import android.view.ViewGroup;
 import android.widget.SeekBar;
 import android.widget.TextView;
 
+import app.minimize.com.spotifystreamer.Activities.ContainerActivity;
+import app.minimize.com.spotifystreamer.Activities.Keys;
+import app.minimize.com.spotifystreamer.MediaPlayerService;
 import app.minimize.com.spotifystreamer.Parcelables.TrackParcelable;
 import app.minimize.com.spotifystreamer.R;
 import app.minimize.com.spotifystreamer.Utility;
@@ -42,6 +46,7 @@ public class PlayerDialogFragment extends DialogFragment {
     NextButton imageViewNext;
 
     private TracksFragment tracksFragment;
+    private TrackParcelable mTrackParcelable;
 
     public static PlayerDialogFragment getInstance(TracksFragment tracksFragment) {
         PlayerDialogFragment playerDialogFragment = new PlayerDialogFragment();
@@ -57,14 +62,14 @@ public class PlayerDialogFragment extends DialogFragment {
         ((AppCompatActivity) tracksFragment.getActivity()).getSupportActionBar()
                 .setTitle("Player");
 
-        TrackParcelable trackParcelable = getArguments().getParcelable(getString(R.string.key_tracks_parcelable));
+        mTrackParcelable = getArguments().getParcelable(getString(R.string.key_tracks_parcelable));
 
-        if (trackParcelable != null) {
-            textViewTrackName.setText(trackParcelable.songName + " "
-                    + trackParcelable.artistName + " " + trackParcelable.albumName);
+        if (mTrackParcelable != null) {
+            textViewTrackName.setText(mTrackParcelable.songName + " "
+                    + mTrackParcelable.artistName + " " + mTrackParcelable.albumName);
+
+            playTrack();
         }
-
-//        playTrack(trackParcelable.previewUrl);
 
         int colorPrimary = Utility.getPrimaryColorFromSelectedTheme(getActivity());
         DrawableCompat.setTint(seekBarPlayer.getThumb(), colorPrimary);
@@ -72,44 +77,19 @@ public class PlayerDialogFragment extends DialogFragment {
         return rootView;
     }
 
-    //region State Methods
-//    private void startServiceForRetrievingState() {
-//        Intent intent = new Intent(getActivity(),
-//                MediaPlayerService.class);
-//        playerReceiver = new PlayerReceiver(null);
-//        intent.putExtra(Keys.KEY_STATE_RECEIVER,
-//                recordoReceiver);
-//        getActivity().startService(intent);
-//    }
-
-//    public class PlayerReceiver extends ResultReceiver {
-//        public PlayerReceiver(Handler handler) {
-//            super(handler);
-//        }
-//
-//        @Override
-//        protected void onReceiveResult(final int resultCode,
-//                                       final Bundle resultData) {
-//            try {
-//                if (resultCode == Keys.KEY_STATE_CODE) {
-//                    handleStateReceiver(resultData);
-//                } else if (resultCode == Keys.KEY_PLAYER_CODE) {
-//                    handlePlayerReceiver(resultData);
-//                }
-//            } catch (NullPointerException e) {
-//                showLog(e.toString());
-//            }
-//        }
-//    }
-
-    private void handlePlayerReceiver(final Bundle resultData) {
-
+    private void playTrack() {
+        Intent intent = new Intent(getActivity(),
+                MediaPlayerService.class);
+        intent.putExtra(Keys.KEY_TRACK_URL, mTrackParcelable.previewUrl);
+        intent.putExtra(Keys.KEY_TRACK_NAME, mTrackParcelable.songName);
+        intent.putExtra(Keys.KEY_PLAYER_RECEIVER,
+                ((ContainerActivity) getActivity()).getPlayerReceiver());
+        getActivity().startService(intent);
     }
 
     private void showLog(final String message) {
         Log.e("Exception", message);
     }
-
 
     @Override
     public void onDestroyView() {

@@ -48,7 +48,7 @@ public class MediaPlayerService extends Service implements MediaPlayerInterface 
 
     @Override
     public Context getContext() {
-        return null;
+        return this;
     }
 
     //MediaPlayer
@@ -71,6 +71,7 @@ public class MediaPlayerService extends Service implements MediaPlayerInterface 
     @Override
     public int onStartCommand(final Intent intent, final int flags, final int startId) {
         if (statusReceiver(intent)) return START_STICKY;
+        if(playerReceiver(intent)) return START_STICKY;
         return START_STICKY;
     }
 
@@ -97,9 +98,9 @@ public class MediaPlayerService extends Service implements MediaPlayerInterface 
 
     private boolean playerReceiver(Intent intent) {
         try {
-            if (null != intent.getParcelableExtra(Keys.KEY_PLAYER)) {
+            if (null != intent.getParcelableExtra(Keys.KEY_PLAYER_RECEIVER)) {
                 mResultReceiver = intent.getParcelableExtra(Keys.KEY_PLAYER_RECEIVER);
-                initializePlayerAndReturn(intent);
+                playTrack(intent);
                 return true;
             }
         } catch (NullPointerException e) {
@@ -108,19 +109,16 @@ public class MediaPlayerService extends Service implements MediaPlayerInterface 
         return false;
     }
 
-    private void initializePlayerAndReturn(final Intent intent) {
-        try {
+    private void playTrack(final Intent intent) {
+//        try {
             //set url
             String trackUrl = intent.getStringExtra(Keys.KEY_TRACK_URL);
             String trackName = intent.getStringExtra(Keys.KEY_TRACK_NAME);
-            //send an empty bundle back
-            Bundle bundle = new Bundle();
-            bundle.putString(Keys.KEY_TRACK_NAME, trackName);
-            bundle.putString(Keys.KEY_TRACK_URL, trackUrl);
-            mResultReceiver.send(Keys.KEY_PLAYER_CODE, bundle);
-        } catch (NullPointerException e) {
-            logHelper(e.getMessage());
-        }
+            mMediaPlayerHandler.handlePlayback(trackUrl,trackName);
+
+//        } catch (NullPointerException e) {
+//            logHelper(e.getMessage());
+//        }
     }
 
     private void logHelper(final String message) {

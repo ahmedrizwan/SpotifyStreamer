@@ -10,12 +10,15 @@ import android.support.v7.widget.Toolbar;
 import android.util.Log;
 import android.view.Menu;
 import android.view.MenuItem;
+import android.view.View;
 import android.widget.ImageView;
 import android.widget.LinearLayout;
 import android.widget.RelativeLayout;
 import android.widget.TextView;
 
 import app.minimize.com.spotifystreamer.Fragments.ArtistsFragment;
+import app.minimize.com.spotifystreamer.HelperClasses.MediaPlayerHandler;
+import app.minimize.com.spotifystreamer.HelperClasses.MediaPlayerInterface;
 import app.minimize.com.spotifystreamer.MediaPlayerService;
 import app.minimize.com.spotifystreamer.R;
 import butterknife.ButterKnife;
@@ -24,6 +27,11 @@ import butterknife.InjectView;
 public class ContainerActivity extends AppCompatActivity {
 
     boolean mTwoPane;
+
+    public PlayerReceiver getPlayerReceiver() {
+        return mPlayerReceiver;
+    }
+
     PlayerReceiver mPlayerReceiver;
 
     @InjectView(R.id.mainToolbar)
@@ -112,7 +120,7 @@ public class ContainerActivity extends AppCompatActivity {
     }
 
 
-    private class PlayerReceiver extends ResultReceiver {
+    public class PlayerReceiver extends ResultReceiver {
 
         public PlayerReceiver(final Handler handler) {
             super(handler);
@@ -138,7 +146,14 @@ public class ContainerActivity extends AppCompatActivity {
 
         private void handleStatusReceiver(final Bundle resultData) {
             logHelper("handleStatus");
+            if (MediaPlayerHandler.getPlayerState() == MediaPlayerInterface.MediaPlayerState.Idle) {
+                //Hide the NowPlaying
+                layoutNowPlaying.setVisibility(View.GONE);
+            } else {
+                layoutNowPlaying.setVisibility(View.VISIBLE);
+                //TODO : Add track and album name to the NowPlaying along with play/pause info
 
+            }
         }
     }
 

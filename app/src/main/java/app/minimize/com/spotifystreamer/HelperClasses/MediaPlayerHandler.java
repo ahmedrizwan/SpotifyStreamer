@@ -4,6 +4,7 @@ import android.content.Context;
 import android.content.Intent;
 import android.media.AudioManager;
 import android.media.MediaPlayer;
+import android.net.Uri;
 import android.util.Log;
 import android.widget.Toast;
 
@@ -21,7 +22,7 @@ public class MediaPlayerHandler implements AudioManager.OnAudioFocusChangeListen
     private MediaPlayerInterface mMediaPlayerInterface;
     private MediaPlayer mMediaPlayer;
     private Context mContext;
-    private String mTrackUrl, mTrackName;
+    private String mTrackUrl="", mTrackName="";
 
     private final String TAG = "MediaPlayerHandler";
 
@@ -67,7 +68,7 @@ public class MediaPlayerHandler implements AudioManager.OnAudioFocusChangeListen
 
     public void handlePlayback(String trackUrl, String trackName) {
         //check if its the same old file or a new one
-        boolean newFile = !this.mTrackUrl.equals(trackUrl);
+        boolean newFile = !mTrackUrl.equals(trackUrl);
         mTrackUrl = trackUrl;
         mTrackName = trackName;
 
@@ -87,7 +88,6 @@ public class MediaPlayerHandler implements AudioManager.OnAudioFocusChangeListen
                 AudioManager.STREAM_MUSIC,
                 // Request permanent focus.
                 AudioManager.AUDIOFOCUS_GAIN);
-
         if (result == AudioManager.AUDIOFOCUS_REQUEST_GRANTED) {
             playPauseOrStopMediaPlayer(newFile, audioManager);
         }
@@ -116,7 +116,6 @@ public class MediaPlayerHandler implements AudioManager.OnAudioFocusChangeListen
     }
 
     private void playUrl() throws IOException {
-        try {
             if (mMediaPlayer == null) {
                 mMediaPlayer = new MediaPlayer();
             }
@@ -124,14 +123,12 @@ public class MediaPlayerHandler implements AudioManager.OnAudioFocusChangeListen
                 mMediaPlayer.stop();
                 mMediaPlayer.release();
             }
-            mMediaPlayer.setDataSource(mTrackUrl);
             mMediaPlayer.setAudioStreamType(AudioManager.STREAM_MUSIC);
+            mMediaPlayer.setDataSource(mContext, Uri.parse(mTrackUrl));
+
             mMediaPlayer.setOnPreparedListener(this);
             mMediaPlayer.setOnCompletionListener(this);
             mMediaPlayer.prepare();
-        } catch (Exception e) {
-            logHelper(e.getMessage());
-        }
     }
 
     @Override
@@ -174,7 +171,6 @@ public class MediaPlayerHandler implements AudioManager.OnAudioFocusChangeListen
     @Override
     public void onCompletion(final MediaPlayer mediaPlayer) {
         mMediaPlayer.release();
-        mMediaPlayer.reset();
         setPlayerState(MediaPlayerInterface.MediaPlayerState.Stopped);
         mMediaPlayerInterface.stopped();
     }
