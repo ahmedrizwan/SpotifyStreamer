@@ -1,28 +1,54 @@
 package app.minimize.com.spotifystreamer.Activities;
 
+import android.content.Intent;
 import android.os.Bundle;
+import android.os.Handler;
+import android.os.ResultReceiver;
 import android.support.v7.app.AlertDialog;
 import android.support.v7.app.AppCompatActivity;
 import android.support.v7.widget.Toolbar;
+import android.util.Log;
 import android.view.Menu;
 import android.view.MenuItem;
+import android.widget.ImageView;
+import android.widget.LinearLayout;
+import android.widget.RelativeLayout;
+import android.widget.TextView;
 
-import app.minimize.com.spotifystreamer.Fragments.PlayerDialogFragment;
+import app.minimize.com.spotifystreamer.Fragments.ArtistsFragment;
+import app.minimize.com.spotifystreamer.MediaPlayerService;
 import app.minimize.com.spotifystreamer.R;
+import butterknife.ButterKnife;
+import butterknife.InjectView;
 
 public class ContainerActivity extends AppCompatActivity {
 
     boolean mTwoPane;
+    PlayerReceiver mPlayerReceiver;
+
+    @InjectView(R.id.mainToolbar)
+    Toolbar mainToolbar;
+    @InjectView(R.id.container)
+    LinearLayout container;
+    @InjectView(R.id.imageViewAlbum)
+    ImageView imageViewAlbum;
+    @InjectView(R.id.textViewTrackName)
+    TextView textViewTrackName;
+    @InjectView(R.id.layoutNowPlaying)
+    RelativeLayout layoutNowPlaying;
+
+
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         setTheme(R.style.AppTheme_GreenTheme);
         super.onCreate(savedInstanceState);
 
         setContentView(R.layout.activity_container);
-        Toolbar toolbar = (Toolbar) findViewById(R.id.mainToolbar);
-        setSupportActionBar(toolbar);
+        ButterKnife.inject(this);
 
-        if(findViewById(R.id.tracksContainer)!=null){
+        setSupportActionBar(mainToolbar);
+
+        if (findViewById(R.id.tracksContainer) != null) {
             mTwoPane = true;
         } else {
             mTwoPane = false;
@@ -30,13 +56,25 @@ public class ContainerActivity extends AppCompatActivity {
             //make transaction for the artists fragment
             if (savedInstanceState == null) {
                 getSupportFragmentManager().beginTransaction()
-                        .add(R.id.container, new PlayerDialogFragment())
+                        .add(R.id.container, new ArtistsFragment())
                         .commit();
             }
         }
+        //start service to retrieve the status of player
+        startServiceForStatusRetrieval();
     }
 
-    public boolean isTwoPane(){
+
+    private void startServiceForStatusRetrieval() {
+        Intent intent = new Intent(this,
+                MediaPlayerService.class);
+        mPlayerReceiver = new PlayerReceiver(null);
+        intent.putExtra(Keys.KEY_GET_STATUS,
+                mPlayerReceiver);
+        startService(intent);
+    }
+
+    public boolean isTwoPane() {
         return mTwoPane;
     }
 
@@ -63,13 +101,48 @@ public class ContainerActivity extends AppCompatActivity {
 
             AlertDialog dialog = builder.create();
             dialog.show();
-            dialog.getButton(AlertDialog.BUTTON_POSITIVE).setTextColor(getResources().getColor(R.color.color_primary));
+            dialog.getButton(AlertDialog.BUTTON_POSITIVE)
+                    .setTextColor(getResources().getColor(R.color.color_primary));
             return true;
-        } else if(id== android.R.id.home) {
+        } else if (id == android.R.id.home) {
             getSupportFragmentManager().popBackStack();
         }
 
         return super.onOptionsItemSelected(item);
     }
 
+
+    private class PlayerReceiver extends ResultReceiver {
+
+        public PlayerReceiver(final Handler handler) {
+            super(handler);
+        }
+
+        @Override
+        protected void onReceiveResult(final int resultCode,
+                                       final Bundle resultData) {
+            try {
+                if (resultCode == Keys.KEY_STATUS_CODE) {
+                    handleStatusReceiver(resultData);
+                } else if (resultCode == Keys.KEY_PLAYER_CODE) {
+                    handlePlayerReceiver(resultData);
+                }
+            } catch (NullPointerException e) {
+                Log.e("Container Activity", e.toString());
+            }
+        }
+
+        private void handlePlayerReceiver(final Bundle resultData) {
+            logHelper("handlePlayer");
+        }
+
+        private void handleStatusReceiver(final Bundle resultData) {
+            logHelper("handleStatus");
+
+        }
+    }
+
+    private void logHelper(final String message) {
+        Log.e("Container Activity", message);
+    }
 }

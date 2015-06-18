@@ -5,6 +5,7 @@ import android.support.annotation.Nullable;
 import android.support.v4.app.DialogFragment;
 import android.support.v4.graphics.drawable.DrawableCompat;
 import android.support.v7.app.AppCompatActivity;
+import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
@@ -53,27 +54,60 @@ public class PlayerDialogFragment extends DialogFragment {
     public View onCreateView(final LayoutInflater inflater, final ViewGroup container, final Bundle savedInstanceState) {
         View rootView = inflater.inflate(R.layout.fragment_player, container, false);
         ButterKnife.inject(this, rootView);
-        try {
-            //get the toolBar
-            ((AppCompatActivity) tracksFragment.getActivity()).getSupportActionBar()
-                    .setTitle("Player");
+        ((AppCompatActivity) tracksFragment.getActivity()).getSupportActionBar()
+                .setTitle("Player");
 
-            //get arguments
-            TrackParcelable trackParcelable = getArguments().getParcelable(getString(R.string.key_tracks_parcelable));
+        TrackParcelable trackParcelable = getArguments().getParcelable(getString(R.string.key_tracks_parcelable));
 
-            if (trackParcelable != null) {
-                textViewTrackName.setText(trackParcelable.songName + " "
-                        + trackParcelable.artistName + " " + trackParcelable.albumName);
-
-            }
-
-
-        } catch (Exception e) {
+        if (trackParcelable != null) {
+            textViewTrackName.setText(trackParcelable.songName + " "
+                    + trackParcelable.artistName + " " + trackParcelable.albumName);
         }
+
+//        playTrack(trackParcelable.previewUrl);
+
         int colorPrimary = Utility.getPrimaryColorFromSelectedTheme(getActivity());
         DrawableCompat.setTint(seekBarPlayer.getThumb(), colorPrimary);
         DrawableCompat.setTint(seekBarPlayer.getProgressDrawable(), colorPrimary);
         return rootView;
+    }
+
+    //region State Methods
+//    private void startServiceForRetrievingState() {
+//        Intent intent = new Intent(getActivity(),
+//                MediaPlayerService.class);
+//        playerReceiver = new PlayerReceiver(null);
+//        intent.putExtra(Keys.KEY_STATE_RECEIVER,
+//                recordoReceiver);
+//        getActivity().startService(intent);
+//    }
+
+//    public class PlayerReceiver extends ResultReceiver {
+//        public PlayerReceiver(Handler handler) {
+//            super(handler);
+//        }
+//
+//        @Override
+//        protected void onReceiveResult(final int resultCode,
+//                                       final Bundle resultData) {
+//            try {
+//                if (resultCode == Keys.KEY_STATE_CODE) {
+//                    handleStateReceiver(resultData);
+//                } else if (resultCode == Keys.KEY_PLAYER_CODE) {
+//                    handlePlayerReceiver(resultData);
+//                }
+//            } catch (NullPointerException e) {
+//                showLog(e.toString());
+//            }
+//        }
+//    }
+
+    private void handlePlayerReceiver(final Bundle resultData) {
+
+    }
+
+    private void showLog(final String message) {
+        Log.e("Exception", message);
     }
 
 
@@ -82,4 +116,5 @@ public class PlayerDialogFragment extends DialogFragment {
         super.onDestroyView();
         ButterKnife.reset(this);
     }
+
 }
