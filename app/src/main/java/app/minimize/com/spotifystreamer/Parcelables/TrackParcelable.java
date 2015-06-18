@@ -17,6 +17,7 @@ public class TrackParcelable implements Parcelable {
     public String songName;
     public String albumName;
     public String artistName;
+    public String previewUrl;
     public List<String> albumImageUrls;
 
     public TrackParcelable(Track track) {
@@ -25,6 +26,8 @@ public class TrackParcelable implements Parcelable {
         this.albumName = track.album.name;
         this.artistName = track.artists.get(0).name;
         this.songDuration = track.duration_ms;
+        this.previewUrl = track.preview_url;
+
         for (Image image : track.album.images) {
             this.albumImageUrls.add(image.url);
         }
@@ -42,6 +45,7 @@ public class TrackParcelable implements Parcelable {
         dest.writeString(this.songName);
         dest.writeString(this.albumName);
         dest.writeString(this.artistName);
+        dest.writeString(this.previewUrl);
         dest.writeStringList(this.albumImageUrls);
     }
 
@@ -50,6 +54,7 @@ public class TrackParcelable implements Parcelable {
         this.songName = in.readString();
         this.albumName = in.readString();
         this.artistName = in.readString();
+        this.previewUrl = in.readString();
         this.albumImageUrls = in.createStringArrayList();
     }
 
