@@ -22,7 +22,7 @@ public class MediaPlayerHandler implements AudioManager.OnAudioFocusChangeListen
     private MediaPlayerInterface mMediaPlayerInterface;
     private MediaPlayer mMediaPlayer;
     private Context mContext;
-    private String mTrackUrl="", mTrackName="";
+    private String mTrackUrl = "", mTrackName = "";
 
     private final String TAG = "MediaPlayerHandler";
 
@@ -55,6 +55,13 @@ public class MediaPlayerHandler implements AudioManager.OnAudioFocusChangeListen
             sMediaPlayerHandler.setContext(mediaPlayerInterface.getContext());
         }
         return sMediaPlayerHandler;
+    }
+
+    public static MediaPlayer getPlayer() {
+        if (sMediaPlayerHandler != null)
+            return sMediaPlayerHandler.mMediaPlayer;
+        else
+            return null;
     }
 
     /***
@@ -116,20 +123,20 @@ public class MediaPlayerHandler implements AudioManager.OnAudioFocusChangeListen
     }
 
     private void playUrl() throws IOException {
-            if (mMediaPlayer == null) {
-                mMediaPlayer = new MediaPlayer();
-            }
-            if (mMediaPlayer.isPlaying()) {
-                mMediaPlayer.stop();
-                mMediaPlayer.release();
-            }
+        if (mMediaPlayer == null) {
+            mMediaPlayer = new MediaPlayer();
+        }
+        if (mMediaPlayer.isPlaying()) {
+            mMediaPlayer.stop();
+            mMediaPlayer.release();
+        }
 
-            mMediaPlayer.setAudioStreamType(AudioManager.STREAM_MUSIC);
-            mMediaPlayer.setDataSource(mContext, Uri.parse(mTrackUrl));
+        mMediaPlayer.setAudioStreamType(AudioManager.STREAM_MUSIC);
+        mMediaPlayer.setDataSource(mContext, Uri.parse(mTrackUrl));
 
-            mMediaPlayer.setOnPreparedListener(this);
-            mMediaPlayer.setOnCompletionListener(this);
-            mMediaPlayer.prepare();
+        mMediaPlayer.setOnPreparedListener(this);
+        mMediaPlayer.setOnCompletionListener(this);
+        mMediaPlayer.prepare();
     }
 
     @Override
@@ -166,14 +173,14 @@ public class MediaPlayerHandler implements AudioManager.OnAudioFocusChangeListen
     public void onPrepared(final MediaPlayer mediaPlayer) {
         mediaPlayer.start();
         setPlayerState(MediaPlayerInterface.MediaPlayerState.Playing);
-        mMediaPlayerInterface.playing(mMediaPlayer.getDuration(), 0);
+        mMediaPlayerInterface.playing(mediaPlayer.getDuration(), 0);
     }
 
     @Override
     public void onCompletion(final MediaPlayer mediaPlayer) {
-        mMediaPlayer.release();
         setPlayerState(MediaPlayerInterface.MediaPlayerState.Stopped);
-        mMediaPlayerInterface.stopped();
+        mMediaPlayerInterface.stopped(mediaPlayer.getDuration());
+        mMediaPlayer.release();
     }
 
     public void setPlayerState(final MediaPlayerInterface.MediaPlayerState playerState) {

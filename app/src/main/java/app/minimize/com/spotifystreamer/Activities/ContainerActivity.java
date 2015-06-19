@@ -60,7 +60,6 @@ public class ContainerActivity extends AppCompatActivity {
             mTwoPane = true;
         } else {
             mTwoPane = false;
-
             //make transaction for the artists fragment
             if (savedInstanceState == null) {
                 getSupportFragmentManager().beginTransaction()

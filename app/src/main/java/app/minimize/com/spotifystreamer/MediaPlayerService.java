@@ -33,9 +33,10 @@ public class MediaPlayerService extends Service implements MediaPlayerInterface 
     }
 
     @Override
-    public void stopped() {
+    public void stopped(final int duration) {
         if (mResultReceiver != null) {
-            mResultReceiver.send(Keys.CODE_STOPPED, null);
+            mBundle.putInt(Keys.KEY_DURATION, duration);
+            mResultReceiver.send(Keys.CODE_STOPPED, mBundle);
         }
     }
 
@@ -101,9 +102,6 @@ public class MediaPlayerService extends Service implements MediaPlayerInterface 
             if (null != intent.getParcelableExtra(Keys.KEY_PLAYER_RECEIVER)) {
                 mResultReceiver = intent.getParcelableExtra(Keys.KEY_PLAYER_RECEIVER);
                 playTrack(intent);
-
-
-
 
                 return true;
             }
