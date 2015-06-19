@@ -26,8 +26,6 @@ android {
 
 dependencies {
     compile fileTree(dir: 'libs', include: ['*.jar'])
-    // Uses this to create RESTful Requests
-    // Uses this to create HTTP connections
     compile 'com.android.support:appcompat-v7:22.2.0'
     compile 'com.squareup.retrofit:retrofit:1.9.0'
     compile 'com.squareup.okhttp:okhttp:2.2.0'

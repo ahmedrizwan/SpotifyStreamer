@@ -4,6 +4,7 @@ import android.content.Intent;
 import android.os.Bundle;
 import android.os.Handler;
 import android.os.ResultReceiver;
+import android.os.SystemClock;
 import android.support.annotation.Nullable;
 import android.support.v4.app.DialogFragment;
 import android.support.v4.graphics.drawable.DrawableCompat;
@@ -12,6 +13,7 @@ import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
+import android.widget.Chronometer;
 import android.widget.SeekBar;
 import android.widget.TextView;
 
@@ -21,6 +23,7 @@ import java.util.TimerTask;
 import app.minimize.com.spotifystreamer.Activities.Keys;
 import app.minimize.com.spotifystreamer.HelperClasses.MediaPlayerHandler;
 import app.minimize.com.spotifystreamer.HelperClasses.MediaPlayerInterface;
+import app.minimize.com.spotifystreamer.HelperClasses.SeekbarChangeListener;
 import app.minimize.com.spotifystreamer.MediaPlayerService;
 import app.minimize.com.spotifystreamer.Parcelables.TrackParcelable;
 import app.minimize.com.spotifystreamer.R;
@@ -36,24 +39,24 @@ import butterknife.InjectView;
  */
 public class PlayerDialogFragment extends DialogFragment {
 
+
     @InjectView(R.id.textViewTrackName)
     TextView textViewTrackName;
     @InjectView(R.id.seekBarPlayer)
     SeekBar seekBarPlayer;
-    @InjectView(R.id.textViewStartTime)
-    TextView textViewStartTime;
-    @InjectView(R.id.textViewEndTime)
-    TextView textViewEndTime;
+    @InjectView(R.id.chronometerStart)
+    Chronometer chronometerStart;
+    @InjectView(R.id.chronometerEnd)
+    Chronometer chronometerEnd;
     @InjectView(R.id.imageViewPrevious)
     PreviousButton imageViewPrevious;
     @InjectView(R.id.imageViewPlay)
     PlayButton imageViewPlay;
     @InjectView(R.id.imageViewNext)
     NextButton imageViewNext;
-
     private TracksFragment tracksFragment;
     private TrackParcelable mTrackParcelable;
-    
+
     private PlayerReceiver mPlayerReceiver;
 
     public static PlayerDialogFragment getInstance(TracksFragment tracksFragment) {
@@ -106,23 +109,42 @@ public class PlayerDialogFragment extends DialogFragment {
         protected void onReceiveResult(final int resultCode,
                                        final Bundle resultData) {
             try {
-                if(resultCode == Keys.CODE_PLAYING){
-                    startSeeking(resultData.getInt(Keys.KEY_PROGRESS),resultData.getInt(Keys.KEY_DURATION));
+                if (resultCode == Keys.CODE_PLAYING) {
+                    startSeeking(resultData.getInt(Keys.KEY_PROGRESS), resultData.getInt(Keys.KEY_DURATION));
+                } else if(resultCode == Keys.CODE_STOPPED){
+                    stopSeeking(resultData.getInt(Keys.KEY_DURATION));
                 }
             } catch (NullPointerException e) {
                 Log.e("Container Activity", e.toString());
             }
         }
     }
+
+    private void stopSeeking(int duration) {
+        if (chronometerStart != null) {
+            chronometerStart.setBase(SystemClock.elapsedRealtime());
+            chronometerEnd.setBase(SystemClock.elapsedRealtime() -
+                    duration);
+            chronometerStart.stop();
+        }
+        seekBarPlayer.setProgress(0);
+    }
+
     private final int mSmoothnessFactor = 500;
-    private int mAmountToUpdate=0,currentProgress=0;
+    private int mAmountToUpdate = 0, currentProgress = 0;
     private Timer timer;
 
     private void startSeeking(final int progress, final int duration) {
         try {
-//            mChronometerRunTime.setBase(SystemClock.elapsedRealtime() - progress);
+            if (chronometerStart != null) {
+                chronometerStart.setBase(SystemClock.elapsedRealtime() - progress);
+                chronometerEnd.setBase(SystemClock.elapsedRealtime() -
+                        duration);
+                chronometerStart.start();
+            }
             mAmountToUpdate = (duration) / mSmoothnessFactor;
-//            seekBarPlayer.setOnSeekBarChangeListener(changeListenerSeekBar);
+            seekBarPlayer.setOnSeekBarChangeListener(SeekbarChangeListener
+                    .getInstance(duration, mSmoothnessFactor, chronometerStart));
             seekBarPlayer.setMax(mSmoothnessFactor);
             seekBarPlayer.setProgress(progress / mAmountToUpdate);
             if (timer != null) {
@@ -137,7 +159,7 @@ public class PlayerDialogFragment extends DialogFragment {
                     try {
                         (getActivity()).runOnUiThread(() -> {
                             try {
-                                if (MediaPlayerHandler.getPlayerState()== MediaPlayerInterface.MediaPlayerState.Playing) {
+                                if (MediaPlayerHandler.getPlayerState() == MediaPlayerInterface.MediaPlayerState.Playing) {
                                     if ((mAmountToUpdate * seekBarPlayer.getProgress() < duration + progress)) {
                                         currentProgress = seekBarPlayer.getProgress();
                                         currentProgress += 1;
@@ -163,7 +185,6 @@ public class PlayerDialogFragment extends DialogFragment {
             Log.e("MediaPlayerHandler Null", e.getMessage());
         }
     }
-
 
 
     private void logHelper(final String message) {

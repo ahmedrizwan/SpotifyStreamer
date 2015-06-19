@@ -9,7 +9,7 @@ public interface MediaPlayerInterface {
 
     void playing(int duration, int progress);
 
-    void stopped();
+    void stopped(final int duration);
 
     void paused();
 

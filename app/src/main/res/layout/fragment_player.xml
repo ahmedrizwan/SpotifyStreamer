@@ -38,16 +38,16 @@
             android:layout_marginRight="5dp"
             />
 
-        <TextView
-            android:id="@+id/textViewStartTime"
+        <Chronometer
+            android:id="@+id/chronometerStart"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:text="00:00"
             android:layout_below="@id/seekBarPlayer"
             android:layout_marginLeft="@dimen/default_margin"/>
 
-        <TextView
-            android:id="@+id/textViewEndTime"
+        <Chronometer
+            android:id="@+id/chronometerEnd"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:text="00:00"
@@ -61,7 +61,7 @@
             android:layout_height="wrap_content"
             android:orientation="horizontal"
             android:gravity="center"
-            android:layout_below="@id/textViewStartTime">
+            android:layout_below="@id/chronometerStart">
 
             <app.minimize.com.spotifystreamer.Views.PreviousButton
                 android:layout_width="@dimen/iv_previous_next"
