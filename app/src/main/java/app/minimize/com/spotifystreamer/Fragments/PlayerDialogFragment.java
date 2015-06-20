@@ -20,6 +20,7 @@ import android.widget.TextView;
 import java.util.Timer;
 import java.util.TimerTask;
 
+import app.minimize.com.spotifystreamer.Activities.ContainerActivity;
 import app.minimize.com.spotifystreamer.Activities.Keys;
 import app.minimize.com.spotifystreamer.HelperClasses.MediaPlayerHandler;
 import app.minimize.com.spotifystreamer.HelperClasses.MediaPlayerInterface;
@@ -56,8 +57,9 @@ public class PlayerDialogFragment extends DialogFragment {
     NextButton imageViewNext;
     private TracksFragment tracksFragment;
     private TrackParcelable mTrackParcelable;
-
     private PlayerReceiver mPlayerReceiver;
+    private int mAmountToUpdate = 0, currentProgress = 0;
+    private Timer timer;
 
     public static PlayerDialogFragment getInstance(TracksFragment tracksFragment) {
         PlayerDialogFragment playerDialogFragment = new PlayerDialogFragment();
@@ -73,13 +75,14 @@ public class PlayerDialogFragment extends DialogFragment {
         ((AppCompatActivity) tracksFragment.getActivity()).getSupportActionBar()
                 .setTitle("Player");
 
+        ((ContainerActivity) getActivity()).hideNowPlayingLayout();
+
         mPlayerReceiver = new PlayerReceiver(null);
         mTrackParcelable = getArguments().getParcelable(getString(R.string.key_tracks_parcelable));
 
         if (mTrackParcelable != null) {
-            textViewTrackName.setText(mTrackParcelable.songName + " "
-                    + mTrackParcelable.artistName + " " + mTrackParcelable.albumName);
-
+            textViewTrackName.setText(mTrackParcelable.songName + "\n"
+                    + mTrackParcelable.albumName);
             playTrack();
         }
 
@@ -92,8 +95,8 @@ public class PlayerDialogFragment extends DialogFragment {
     private void playTrack() {
         Intent intent = new Intent(getActivity(),
                 MediaPlayerService.class);
-        intent.putExtra(Keys.KEY_TRACK_URL, mTrackParcelable.previewUrl);
-        intent.putExtra(Keys.KEY_TRACK_NAME, mTrackParcelable.songName);
+        //send trackParcelable
+        intent.putExtra(Keys.KEY_TRACK_PARCELABLE, mTrackParcelable);
         intent.putExtra(Keys.KEY_PLAYER_RECEIVER, mPlayerReceiver);
         getActivity().startService(intent);
     }
@@ -130,10 +133,6 @@ public class PlayerDialogFragment extends DialogFragment {
         seekBarPlayer.setProgress(0);
     }
 
-    private final int mSmoothnessFactor = 500;
-    private int mAmountToUpdate = 0, currentProgress = 0;
-    private Timer timer;
-
     private void startSeeking(final int progress, final int duration) {
         try {
             if (chronometerStart != null) {
@@ -142,10 +141,10 @@ public class PlayerDialogFragment extends DialogFragment {
                         duration);
                 chronometerStart.start();
             }
-            mAmountToUpdate = (duration) / mSmoothnessFactor;
+            mAmountToUpdate = (duration) / Keys.SMOOTHNESS_FACTOR;
             seekBarPlayer.setOnSeekBarChangeListener(SeekbarChangeListener
-                    .getInstance(duration, mSmoothnessFactor, chronometerStart));
-            seekBarPlayer.setMax(mSmoothnessFactor);
+                    .getInstance(duration, Keys.SMOOTHNESS_FACTOR, chronometerStart));
+            seekBarPlayer.setMax(Keys.SMOOTHNESS_FACTOR);
             seekBarPlayer.setProgress(progress / mAmountToUpdate);
             if (timer != null) {
                 timer.cancel();

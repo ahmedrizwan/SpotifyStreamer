@@ -56,6 +56,7 @@
                 android:layout_toRightOf="@id/imageViewAlbum"
                 android:layout_below="@id/textViewTrackName"
                 android:textSize="@dimen/tv_large"
+                android:id="@+id/textViewAlbumName"
                 />
             <app.minimize.com.spotifystreamer.Views.PlayButton
                 android:layout_width="@dimen/iv_play"

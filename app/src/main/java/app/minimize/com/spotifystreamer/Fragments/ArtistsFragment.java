@@ -296,11 +296,7 @@ public class ArtistsFragment extends Fragment implements ArtistsAdapter.ArtistsE
             bundle.putString(TracksFragment.ARTIST_NAME, artistModel.artistName);
             bundle.putString(TracksFragment.ARTIST_ID, artistModel.id);
             fragment.setArguments(bundle);
-            FragmentTransaction trans = getActivity().getSupportFragmentManager()
-                    .beginTransaction();
-            trans.replace(container, fragment);
-            trans.addToBackStack(null);
-            trans.commit();
+            Utility.launchFragment(((AppCompatActivity) getActivity()), R.id.container,fragment);
         }
 
     }

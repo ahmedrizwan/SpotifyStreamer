@@ -118,14 +118,15 @@ public class MediaPlayerHandler implements AudioManager.OnAudioFocusChangeListen
             } catch (IOException e) {
                 Toast.makeText(mContext, "Unable to play " + mTrackName, Toast.LENGTH_SHORT)
                         .show();
+            } catch (IllegalStateException e) {
+                Log.e(TAG, e.toString());
             }
         }
     }
 
-    private void playUrl() throws IOException {
-        if (mMediaPlayer == null) {
-            mMediaPlayer = new MediaPlayer();
-        }
+    private void playUrl() throws IOException, IllegalStateException {
+        mMediaPlayer = new MediaPlayer();
+
         if (mMediaPlayer.isPlaying()) {
             mMediaPlayer.stop();
             mMediaPlayer.release();
@@ -162,6 +163,7 @@ public class MediaPlayerHandler implements AudioManager.OnAudioFocusChangeListen
             mMediaPlayer.start();
             setPlayerState(MediaPlayerInterface.MediaPlayerState.Playing);
             mMediaPlayerInterface.playing(mMediaPlayer.getDuration(), mMediaPlayer.getCurrentPosition());
+
         }
     }
 

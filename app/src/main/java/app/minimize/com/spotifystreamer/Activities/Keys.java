@@ -14,8 +14,9 @@ public class Keys {
     public static final String STATUS = "Status";
 
     public static final String KEY_TRACK_NAME = "TrackName";
-    public static final String KEY_PLAYER = "Player";
     public static final String KEY_TRACK_URL = "TrackUrl";
+    public static final String KEY_ALBUM_NAME = "AlbumName";
+    public static final String KEY_ARTIST_NAME = "ArtistName";
 
     //Receiver
     public static final String KEY_PLAYER_RECEIVER = "PlayerReceiver";
@@ -30,4 +31,8 @@ public class Keys {
     public static final int CODE_PLAYING = 123321;
     public static final int CODE_STOPPED = 321123;
     public static final int CODE_PAUSED = 312123;
+
+    public static final String KEY_TRACK_PARCELABLE = "TrackParcelable";
+    public static final String KEY_ARTIST_PARCELABLE = "ArtistParcelable";
+    public static final int SMOOTHNESS_FACTOR = 500;
 }

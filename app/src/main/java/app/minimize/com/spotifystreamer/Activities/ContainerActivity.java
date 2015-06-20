@@ -4,6 +4,7 @@ import android.content.Intent;
 import android.os.Bundle;
 import android.os.Handler;
 import android.os.ResultReceiver;
+import android.support.v4.content.ContextCompat;
 import android.support.v7.app.AlertDialog;
 import android.support.v7.app.AppCompatActivity;
 import android.support.v7.widget.Toolbar;
@@ -27,6 +28,8 @@ import butterknife.InjectView;
 public class ContainerActivity extends AppCompatActivity {
 
     boolean mTwoPane;
+    @InjectView(R.id.textViewAlbumName)
+    TextView textViewAlbumName;
 
     public NowPlayingReceiver getNowPlayingReceiver() {
         return mNowPlayingReceiver;
@@ -50,12 +53,12 @@ public class ContainerActivity extends AppCompatActivity {
     protected void onCreate(Bundle savedInstanceState) {
         setTheme(R.style.AppTheme_GreenTheme);
         super.onCreate(savedInstanceState);
-
         setContentView(R.layout.activity_container);
         ButterKnife.inject(this);
-
+        //ActionBar
         setSupportActionBar(mainToolbar);
 
+        //Check for twoPanes
         if (findViewById(R.id.tracksContainer) != null) {
             mTwoPane = true;
         } else {
@@ -72,7 +75,7 @@ public class ContainerActivity extends AppCompatActivity {
     }
 
 
-    private void startServiceForStatusRetrieval() {
+    public void startServiceForStatusRetrieval() {
         Intent intent = new Intent(this,
                 MediaPlayerService.class);
         mNowPlayingReceiver = new NowPlayingReceiver(null);
@@ -118,6 +121,10 @@ public class ContainerActivity extends AppCompatActivity {
         return super.onOptionsItemSelected(item);
     }
 
+    public void hideNowPlayingLayout() {
+        layoutNowPlaying.setVisibility(View.GONE);
+    }
+
 
     public class NowPlayingReceiver extends ResultReceiver {
 
@@ -137,19 +144,21 @@ public class ContainerActivity extends AppCompatActivity {
             }
         }
 
-        private void handlePlayerReceiver(final Bundle resultData) {
-            logHelper("handlePlayer");
-        }
-
         private void handleStatusReceiver(final Bundle resultData) {
             logHelper("handleStatus");
             if (MediaPlayerHandler.getPlayerState() == MediaPlayerInterface.MediaPlayerState.Idle) {
                 //Hide the NowPlaying
-                layoutNowPlaying.setVisibility(View.GONE);
+                hideNowPlayingLayout();
             } else {
                 layoutNowPlaying.setVisibility(View.VISIBLE);
-                //TODO : Add track and album name to the NowPlaying along with play/pause info
 
+                String trackName = resultData.getString(Keys.KEY_TRACK_NAME);
+                String albumName = resultData.getString(Keys.KEY_ALBUM_NAME);
+                textViewTrackName.setText(trackName);
+                textViewAlbumName.setText(albumName);
+                if (MediaPlayerHandler.getPlayerState() != MediaPlayerInterface.MediaPlayerState.Playing) {
+                    imageViewAlbum.setImageDrawable(ContextCompat.getDrawable(ContainerActivity.this, R.drawable.ic_not_available));
+                }
             }
         }
     }

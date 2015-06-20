@@ -28,6 +28,7 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
+import app.minimize.com.spotifystreamer.Activities.ContainerActivity;
 import app.minimize.com.spotifystreamer.Adapters.TracksAdapter;
 import app.minimize.com.spotifystreamer.Parcelables.TrackParcelable;
 import app.minimize.com.spotifystreamer.R;
@@ -82,8 +83,12 @@ public class TracksFragment extends Fragment implements TracksAdapter.TracksEven
         ActionBar actionBar = ((AppCompatActivity) getActivity()).getSupportActionBar();
         if (actionBar != null) {
             actionBar.setDisplayHomeAsUpEnabled(true);
+            actionBar.setTitle(getString(R.string.activity_tracks_title));
             actionBar.setSubtitle(mName);
         }
+
+        ((ContainerActivity) getActivity()). //start service to retrieve the status of player
+                startServiceForStatusRetrieval();
 
         recyclerViewTracks.hasFixedSize();
         recyclerViewTracks.setLayoutManager(new LinearLayoutManager(getActivity()));
