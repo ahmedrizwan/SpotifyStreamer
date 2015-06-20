@@ -32,7 +32,6 @@
             android:layout_width="match_parent"
             android:layout_height="72sp"
             android:id="@+id/layoutNowPlaying"
-            android:theme="@style/AppTheme.Light"
             >
             <ImageView
                 android:layout_width="@dimen/iv_artists_large"
@@ -40,29 +39,39 @@
                 android:src="@drawable/ic_not_available"
                 android:id="@+id/imageViewAlbum"
                 />
-            <TextView
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:text="Track Name"
-                android:layout_toRightOf="@id/imageViewAlbum"
-                android:textSize="@dimen/tv_large"
-                android:id="@+id/textViewTrackName"
-                />
-
-            <TextView
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:text="Album"
-                android:layout_toRightOf="@id/imageViewAlbum"
-                android:layout_below="@id/textViewTrackName"
-                android:textSize="@dimen/tv_large"
-                android:id="@+id/textViewAlbumName"
-                />
             <app.minimize.com.spotifystreamer.Views.PlayButton
                 android:layout_width="@dimen/iv_play"
                 android:layout_height="@dimen/iv_play"
                 android:layout_alignParentRight="true"
+                android:id="@+id/buttonPlayPause"
                 />
+            <LinearLayout
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_toRightOf="@id/imageViewAlbum"
+                android:layout_toLeftOf="@id/buttonPlayPause"
+                android:orientation="vertical"
+                android:layout_centerVertical="true">
+
+                <TextView
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:text="Track Name"
+                    android:textSize="@dimen/tv_large"
+                    android:id="@+id/textViewTrackName"
+                    />
+
+                <TextView
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:text="Album"
+                    android:textSize="@dimen/tv_small"
+                    android:id="@+id/textViewAlbumName"
+                    />
+
+            </LinearLayout>
+
+
 
         </RelativeLayout>
 
