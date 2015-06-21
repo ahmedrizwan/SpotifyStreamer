@@ -4,7 +4,6 @@
     xmlns:tools="http://schemas.android.com/tools"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
-    xmlns:app="http://schemas.android.com/apk/res-auto"
     android:background="@android:color/white"
     android:orientation="vertical"
     tools:context="app.minimize.com.spotifystreamer.Activities.ContainerActivity">
@@ -16,66 +15,16 @@
         android:background="?attr/colorPrimary"
         />
 
-    <LinearLayout
-        android:id="@+id/container"
-        android:layout_width="match_parent"
-        android:layout_height="0dp"
-        android:layout_weight="1"
-        android:orientation="vertical"/>
 
-    <android.support.v7.widget.CardView
-        android:layout_width="match_parent"
-        android:layout_height="wrap_content"
-        app:cardElevation="6dp"
-        >
-        <RelativeLayout
+        <LinearLayout
+            android:id="@+id/container"
             android:layout_width="match_parent"
-            android:layout_height="72sp"
-            android:id="@+id/layoutNowPlaying"
-            >
-            <ImageView
-                android:layout_width="@dimen/iv_artists_large"
-                android:layout_height="@dimen/iv_artists_large"
-                android:src="@drawable/ic_not_available"
-                android:id="@+id/imageViewAlbum"
-                />
-            <app.minimize.com.spotifystreamer.Views.PlayButton
-                android:layout_width="@dimen/iv_play"
-                android:layout_height="@dimen/iv_play"
-                android:layout_alignParentRight="true"
-                android:id="@+id/buttonPlayPause"
-                />
-            <LinearLayout
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:layout_toRightOf="@id/imageViewAlbum"
-                android:layout_toLeftOf="@id/buttonPlayPause"
-                android:orientation="vertical"
-                android:layout_centerVertical="true">
+            android:layout_height="match_parent"
+            android:layout_weight="1"
+            android:orientation="vertical"/>
 
-                <TextView
-                    android:layout_width="wrap_content"
-                    android:layout_height="wrap_content"
-                    android:text="Track Name"
-                    android:textSize="@dimen/tv_large"
-                    android:id="@+id/textViewTrackName"
-                    />
+        <include layout="@layout/include_now_playing"/>
 
-                <TextView
-                    android:layout_width="wrap_content"
-                    android:layout_height="wrap_content"
-                    android:text="Album"
-                    android:textSize="@dimen/tv_small"
-                    android:id="@+id/textViewAlbumName"
-                    />
-
-            </LinearLayout>
-
-
-
-        </RelativeLayout>
-
-    </android.support.v7.widget.CardView>
 
 </LinearLayout>
 

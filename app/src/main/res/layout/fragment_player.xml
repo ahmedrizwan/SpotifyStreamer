@@ -22,6 +22,7 @@
             android:textSize="@dimen/tv_large"
             android:layout_margin="@dimen/default_margin"
             android:text="Hello"
+            android:textColor="@android:color/black"
             android:layout_centerHorizontal="true"
             android:id="@+id/textViewTrackName"/>
 
@@ -42,6 +43,7 @@
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:text="00:00"
+            android:textColor="@android:color/black"
             android:layout_below="@id/seekBarPlayer"
             android:layout_marginLeft="@dimen/default_margin"/>
 
@@ -50,6 +52,7 @@
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:text="00:00"
+            android:textColor="@android:color/black"
             android:layout_below="@id/seekBarPlayer"
             android:layout_alignParentRight="true"
             android:layout_marginRight="@dimen/default_margin"/>

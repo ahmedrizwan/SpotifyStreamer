@@ -29,6 +29,7 @@ import java.util.List;
 import java.util.Map;
 
 import app.minimize.com.spotifystreamer.Activities.ContainerActivity;
+import app.minimize.com.spotifystreamer.Activities.Keys;
 import app.minimize.com.spotifystreamer.Adapters.TracksAdapter;
 import app.minimize.com.spotifystreamer.Parcelables.TrackParcelable;
 import app.minimize.com.spotifystreamer.R;
@@ -190,6 +191,7 @@ public class TracksFragment extends Fragment implements TracksAdapter.TracksEven
         PlayerDialogFragment playerDialogFragment = PlayerDialogFragment.getInstance(this);
         Bundle bundle = new Bundle();
         bundle.putParcelable(getString(R.string.key_tracks_parcelable), track);
+        bundle.putParcelableArrayList(Keys.KEY_TRACK_PARCELABLE_LIST,mTracksAdapter.getDataSet());
         playerDialogFragment.setArguments(bundle);
         Utility.launchFragment(((AppCompatActivity) getActivity()), R.id.container, playerDialogFragment);
     }
