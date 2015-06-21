@@ -5,6 +5,7 @@ import android.content.res.TypedArray;
 import android.graphics.Color;
 import android.os.Build;
 import android.support.v4.app.Fragment;
+import android.support.v4.app.FragmentTransaction;
 import android.support.v7.app.AppCompatActivity;
 import android.util.Log;
 
@@ -39,10 +40,11 @@ public class Utility {
     }
 
     public static void launchFragment(final AppCompatActivity activity, int containerId, final Fragment fragment) {
-        activity.getSupportFragmentManager()
-                .beginTransaction()
-                .replace(containerId, fragment)
-                .commit();
+        FragmentTransaction trans = activity.getSupportFragmentManager()
+                .beginTransaction();
+        trans.replace(containerId, fragment);
+        trans.addToBackStack(null);
+        trans.commit();
     }
 
     public static void launchFragmentWithSharedElements(final Fragment fromFragment, final Fragment toFragment) {

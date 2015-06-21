@@ -1,6 +1,7 @@
 package app.minimize.com.spotifystreamer.Adapters;
 
 import android.content.Context;
+import android.os.Parcelable;
 import android.support.v7.widget.RecyclerView;
 import android.view.LayoutInflater;
 import android.view.View;
@@ -10,6 +11,7 @@ import android.widget.TextView;
 
 import com.squareup.picasso.Picasso;
 
+import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
 
@@ -78,6 +80,10 @@ public class TracksAdapter extends RecyclerView.Adapter<TracksAdapter.RecyclerVi
     public int getItemCount() {
         //return size of items + 1 header
         return mData.size();
+    }
+
+    public ArrayList<? extends Parcelable> getDataSet() {
+        return (ArrayList<? extends Parcelable>) mData;
     }
 
 

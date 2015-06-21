@@ -16,7 +16,7 @@ import app.minimize.com.spotifystreamer.R;
  */
 public class Notifications {
 
-    public static void showPlayerNotifications(Context context, MediaPlayerInterface.MediaPlayerState mediaPlayerState, String trackName) {
+    public static void showPlayerNotifications(Context context, MediaPlayerHandler.MediaPlayerState mediaPlayerState, String trackName) {
         //Create Notification
         NotificationManager notificationManager = (NotificationManager) context.getSystemService(Context.NOTIFICATION_SERVICE);
         Intent containerActivity = new Intent(context, ContainerActivity.class);
@@ -34,7 +34,7 @@ public class Notifications {
         resumeIntent.setAction(Keys.RESUME);
         resumeIntent.putExtra(Keys.KEY_TRACK_NAME, trackName);
 
-        if (mediaPlayerState == MediaPlayerInterface.MediaPlayerState.Playing) {
+        if (mediaPlayerState == MediaPlayerHandler.MediaPlayerState.Playing) {
             NotificationCompat.Builder builder = new NotificationCompat.Builder(context);
             PendingIntent pendingIntent = PendingIntent.getActivity(context, 0, containerActivity, 0);
             PendingIntent pausePendingIntent = PendingIntent.getBroadcast(context, 0, pauseIntent, PendingIntent.FLAG_UPDATE_CURRENT);
@@ -50,7 +50,7 @@ public class Notifications {
             Notification notification = builder.build();
             notification.flags = Notification.FLAG_ONGOING_EVENT;
             notificationManager.notify(Keys.KEY_NOTIFICATION_ID, notification);
-        } else if (mediaPlayerState == MediaPlayerInterface.MediaPlayerState.Paused) {
+        } else if (mediaPlayerState == MediaPlayerHandler.MediaPlayerState.Paused) {
             NotificationCompat.Builder builder = new NotificationCompat.Builder(context);
             PendingIntent pendingIntent = PendingIntent.getActivity(context, 0, containerActivity, 0);
             PendingIntent resumePendingIntent = PendingIntent.getBroadcast(context, 0, resumeIntent, PendingIntent.FLAG_UPDATE_CURRENT);
@@ -66,7 +66,7 @@ public class Notifications {
             Notification notification = builder.build();
             notification.flags = Notification.FLAG_ONGOING_EVENT;
             notificationManager.notify(Keys.KEY_NOTIFICATION_ID, notification);
-        } else if (mediaPlayerState == MediaPlayerInterface.MediaPlayerState.Stopped) {
+        } else if (mediaPlayerState == MediaPlayerHandler.MediaPlayerState.Stopped) {
             cancelNotification(context);
         }
     }

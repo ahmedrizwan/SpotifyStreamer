@@ -1,10 +1,9 @@
 <?xml version="1.0" encoding="utf-8"?>
 <LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
-              xmlns:app="http://schemas.android.com/apk/res-auto"
               android:orientation="vertical"
               android:layout_width="match_parent"
               android:layout_height="match_parent"
-              app:theme="@style/Theme.AppCompat.Light">
+    >
 
     <ImageView
         android:layout_width="match_parent"
@@ -23,6 +22,7 @@
             android:textSize="@dimen/tv_large"
             android:layout_margin="@dimen/default_margin"
             android:text="Hello"
+            android:textColor="@android:color/black"
             android:layout_centerHorizontal="true"
             android:id="@+id/textViewTrackName"/>
 
@@ -43,6 +43,7 @@
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:text="00:00"
+            android:textColor="@android:color/black"
             android:layout_below="@id/seekBarPlayer"
             android:layout_marginLeft="@dimen/default_margin"/>
 
@@ -51,6 +52,7 @@
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:text="00:00"
+            android:textColor="@android:color/black"
             android:layout_below="@id/seekBarPlayer"
             android:layout_alignParentRight="true"
             android:layout_marginRight="@dimen/default_margin"/>

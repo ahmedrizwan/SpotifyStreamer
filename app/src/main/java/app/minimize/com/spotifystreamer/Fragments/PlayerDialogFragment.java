@@ -2,12 +2,11 @@ package app.minimize.com.spotifystreamer.Fragments;
 
 import android.content.Intent;
 import android.os.Bundle;
-import android.os.Handler;
-import android.os.ResultReceiver;
 import android.os.SystemClock;
 import android.support.annotation.Nullable;
 import android.support.v4.app.DialogFragment;
 import android.support.v4.graphics.drawable.DrawableCompat;
+import android.support.v7.app.ActionBar;
 import android.support.v7.app.AppCompatActivity;
 import android.util.Log;
 import android.view.LayoutInflater;
@@ -16,13 +15,15 @@ import android.view.ViewGroup;
 import android.widget.Chronometer;
 import android.widget.SeekBar;
 import android.widget.TextView;
+import android.widget.Toast;
 
+import java.util.List;
 import java.util.Timer;
 import java.util.TimerTask;
 
+import app.minimize.com.spotifystreamer.Activities.ContainerActivity;
 import app.minimize.com.spotifystreamer.Activities.Keys;
 import app.minimize.com.spotifystreamer.HelperClasses.MediaPlayerHandler;
-import app.minimize.com.spotifystreamer.HelperClasses.MediaPlayerInterface;
 import app.minimize.com.spotifystreamer.HelperClasses.SeekbarChangeListener;
 import app.minimize.com.spotifystreamer.MediaPlayerService;
 import app.minimize.com.spotifystreamer.Parcelables.TrackParcelable;
@@ -33,6 +34,8 @@ import app.minimize.com.spotifystreamer.Views.PlayButton;
 import app.minimize.com.spotifystreamer.Views.PreviousButton;
 import butterknife.ButterKnife;
 import butterknife.InjectView;
+import de.greenrobot.event.EventBus;
+import de.greenrobot.event.Subscribe;
 
 /**
  * Created by ahmedrizwan on 6/15/15.
@@ -54,10 +57,11 @@ public class PlayerDialogFragment extends DialogFragment {
     PlayButton imageViewPlay;
     @InjectView(R.id.imageViewNext)
     NextButton imageViewNext;
+
     private TracksFragment tracksFragment;
     private TrackParcelable mTrackParcelable;
-
-    private PlayerReceiver mPlayerReceiver;
+    private int mAmountToUpdate = 0, currentProgress = 0;
+    private Timer timer;
 
     public static PlayerDialogFragment getInstance(TracksFragment tracksFragment) {
         PlayerDialogFragment playerDialogFragment = new PlayerDialogFragment();
@@ -70,17 +74,27 @@ public class PlayerDialogFragment extends DialogFragment {
     public View onCreateView(final LayoutInflater inflater, final ViewGroup container, final Bundle savedInstanceState) {
         View rootView = inflater.inflate(R.layout.fragment_player, container, false);
         ButterKnife.inject(this, rootView);
-        ((AppCompatActivity) tracksFragment.getActivity()).getSupportActionBar()
-                .setTitle("Player");
+        ActionBar actionBar = ((AppCompatActivity) getActivity()).getSupportActionBar();
+        if(actionBar!=null){
+            actionBar.setTitle(R.string.title_player);
+        }
 
-        mPlayerReceiver = new PlayerReceiver(null);
+        ((ContainerActivity) getActivity()).hideNowPlayingLayout();
+
         mTrackParcelable = getArguments().getParcelable(getString(R.string.key_tracks_parcelable));
+        List<TrackParcelable> trackParcelableList = getArguments().getParcelableArrayList(Keys.KEY_TRACK_PARCELABLE_LIST);
+
+        Toast.makeText(getActivity(),trackParcelableList.indexOf(mTrackParcelable)+"",Toast.LENGTH_SHORT).show();
 
         if (mTrackParcelable != null) {
-            textViewTrackName.setText(mTrackParcelable.songName + " "
-                    + mTrackParcelable.artistName + " " + mTrackParcelable.albumName);
+            textViewTrackName.setText(mTrackParcelable.songName + "\n"
+                    + mTrackParcelable.albumName);
 
-            playTrack();
+            Utility.runOnWorkerThread(() -> {
+                playTrack();
+                return null;
+            });
+
         }
 
         int colorPrimary = Utility.getPrimaryColorFromSelectedTheme(getActivity());
@@ -92,61 +106,50 @@ public class PlayerDialogFragment extends DialogFragment {
     private void playTrack() {
         Intent intent = new Intent(getActivity(),
                 MediaPlayerService.class);
-        intent.putExtra(Keys.KEY_TRACK_URL, mTrackParcelable.previewUrl);
-        intent.putExtra(Keys.KEY_TRACK_NAME, mTrackParcelable.songName);
-        intent.putExtra(Keys.KEY_PLAYER_RECEIVER, mPlayerReceiver);
+        //send trackParcelable
+        intent.putExtra(Keys.KEY_TRACK_PARCELABLE, mTrackParcelable);
         getActivity().startService(intent);
     }
 
-
-    public class PlayerReceiver extends ResultReceiver {
-
-        public PlayerReceiver(final Handler handler) {
-            super(handler);
-        }
-
-        @Override
-        protected void onReceiveResult(final int resultCode,
-                                       final Bundle resultData) {
-            try {
-                if (resultCode == Keys.CODE_PLAYING) {
-                    startSeeking(resultData.getInt(Keys.KEY_PROGRESS), resultData.getInt(Keys.KEY_DURATION));
-                } else if(resultCode == Keys.CODE_STOPPED){
-                    stopSeeking(resultData.getInt(Keys.KEY_DURATION));
-                }
-            } catch (NullPointerException e) {
-                Log.e("Container Activity", e.toString());
-            }
-        }
+    @Override
+    public void onStart() {
+        super.onStart();
+        EventBus.getDefault().register(this);
     }
 
-    private void stopSeeking(int duration) {
+    @Override
+    public void onStop() {
+        EventBus.getDefault().unregister(this);
+        super.onStop();
+    }
+
+    @Subscribe
+    public void onEventMainThread(MediaPlayerHandler.StoppedEvent stoppedEvent){
         if (chronometerStart != null) {
             chronometerStart.setBase(SystemClock.elapsedRealtime());
             chronometerEnd.setBase(SystemClock.elapsedRealtime() -
-                    duration);
+                    stoppedEvent.duration);
             chronometerStart.stop();
         }
+
         seekBarPlayer.setProgress(0);
     }
 
-    private final int mSmoothnessFactor = 500;
-    private int mAmountToUpdate = 0, currentProgress = 0;
-    private Timer timer;
-
-    private void startSeeking(final int progress, final int duration) {
+    @Subscribe
+    public void onEventMainThread(MediaPlayerHandler.PlayingEvent playingEvent){
         try {
             if (chronometerStart != null) {
-                chronometerStart.setBase(SystemClock.elapsedRealtime() - progress);
+                chronometerStart.setBase(SystemClock.elapsedRealtime() - playingEvent.progress);
                 chronometerEnd.setBase(SystemClock.elapsedRealtime() -
-                        duration);
+                        playingEvent.duration);
                 chronometerStart.start();
             }
-            mAmountToUpdate = (duration) / mSmoothnessFactor;
+            mAmountToUpdate = (playingEvent.duration) / Keys.SMOOTHNESS_FACTOR;
             seekBarPlayer.setOnSeekBarChangeListener(SeekbarChangeListener
-                    .getInstance(duration, mSmoothnessFactor, chronometerStart));
-            seekBarPlayer.setMax(mSmoothnessFactor);
-            seekBarPlayer.setProgress(progress / mAmountToUpdate);
+                    .getInstance(playingEvent.duration, Keys.SMOOTHNESS_FACTOR, chronometerStart));
+            seekBarPlayer.setMax(Keys.SMOOTHNESS_FACTOR);
+            seekBarPlayer.setProgress(playingEvent.progress / mAmountToUpdate);
+
             if (timer != null) {
                 timer.cancel();
                 timer = null;
@@ -159,8 +162,8 @@ public class PlayerDialogFragment extends DialogFragment {
                     try {
                         (getActivity()).runOnUiThread(() -> {
                             try {
-                                if (MediaPlayerHandler.getPlayerState() == MediaPlayerInterface.MediaPlayerState.Playing) {
-                                    if ((mAmountToUpdate * seekBarPlayer.getProgress() < duration + progress)) {
+                                if (MediaPlayerHandler.getPlayerState() == MediaPlayerHandler.MediaPlayerState.Playing) {
+                                    if ((mAmountToUpdate * seekBarPlayer.getProgress() < playingEvent.duration + playingEvent.progress)) {
                                         currentProgress = seekBarPlayer.getProgress();
                                         currentProgress += 1;
                                         seekBarPlayer.setProgress(currentProgress);
@@ -185,7 +188,6 @@ public class PlayerDialogFragment extends DialogFragment {
             Log.e("MediaPlayerHandler Null", e.getMessage());
         }
     }
-
 
     private void logHelper(final String message) {
         Log.e("Exception", message);
