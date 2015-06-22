@@ -40,6 +40,7 @@ import java.util.Collections;
 import java.util.List;
 
 import app.minimize.com.spotifystreamer.Activities.ContainerActivity;
+import app.minimize.com.spotifystreamer.Activities.Keys;
 import app.minimize.com.spotifystreamer.Adapters.ArtistsAdapter;
 import app.minimize.com.spotifystreamer.Parcelables.ArtistParcelable;
 import app.minimize.com.spotifystreamer.R;
@@ -100,7 +101,8 @@ public class ArtistsFragment extends Fragment implements ArtistsAdapter.ArtistsE
     public View onCreateView(final LayoutInflater inflater, final ViewGroup container, final Bundle savedInstanceState) {
         View rootView = inflater.inflate(R.layout.fragment_artists, container, false);
         ButterKnife.inject(this, rootView);
-        ((AppCompatActivity) getActivity()).setTitle(getString(R.string.app_name));
+
+        getActivity().setTitle(getString(R.string.app_name));
         ActionBar actionBar = ((AppCompatActivity) getActivity()).getSupportActionBar();
 
         if (actionBar != null) {
@@ -186,12 +188,12 @@ public class ArtistsFragment extends Fragment implements ArtistsAdapter.ArtistsE
                 spotifyService.searchArtists(artistName, new Callback<ArtistsPager>() {
                     @Override
                     public void success(final ArtistsPager artistsPager, final Response response) {
-                        artistsFound(artistsPager);
+                        getActivity().runOnUiThread(() -> artistsFound(artistsPager));
                     }
 
                     @Override
                     public void failure(final RetrofitError error) {
-                        artistsNotFound(error);
+                        getActivity().runOnUiThread(() -> artistsNotFound(error));
                     }
                 });
                 return null;
@@ -200,33 +202,27 @@ public class ArtistsFragment extends Fragment implements ArtistsAdapter.ArtistsE
     }
 
     private void artistsNotFound(final RetrofitError error) {
-        Utility.runOnUiThread(((AppCompatActivity) getActivity()), () -> {
-            if (error.getKind() == RetrofitError.Kind.NETWORK) {
-                textViewError.setText(getString(R.string.network_error));
-                textViewError.setVisibility(View.VISIBLE);
-                progressBar.setVisibility(View.GONE);
-            }
-            return null;
-        });
+        if (error.getKind() == RetrofitError.Kind.NETWORK) {
+            textViewError.setText(getString(R.string.network_error));
+            textViewError.setVisibility(View.VISIBLE);
+            progressBar.setVisibility(View.GONE);
+        }
     }
 
     private void artistsFound(final ArtistsPager artistsPager) {
-        mArtists = new ArrayList<ArtistParcelable>();
+        mArtists = new ArrayList<>();
         //iterate and save in the list
         for (Artist artist : artistsPager.artists.items) {
             mArtists.add(new ArtistParcelable(artist));
         }
         //update the adapter
-        Utility.runOnUiThread(((AppCompatActivity) getActivity()), () -> {
-            if (mArtists.size() == 0) {
-                textViewError.setText(getString(R.string.tv_no_artists));
-                textViewError.setVisibility(View.VISIBLE);
-            }
+        if (mArtists.size() == 0) {
+            textViewError.setText(getString(R.string.tv_no_artists));
+            textViewError.setVisibility(View.VISIBLE);
+        }
 
-            mArtistsAdapter.updateList(mArtists);
-            progressBar.setVisibility(View.GONE);
-            return null;
-        });
+        mArtistsAdapter.updateList(mArtists);
+        progressBar.setVisibility(View.GONE);
     }
 
 
@@ -252,7 +248,7 @@ public class ArtistsFragment extends Fragment implements ArtistsAdapter.ArtistsE
 
     @TargetApi(Build.VERSION_CODES.LOLLIPOP)
     @Override
-    public void artistClicked(final ArtistParcelable artistModel, final ArtistsAdapter.RecyclerViewHolderArtists holder) {
+    public void artistClicked(final ArtistParcelable artistParcelable, final ArtistsAdapter.RecyclerViewHolderArtists holder) {
         int container = ((ContainerActivity) getActivity()).isTwoPane() ? R.id.tracksContainer : R.id.container;
         //Shared Element transition using fragments if lollipop and above
         if (Utility.isVersionLollipopAndAbove()) {
@@ -261,23 +257,17 @@ public class ArtistsFragment extends Fragment implements ArtistsAdapter.ArtistsE
             transitionSet.addTransition(new ChangeBounds());
             transitionSet.addTransition(new ChangeTransform());
             transitionSet.setDuration(300);
-
             setSharedElementReturnTransition(transitionSet);
             setSharedElementEnterTransition(transitionSet);
 
             TracksFragment tracksFragment = new TracksFragment();
             tracksFragment.setImageTransitionName(holder.imageViewArtist.getTransitionName());
-            tracksFragment.setTextTransitionName(holder.textViewArtistName.getTransitionName());
             tracksFragment.setSharedElementEnterTransition(transitionSet);
+            tracksFragment.setSharedElementReturnTransition(transitionSet);
+
             Bundle bundle = new Bundle();
-
-            if (artistModel.artistImageUrls.size() > 0)
-                bundle.putString(TracksFragment.IMAGE_URL, artistModel.artistImageUrls.get(0));
-            bundle.putString(TracksFragment.ARTIST_NAME, artistModel.artistName);
-            bundle.putString(TracksFragment.ARTIST_ID, artistModel.id);
+            bundle.putParcelable(Keys.KEY_ARTIST_PARCELABLE, artistParcelable);
             tracksFragment.setArguments(bundle);
-
-            tracksFragment.setSharedElementEnterTransition(transitionSet);
 
             FragmentTransaction fragmentTransaction = getActivity().getSupportFragmentManager()
                     .beginTransaction();
@@ -291,12 +281,9 @@ public class ArtistsFragment extends Fragment implements ArtistsAdapter.ArtistsE
         } else {
             TracksFragment fragment = new TracksFragment();
             Bundle bundle = new Bundle();
-            if (artistModel.artistImageUrls.size() > 0)
-                bundle.putString(TracksFragment.IMAGE_URL, artistModel.artistImageUrls.get(artistModel.artistImageUrls.size() - 2));
-            bundle.putString(TracksFragment.ARTIST_NAME, artistModel.artistName);
-            bundle.putString(TracksFragment.ARTIST_ID, artistModel.id);
+            bundle.putParcelable(Keys.KEY_ARTIST_PARCELABLE, artistParcelable);
             fragment.setArguments(bundle);
-            Utility.launchFragment(((AppCompatActivity) getActivity()), R.id.container,fragment);
+            Utility.launchFragment(((AppCompatActivity) getActivity()), R.id.container, fragment);
         }
 
     }

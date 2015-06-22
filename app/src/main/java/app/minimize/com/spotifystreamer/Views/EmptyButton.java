@@ -27,33 +27,6 @@ public class EmptyButton extends ImageView {
 
     public EmptyButton(Context context, AttributeSet attrs) {
         super(context, attrs);
-//        int buttonColor;
-//        try {
-//            String background = attrs.getAttributeValue("http://schemas.android.com/apk/res/android", "background");
-//            background = background.replaceAll("\\D+", "");
-////            Log.e("Background", background + "  " + R.attr.colorPrimary);
-//            if (Integer.parseInt(background) == (R.attr.colorPrimary)) {
-//                buttonColor = (getPrimaryColorFromSelectedTheme(context));
-//            } else
-//                buttonColor = getResources().getColor(Integer.parseInt(background));
-//        } catch (Exception e) {
-//            buttonColor = Color.BLACK;
-//        }
-//        setButtonBackgroundColor(context, buttonColor);
-
-    }
-
-    public void setButtonBackgroundColor(Context context, int buttonColor) {
-//        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.LOLLIPOP) {
-//            setBackground(getRippleCircularButton(context, buttonColor));
-//
-//        } else if (Build.VERSION.SDK_INT > Build.VERSION_CODES.ICE_CREAM_SANDWICH_MR1) {
-//            setBackground(getCircularButton(buttonColor,
-//                    darker(buttonColor, 2)));
-//        } else {
-//            setBackgroundDrawable(getCircularButton(buttonColor,
-//                    darker(buttonColor, 2)));
-//        }
     }
 
     //

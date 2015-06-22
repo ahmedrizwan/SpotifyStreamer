@@ -9,33 +9,42 @@
         android:layout_width="match_parent"
         android:layout_height="0dp"
         android:layout_weight="1"
+        android:id="@+id/imageViewAlbum"
         android:src="@drawable/ic_not_available"/>
 
     <RelativeLayout
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
+        android:padding="@dimen/default_margin"
         android:background="@android:color/white">
 
         <TextView
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:textSize="@dimen/tv_large"
-            android:layout_margin="@dimen/default_margin"
             android:text="Hello"
             android:textColor="@android:color/black"
             android:layout_centerHorizontal="true"
             android:id="@+id/textViewTrackName"/>
+        <TextView
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:textSize="@dimen/tv_small"
+            android:text="Hello"
+            android:layout_marginBottom="@dimen/default_margin"
+            android:textColor="@android:color/black"
+            android:layout_centerHorizontal="true"
+            android:layout_below="@id/textViewTrackName"
+            android:id="@+id/textViewTrackAlbum"/>
 
 
         <SeekBar
             android:id="@+id/seekBarPlayer"
             android:layout_width="fill_parent"
             android:layout_height="wrap_content"
-            android:layout_below="@id/textViewTrackName"
+            android:layout_below="@id/textViewTrackAlbum"
             android:layout_centerVertical="true"
             android:layout_gravity="center"
-            android:layout_marginLeft="5dp"
-            android:layout_marginRight="5dp"
             />
 
         <Chronometer
@@ -73,7 +82,7 @@
             <app.minimize.com.spotifystreamer.Views.PlayButton
                 android:layout_width="@dimen/iv_play"
                 android:layout_height="@dimen/iv_play"
-                android:background="@android:color/white"
+                android:background="?attr/colorPrimary"
                 android:id="@+id/imageViewPlay"
                 />
             <app.minimize.com.spotifystreamer.Views.NextButton

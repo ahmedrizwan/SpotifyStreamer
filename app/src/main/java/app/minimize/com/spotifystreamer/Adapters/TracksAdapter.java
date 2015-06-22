@@ -27,13 +27,9 @@ public class TracksAdapter extends RecyclerView.Adapter<TracksAdapter.RecyclerVi
     private List<TrackParcelable> mData = Collections.emptyList();
 
     private TracksEventListener tracksEventListener;
-    private String artistName;
-    private String artistUrl;
 
     public TracksAdapter(TracksEventListener tracksEventListener, List<TrackParcelable> data) {
         this.tracksEventListener = tracksEventListener;
-        this.artistName = artistName;
-        this.artistUrl = artistUrl;
         this.context = tracksEventListener.getContext();
         mData = data;
     }
@@ -45,35 +41,36 @@ public class TracksAdapter extends RecyclerView.Adapter<TracksAdapter.RecyclerVi
 
     @Override
     public RecyclerViewHolderTracks onCreateViewHolder(final ViewGroup parent,
-                                                 final int viewType) {
-            View view = LayoutInflater.from(parent.getContext())
-                    .inflate(R.layout.item_view_track, parent, false);
-            return new RecyclerViewHolderTracks(view);
+                                                       final int viewType) {
+        View view = LayoutInflater.from(parent.getContext())
+                .inflate(R.layout.item_view_track, parent, false);
+        return new RecyclerViewHolderTracks(view);
     }
 
     @Override
     public void onBindViewHolder(final RecyclerViewHolderTracks holder, final int position) {
-            TrackParcelable track = (TrackParcelable) mData.get(position);
-            holder.textViewTrackName.setText(track.songName);
-            holder.textViewTrackAlbum.setText(track.albumName);
-            int images = track.albumImageUrls.size();
-            //if there are artistImageUrls available
-            if (images > 0) {
-                //first cancel the previous request
-                Picasso.with(context)
-                        .cancelRequest((holder).imageViewAlbum);
-                //request the smallest image
-                Picasso.with(context)
-                        .load(track.albumImageUrls.get(images - 1))
-                        .into((holder).imageViewAlbum);
-            } else {
-                (holder).imageViewAlbum.setImageDrawable(context.getResources()
-                        .getDrawable(R.drawable.ic_not_available));
-            }
+        TrackParcelable track = (TrackParcelable) mData.get(position);
+        holder.textViewTrackName.setText(track.songName);
+        holder.textViewTrackAlbum.setText(track.albumName);
+        int images = track.albumImageUrls.size();
+        //if there are artistImageUrls available
+        if (images > 0) {
+            //first cancel the previous request
+            Picasso.with(context)
+                    .cancelRequest((holder).imageViewAlbum);
+            //request the smallest image
+            Picasso.with(context)
+                    .load(track.albumImageUrls.get(images - 1))
+                    .placeholder(R.drawable.ic_not_available)
+                    .into((holder).imageViewAlbum);
+        } else {
+            (holder).imageViewAlbum.setImageDrawable(context.getResources()
+                    .getDrawable(R.drawable.ic_not_available));
+        }
 
-            holder.itemView.setOnClickListener(view -> {
-                tracksEventListener.trackClicked(track, (holder));
-            });
+        holder.itemView.setOnClickListener(view -> {
+            tracksEventListener.trackClicked(track, (holder));
+        });
     }
 
     @Override
@@ -88,8 +85,9 @@ public class TracksAdapter extends RecyclerView.Adapter<TracksAdapter.RecyclerVi
 
 
     //Interface for events
-    public static interface TracksEventListener{
+    public static interface TracksEventListener {
         public void trackClicked(TrackParcelable track, RecyclerViewHolderTracks holder);
+
         public Context getContext();
     }
 
@@ -106,4 +104,5 @@ public class TracksAdapter extends RecyclerView.Adapter<TracksAdapter.RecyclerVi
             imageViewAlbum = (ImageView) itemView.findViewById(R.id.imageViewAlbum);
         }
     }
+
 }

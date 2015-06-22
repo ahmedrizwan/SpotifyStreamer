@@ -2,18 +2,18 @@ package app.minimize.com.spotifystreamer.Views;
 
 import android.content.Context;
 import android.graphics.Canvas;
+import android.graphics.Color;
 import android.graphics.Paint;
 import android.graphics.Path;
 import android.util.AttributeSet;
 
 import app.minimize.com.spotifystreamer.R;
-import app.minimize.com.spotifystreamer.Utility;
 
 
 /**
  * Created by ahmedrizwan on 2/28/15.
  */
-public class PlayButton extends EmptyButton {
+public class PlayButton extends CircularEmptyButton {
     Paint mPaint;
     Paint mPaintLine;
     Path mPath;
@@ -29,16 +29,14 @@ public class PlayButton extends EmptyButton {
         super(context, attrs);
         mPaint = new Paint();
         mPaint.setStyle(Paint.Style.FILL);
-//        mPaint.setColor(getResources().getColor(R.color.color_primary));
-        mPaint.setColor(Utility.getPrimaryColorFromSelectedTheme(context));
+        mPaint.setColor(Color.WHITE);
         mPaint.setStrokeWidth(3.0f);
         mPaint.setAntiAlias(true);
 
         mPaintLine = new Paint();
         mPaintLine.setStyle(Paint.Style.FILL);
         mPaintLine.setAntiAlias(true);
-        mPaintLine.setColor(getResources().getColor(R.color.color_primary));
-//        mPaintLine.setColor(Color.BLACK);
+        mPaintLine.setColor(Color.WHITE);
         mPaintLine.setStrokeWidth(3.0f);
 
         mPath = new Path();
@@ -73,7 +71,6 @@ public class PlayButton extends EmptyButton {
                     2 * widthHeight / 3, widthHeight - widthHeight / 3,
                     mPaint);
         }
-
     }
 
     public void setPauseMode(boolean pauseMode) {
