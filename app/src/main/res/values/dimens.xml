@@ -14,5 +14,5 @@
     <dimen name="parallax_large">250sp</dimen>
     <dimen name="parallax_small">150sp</dimen>
     <dimen name="iv_previous_next">56sp</dimen>
-    <dimen name="iv_play">72sp</dimen>
+    <dimen name="iv_play">56sp</dimen>
 </resources>

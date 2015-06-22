@@ -62,6 +62,7 @@ public class ArtistsAdapter extends RecyclerView.Adapter<ArtistsAdapter.Recycler
             //request the smallest image
             Picasso.with(context)
                     .load(artistModel.artistImageUrls.get(images - 1))
+                    .placeholder(R.drawable.ic_not_available)
                     .into(holder.imageViewArtist);
         } else {
             if (Utility.isVersionLollipopAndAbove())
@@ -72,10 +73,9 @@ public class ArtistsAdapter extends RecyclerView.Adapter<ArtistsAdapter.Recycler
                         .getDrawable(R.drawable.ic_not_available));
         }
 
-        if (Utility.isVersionLollipopAndAbove()) {
+        if (Utility.isVersionLollipopAndAbove())
             holder.imageViewArtist.setTransitionName(context.getString(R.string.artists_image_transition) + position);
-            holder.textViewArtistName.setTransitionName(context.getString(R.string.artists_text_transition) + position);
-        }
+
 
         holder.itemView.setOnClickListener(view -> {
             selectedArtist = artistModel.id;
@@ -111,7 +111,7 @@ public class ArtistsAdapter extends RecyclerView.Adapter<ArtistsAdapter.Recycler
     }
 
     //Interface for events
-    public static interface ArtistsEventListener {
+    public interface ArtistsEventListener {
         public void artistClicked(ArtistParcelable artistModel, RecyclerViewHolderArtists holder);
 
         public Context getContext();

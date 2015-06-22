@@ -8,6 +8,10 @@ import android.support.v4.app.Fragment;
 import android.support.v4.app.FragmentTransaction;
 import android.support.v7.app.AppCompatActivity;
 import android.util.Log;
+import android.widget.ImageView;
+
+import com.squareup.picasso.Callback;
+import com.squareup.picasso.Picasso;
 
 import java.util.concurrent.Callable;
 
@@ -15,6 +19,7 @@ import java.util.concurrent.Callable;
  * Created by ahmedrizwan on 6/9/15.
  */
 public class Utility {
+
     public static void runOnUiThread(AppCompatActivity context, final Callable callable) {
         context.runOnUiThread(() -> {
             try {
@@ -53,7 +58,8 @@ public class Utility {
 
     public static int getPrimaryColorDarkFromSelectedTheme(Context context) {
         int[] attrs = {R.attr.colorPrimary, R.attr.colorPrimaryDark};
-        TypedArray ta = context.getTheme().obtainStyledAttributes(attrs);
+        TypedArray ta = context.getTheme()
+                .obtainStyledAttributes(attrs);
         int primaryColorDark = ta.getColor(1, Color.WHITE);
         ta.recycle();
         return primaryColorDark;
@@ -62,9 +68,31 @@ public class Utility {
     public static int getPrimaryColorFromSelectedTheme(Context context) {
         // Parse MyCustomStyle, using Context.obtainStyledAttributes()
         int[] attrs = {R.attr.colorPrimary, R.attr.colorPrimaryDark};
-        TypedArray ta = context.getTheme().obtainStyledAttributes(attrs);
+        TypedArray ta = context.getTheme()
+                .obtainStyledAttributes(attrs);
         int primaryColor = ta.getColor(0, Color.YELLOW);
         ta.recycle();
         return primaryColor;
+    }
+
+    public static void loadImage(Context context, String smallImageUrl,
+                                 String largeImageUrl, ImageView imageView) {
+
+        Picasso.with(context)
+                .load(smallImageUrl) // thumbnail url goes here
+                .placeholder(R.drawable.ic_not_available)
+                .into(imageView, new Callback(  ) {
+                    @Override
+                    public void onSuccess() {
+                        Picasso.with(context)
+                                .load(largeImageUrl) // image url goes here
+                                .placeholder(imageView.getDrawable())
+                                .into(imageView);
+                    }
+
+                    @Override
+                    public void onError() {
+                    }
+                });
     }
 }

@@ -10,9 +10,9 @@ import android.util.Log;
 import android.view.Menu;
 import android.view.MenuItem;
 import android.view.View;
+import android.view.ViewGroup;
 import android.widget.ImageView;
 import android.widget.LinearLayout;
-import android.widget.RelativeLayout;
 import android.widget.TextView;
 import android.widget.Toast;
 
@@ -42,7 +42,7 @@ public class ContainerActivity extends AppCompatActivity {
     @InjectView(R.id.textViewTrackName)
     TextView textViewTrackName;
     @InjectView(R.id.layoutNowPlaying)
-    RelativeLayout layoutNowPlaying;
+    ViewGroup layoutNowPlaying;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -52,7 +52,6 @@ public class ContainerActivity extends AppCompatActivity {
         ButterKnife.inject(this);
         //ActionBar
         setSupportActionBar(mainToolbar);
-
         //Check for twoPanes
         if (findViewById(R.id.tracksContainer) != null) {
             mTwoPane = true;
@@ -110,7 +109,6 @@ public class ContainerActivity extends AppCompatActivity {
         } else if (id == android.R.id.home) {
             getSupportFragmentManager().popBackStack();
         }
-
         return super.onOptionsItemSelected(item);
     }
 
@@ -134,13 +132,21 @@ public class ContainerActivity extends AppCompatActivity {
 
     @Subscribe
     public void onEventMainThread(TrackParcelable trackParcelable) {
-        Toast.makeText(ContainerActivity.this, "status", Toast.LENGTH_SHORT)
-                .show();
         if (MediaPlayerHandler.getPlayerState() == MediaPlayerHandler.MediaPlayerState.Idle) {
             //Hide the NowPlaying
             hideNowPlayingLayout();
         } else {
             layoutNowPlaying.setVisibility(View.VISIBLE);
+            layoutNowPlaying.setOnClickListener(v -> {
+                Toast.makeText(this,
+                        ((TextView) layoutNowPlaying.findViewById(R.id.textViewTrackName)).getText()
+                                .toString(),
+                        Toast.LENGTH_SHORT)
+                        .show();
+                //TODO : launch the PlayerFragment here
+
+
+            });
             textViewTrackName.setText(trackParcelable.songName);
             textViewArtistName.setText(trackParcelable.artistName);
             int size = trackParcelable.albumImageUrls.size();
@@ -148,9 +154,8 @@ public class ContainerActivity extends AppCompatActivity {
                 Picasso.with(ContainerActivity.this)
                         .load(trackParcelable.albumImageUrls.get(size - 1))
                         .into(imageViewAlbum);
-            if (MediaPlayerHandler.getPlayerState() != MediaPlayerHandler.MediaPlayerState.Playing) {
+            else
                 imageViewAlbum.setImageDrawable(ContextCompat.getDrawable(ContainerActivity.this, R.drawable.ic_not_available));
-            }
         }
     }
 

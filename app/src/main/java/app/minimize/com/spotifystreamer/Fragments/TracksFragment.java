@@ -20,8 +20,6 @@ import android.widget.ImageView;
 import android.widget.ProgressBar;
 import android.widget.TextView;
 
-import com.squareup.picasso.Picasso;
-
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.HashMap;
@@ -31,6 +29,7 @@ import java.util.Map;
 import app.minimize.com.spotifystreamer.Activities.ContainerActivity;
 import app.minimize.com.spotifystreamer.Activities.Keys;
 import app.minimize.com.spotifystreamer.Adapters.TracksAdapter;
+import app.minimize.com.spotifystreamer.Parcelables.ArtistParcelable;
 import app.minimize.com.spotifystreamer.Parcelables.TrackParcelable;
 import app.minimize.com.spotifystreamer.R;
 import app.minimize.com.spotifystreamer.Utility;
@@ -66,11 +65,11 @@ public class TracksFragment extends Fragment implements TracksAdapter.TracksEven
     @InjectView(R.id.main_content)
     CoordinatorLayout mainContent;
 
-    private String mUrl, mName, mId;
     private TracksAdapter mTracksAdapter;
     private List<TrackParcelable> mData = Collections.emptyList();
     private String imageTransitionName;
     private String textTransitionName;
+    private ArtistParcelable mArtistParcelable;
 
     @TargetApi(Build.VERSION_CODES.LOLLIPOP)
     @Override
@@ -78,6 +77,19 @@ public class TracksFragment extends Fragment implements TracksAdapter.TracksEven
                              Bundle savedInstanceState) {
         View rootView = inflater.inflate(R.layout.fragment_tracks, container, false);
         ButterKnife.inject(this, rootView);
+        //Restore state
+        if (savedInstanceState != null) {
+            mArtistParcelable = savedInstanceState.getParcelable(Keys.KEY_ARTIST_PARCELABLE);
+            mData = savedInstanceState.getParcelableArrayList(TRACKS);
+            if ((mData != null ? mData.size() : 0) == 0)
+                textViewError.setVisibility(View.VISIBLE);
+        } else {
+            //Get Artist info from the arguments
+            Bundle activityIntent = getArguments();
+            mArtistParcelable = activityIntent.getParcelable(Keys.KEY_ARTIST_PARCELABLE);
+            progressBar.setVisibility(View.VISIBLE);
+            loadTracks();
+        }
 
         //ActionBar
         ((AppCompatActivity) getActivity()).setTitle(getString(R.string.activity_tracks_title));
@@ -85,8 +97,9 @@ public class TracksFragment extends Fragment implements TracksAdapter.TracksEven
         if (actionBar != null) {
             actionBar.setDisplayHomeAsUpEnabled(true);
             actionBar.setTitle(getString(R.string.activity_tracks_title));
-            actionBar.setSubtitle(mName);
+            actionBar.setSubtitle(mArtistParcelable.artistName);
         }
+
 
         ((ContainerActivity) getActivity()). //start service to retrieve the status of player
                 startServiceForStatusRetrieval();
@@ -94,35 +107,17 @@ public class TracksFragment extends Fragment implements TracksAdapter.TracksEven
         recyclerViewTracks.hasFixedSize();
         recyclerViewTracks.setLayoutManager(new LinearLayoutManager(getActivity()));
 
-        //Restore state
-        if (savedInstanceState != null) {
-            mUrl = savedInstanceState.getString(IMAGE_URL);
-            mName = savedInstanceState.getString(ARTIST_NAME);
-            mId = savedInstanceState.getString(ARTIST_ID);
-            mData = savedInstanceState.getParcelableArrayList(TRACKS);
-            if ((mData != null ? mData.size() : 0) == 0)
-                textViewError.setVisibility(View.VISIBLE);
-        } else {
-            //Get Artist info from the arguments
-            Bundle activityIntent = getArguments();
-            mUrl = activityIntent.getString(IMAGE_URL);
-            mName = activityIntent.getString(ARTIST_NAME);
-            mId = activityIntent.getString(ARTIST_ID);
-            progressBar.setVisibility(View.VISIBLE);
-            loadTracks();
-        }
 
         if (Utility.isVersionLollipopAndAbove()) {
             imageViewArtist.setTransitionName(imageTransitionName);
         }
 
-        if (mUrl != null && !mUrl.equals(""))
-            Picasso.with(getActivity())
-                    .load(mUrl)
-                    .into(imageViewArtist);
+        int size = mArtistParcelable.artistImageUrls.size();
 
-        if (mUrl == null)
-            mUrl = "";
+        if (size > 0) {
+            Utility.loadImage(getActivity(), mArtistParcelable.artistImageUrls.get(size - 1)
+                    , mArtistParcelable.artistImageUrls.get(0), imageViewArtist);
+        }
 
         mTracksAdapter = new TracksAdapter(this, mData);
         recyclerViewTracks.setAdapter(mTracksAdapter);
@@ -134,9 +129,7 @@ public class TracksFragment extends Fragment implements TracksAdapter.TracksEven
     public void onSaveInstanceState(final Bundle outState) {
         super.onSaveInstanceState(outState);
         try {
-            outState.putString(IMAGE_URL, mUrl);
-            outState.putString(ARTIST_ID, mId);
-            outState.putString(ARTIST_NAME, mName);
+            outState.putParcelable(Keys.KEY_ARTIST_PARCELABLE, mArtistParcelable);
             outState.putParcelableArrayList(TRACKS, (ArrayList<? extends Parcelable>) mData);
         } catch (Exception e) {
             e.printStackTrace();
@@ -149,7 +142,8 @@ public class TracksFragment extends Fragment implements TracksAdapter.TracksEven
             SpotifyService spotifyService = spotifyApi.getService();
             Map<String, Object> options = new HashMap<>();
             options.put(SpotifyService.COUNTRY, "US");
-            spotifyService.getArtistTopTrack(mId, options, new Callback<Tracks>() {
+
+            spotifyService.getArtistTopTrack(mArtistParcelable.id, options, new Callback<Tracks>() {
                 @Override
                 public void success(final Tracks tracks, final Response response) {
                     mData = new ArrayList<TrackParcelable>();
@@ -170,15 +164,14 @@ public class TracksFragment extends Fragment implements TracksAdapter.TracksEven
 
                 @Override
                 public void failure(final RetrofitError error) {
-                    Utility.runOnUiThread(((AppCompatActivity) getActivity()), () -> {
-                        //Handle network error
-                        if (error.getKind() == RetrofitError.Kind.NETWORK) {
-                            textViewError.setText(getString(R.string.network_error));
-                            textViewError.setVisibility(View.VISIBLE);
-                            progressBar.setVisibility(View.GONE);
-                        }
-                        return null;
-                    });
+
+                    //Handle network error
+                    if (error.getKind() == RetrofitError.Kind.NETWORK) {
+                        textViewError.setText(getString(R.string.network_error));
+                        textViewError.setVisibility(View.VISIBLE);
+                        progressBar.setVisibility(View.GONE);
+                    }
+
                 }
             });
             return null;
@@ -191,7 +184,7 @@ public class TracksFragment extends Fragment implements TracksAdapter.TracksEven
         PlayerDialogFragment playerDialogFragment = PlayerDialogFragment.getInstance(this);
         Bundle bundle = new Bundle();
         bundle.putParcelable(getString(R.string.key_tracks_parcelable), track);
-        bundle.putParcelableArrayList(Keys.KEY_TRACK_PARCELABLE_LIST,mTracksAdapter.getDataSet());
+        bundle.putParcelableArrayList(Keys.KEY_TRACK_PARCELABLE_LIST, mTracksAdapter.getDataSet());
         playerDialogFragment.setArguments(bundle);
         Utility.launchFragment(((AppCompatActivity) getActivity()), R.id.container, playerDialogFragment);
     }

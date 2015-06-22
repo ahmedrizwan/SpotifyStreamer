@@ -18,6 +18,7 @@ import de.greenrobot.event.EventBus;
  */
 public class MediaPlayerHandler implements AudioManager.OnAudioFocusChangeListener, MediaPlayer.OnPreparedListener, MediaPlayer.OnCompletionListener {
     public enum MediaPlayerState {Playing, Stopped, Paused, Idle}
+
     //State
     MediaPlayerState mMediaPlayerState = MediaPlayerState.Idle;
     private static MediaPlayerHandler sMediaPlayerHandler;
@@ -56,8 +57,8 @@ public class MediaPlayerHandler implements AudioManager.OnAudioFocusChangeListen
         if (sMediaPlayerHandler == null) {
             sMediaPlayerHandler = new MediaPlayerHandler();
             sMediaPlayerHandler.mMediaPlayer = new MediaPlayer();
-            sMediaPlayerHandler.mPausedEvent = new PausedEvent();
-            sMediaPlayerHandler.mPlayingEvent = new PlayingEvent(0,0);
+            sMediaPlayerHandler.mPausedEvent = new PausedEvent(0, 0);
+            sMediaPlayerHandler.mPlayingEvent = new PlayingEvent(0, 0);
             sMediaPlayerHandler.mStoppedEvent = new StoppedEvent(0);
             sMediaPlayerHandler.setContext(context);
         }
@@ -87,6 +88,14 @@ public class MediaPlayerHandler implements AudioManager.OnAudioFocusChangeListen
         mTrackName = trackName;
 
         if (newFile || mMediaPlayerState == MediaPlayerState.Stopped) {
+
+            try {
+                mMediaPlayer.stop();
+                mMediaPlayer.release();
+            } catch (IllegalStateException e) {
+                Log.e(TAG, e.toString());
+            }
+
             mMediaPlayer = new MediaPlayer();
         }
 
@@ -130,18 +139,22 @@ public class MediaPlayerHandler implements AudioManager.OnAudioFocusChangeListen
 
     private void playUrl() throws IOException, IllegalStateException {
         mMediaPlayer = new MediaPlayer();
-
-        if (mMediaPlayer.isPlaying()) {
-            mMediaPlayer.stop();
-            mMediaPlayer.release();
-        }
-
-        mMediaPlayer.setAudioStreamType(AudioManager.STREAM_MUSIC);
-        mMediaPlayer.setDataSource(mContext, Uri.parse(mTrackUrl));
-
-        mMediaPlayer.setOnPreparedListener(this);
-        mMediaPlayer.setOnCompletionListener(this);
-        mMediaPlayer.prepare();
+        new Thread(()-> {
+                if (mMediaPlayer.isPlaying()) {
+                    mMediaPlayer.stop();
+                    mMediaPlayer.release();
+                }
+                mMediaPlayer.setAudioStreamType(AudioManager.STREAM_MUSIC);
+                try {
+                    mMediaPlayer.setDataSource(mContext, Uri.parse(mTrackUrl));
+                    mMediaPlayer.setOnPreparedListener(this);
+                    mMediaPlayer.setOnCompletionListener(this);
+                    mMediaPlayer.prepare();
+                } catch (IOException e) {
+                    e.printStackTrace();
+                }
+            }
+        ).start();
     }
 
     @Override
@@ -163,13 +176,10 @@ public class MediaPlayerHandler implements AudioManager.OnAudioFocusChangeListen
             mMediaPlayer.pause();
             setPlayerState(MediaPlayerState.Paused);
             EventBus.getDefault()
-                    .post(mPausedEvent);
-//            mMediaPlayerInterface.paused();
+                    .post(mPausedEvent.setProgress(mMediaPlayer.getCurrentPosition()));
         } else {
             mMediaPlayer.start();
             setPlayerState(MediaPlayerState.Playing);
-//            mMediaPlayerInterface.playing(mMediaPlayer.getDuration(), mMediaPlayer.getCurrentPosition());
-
             //Post the playingEvent
             EventBus.getDefault()
                     .post(mPlayingEvent.setDuration(mMediaPlayer.getDuration())
@@ -185,7 +195,6 @@ public class MediaPlayerHandler implements AudioManager.OnAudioFocusChangeListen
     public void onPrepared(final MediaPlayer mediaPlayer) {
         mediaPlayer.start();
         setPlayerState(MediaPlayerState.Playing);
-//        mMediaPlayerInterface.playing(mediaPlayer.getDuration(), 0);
         EventBus.getDefault()
                 .post(mPlayingEvent.setDuration(mediaPlayer.getDuration())
                         .setProgress(0));
@@ -194,7 +203,6 @@ public class MediaPlayerHandler implements AudioManager.OnAudioFocusChangeListen
     @Override
     public void onCompletion(final MediaPlayer mediaPlayer) {
         setPlayerState(MediaPlayerState.Stopped);
-//        mMediaPlayerInterface.stopped(mediaPlayer.getDuration());
         EventBus.getDefault()
                 .post(mStoppedEvent.setDuration(mediaPlayer.getDuration()));
         mMediaPlayer.release();
@@ -205,6 +213,22 @@ public class MediaPlayerHandler implements AudioManager.OnAudioFocusChangeListen
     }
 
     static public class PausedEvent {
+        public int progress;
+        public int duration;
+
+        public PausedEvent(int duration, int progress) {
+            this.progress = progress;
+        }
+
+        public PausedEvent setProgress(int progress) {
+            this.progress = progress;
+            return this;
+        }
+
+        public PausedEvent setDuration(int duration) {
+            this.duration = duration;
+            return this;
+        }
     }
 
     static public class StoppedEvent {
