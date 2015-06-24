@@ -3,24 +3,22 @@ package app.minimize.com.spotifystreamer.Fragments;
 import android.annotation.TargetApi;
 import android.app.Activity;
 import android.content.Context;
+import android.graphics.Color;
+import android.graphics.drawable.BitmapDrawable;
 import android.os.Build;
 import android.os.Bundle;
 import android.os.Parcelable;
 import android.support.annotation.NonNull;
 import android.support.annotation.Nullable;
 import android.support.v4.app.Fragment;
-import android.support.v4.app.FragmentTransaction;
 import android.support.v7.app.ActionBar;
 import android.support.v7.app.AppCompatActivity;
+import android.support.v7.graphics.Palette;
 import android.support.v7.widget.LinearLayoutManager;
 import android.support.v7.widget.RecyclerView;
 import android.support.v7.widget.Toolbar;
 import android.text.Editable;
 import android.text.TextWatcher;
-import android.transition.ChangeBounds;
-import android.transition.ChangeImageTransform;
-import android.transition.ChangeTransform;
-import android.transition.TransitionSet;
 import android.view.KeyEvent;
 import android.view.LayoutInflater;
 import android.view.View;
@@ -110,7 +108,7 @@ public class ArtistsFragment extends Fragment implements ArtistsAdapter.ArtistsE
             //Clear the subtitle, as I'm re-using the actionBar for both fragments
             actionBar.setSubtitle("");
         }
-
+        Utility.setActionBarAndStatusBarColor(((AppCompatActivity) getActivity()),  Utility.getPrimaryColorFromSelectedTheme(getActivity()));
         if (savedInstanceState != null) {
             mArtists = savedInstanceState.getParcelableArrayList(ARTIST);
             if (mArtists == null)
@@ -246,47 +244,7 @@ public class ArtistsFragment extends Fragment implements ArtistsAdapter.ArtistsE
         super.onDetach();
     }
 
-    @TargetApi(Build.VERSION_CODES.LOLLIPOP)
-    @Override
-    public void artistClicked(final ArtistParcelable artistParcelable, final ArtistsAdapter.RecyclerViewHolderArtists holder) {
-        int container = ((ContainerActivity) getActivity()).isTwoPane() ? R.id.tracksContainer : R.id.container;
-        //Shared Element transition using fragments if lollipop and above
-        if (Utility.isVersionLollipopAndAbove()) {
-            final TransitionSet transitionSet = new TransitionSet();
-            transitionSet.addTransition(new ChangeImageTransform());
-            transitionSet.addTransition(new ChangeBounds());
-            transitionSet.addTransition(new ChangeTransform());
-            transitionSet.setDuration(300);
-            setSharedElementReturnTransition(transitionSet);
-            setSharedElementEnterTransition(transitionSet);
 
-            TracksFragment tracksFragment = new TracksFragment();
-            tracksFragment.setImageTransitionName(holder.imageViewArtist.getTransitionName());
-            tracksFragment.setSharedElementEnterTransition(transitionSet);
-            tracksFragment.setSharedElementReturnTransition(transitionSet);
-
-            Bundle bundle = new Bundle();
-            bundle.putParcelable(Keys.KEY_ARTIST_PARCELABLE, artistParcelable);
-            tracksFragment.setArguments(bundle);
-
-            FragmentTransaction fragmentTransaction = getActivity().getSupportFragmentManager()
-                    .beginTransaction();
-            fragmentTransaction.replace(container, tracksFragment)
-                    .addToBackStack(null)
-                    .addSharedElement(holder.imageViewArtist, holder.imageViewArtist.getTransitionName())
-                    .addSharedElement(holder.textViewArtistName,
-                            holder.textViewArtistName.getTransitionName())
-                    .commit();
-
-        } else {
-            TracksFragment fragment = new TracksFragment();
-            Bundle bundle = new Bundle();
-            bundle.putParcelable(Keys.KEY_ARTIST_PARCELABLE, artistParcelable);
-            fragment.setArguments(bundle);
-            Utility.launchFragment(((AppCompatActivity) getActivity()), R.id.container, fragment);
-        }
-
-    }
 
     @Override
     public Context getContext() {
@@ -348,6 +306,28 @@ public class ArtistsFragment extends Fragment implements ArtistsAdapter.ArtistsE
     public void onDestroyView() {
         super.onDestroyView();
         ButterKnife.reset(this);
+    }
+
+    @TargetApi(Build.VERSION_CODES.LOLLIPOP)
+    @Override
+    public void artistClicked(final ArtistParcelable artistParcelable, final ArtistsAdapter.RecyclerViewHolderArtists holder) {
+        int container = ((ContainerActivity) getActivity()).isTwoPane() ? R.id.tracksContainer : R.id.container;
+        //Shared Element transition using fragments if lollipop and above
+        TracksFragment tracksFragment = new TracksFragment();
+        tracksFragment.setImageTransitionName(holder.imageViewArtist.getTransitionName());
+        Bundle bundle = new Bundle();
+        bundle.putParcelable(Keys.KEY_ARTIST_PARCELABLE, artistParcelable);
+        Utility.runOnWorkerThread(() -> {
+            int vibrantColor = Palette.from(((BitmapDrawable) holder.imageViewArtist.getDrawable()).getBitmap())
+                    .generate()
+                    .getVibrantColor(Color.BLACK);
+            bundle.putInt(Keys.COLOR_ACTION_BAR, vibrantColor);
+            return null;
+        });
+
+        tracksFragment.setArguments(bundle);
+        Utility.launchFragmentWithSharedElements(this, tracksFragment, container, holder.imageViewArtist);
+
     }
 
 }

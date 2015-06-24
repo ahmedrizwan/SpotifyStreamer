@@ -1,5 +1,6 @@
 <?xml version="1.0" encoding="utf-8"?>
 <LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+              xmlns:app="http://schemas.android.com/apk/res-auto"
               android:orientation="vertical"
               android:layout_width="match_parent"
               android:layout_height="match_parent"
@@ -34,14 +35,17 @@
             android:layout_marginBottom="@dimen/default_margin"
             android:textColor="@android:color/black"
             android:layout_centerHorizontal="true"
+
             android:layout_below="@id/textViewTrackName"
             android:id="@+id/textViewTrackAlbum"/>
 
 
-        <SeekBar
+        <app.minimize.com.spotifystreamer.Views.MaterialSeekBar
             android:id="@+id/seekBarPlayer"
             android:layout_width="fill_parent"
             android:layout_height="wrap_content"
+            app:thumbColor="@android:color/black"
+            app:progressColor="@android:color/black"
             android:layout_below="@id/textViewTrackAlbum"
             android:layout_centerVertical="true"
             android:layout_gravity="center"

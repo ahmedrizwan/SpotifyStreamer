@@ -6,6 +6,7 @@
     android:layout_gravity="bottom"
     android:layout_height="90sp"
     android:layout_width="match_parent"
+    android:visibility="gone"
     android:id="@+id/layoutNowPlaying"
     app:cardElevation="6dp"
     app:cardCornerRadius="3dp"

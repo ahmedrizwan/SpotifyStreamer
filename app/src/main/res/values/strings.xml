@@ -18,4 +18,5 @@
     <string name="tv_no_tracks">Oops… No tracks found!</string>
     <string name="key_tracks_parcelable">TrackParcelable</string>
     <string name="title_player">Player</string>
+    <string name="album_image_transition">albumImageTransition</string>
 </resources>

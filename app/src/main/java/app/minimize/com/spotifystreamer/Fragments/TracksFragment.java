@@ -2,6 +2,8 @@ package app.minimize.com.spotifystreamer.Fragments;
 
 import android.annotation.TargetApi;
 import android.content.Context;
+import android.graphics.Color;
+import android.graphics.drawable.BitmapDrawable;
 import android.os.Build;
 import android.os.Bundle;
 import android.os.Parcelable;
@@ -11,6 +13,7 @@ import android.support.design.widget.CoordinatorLayout;
 import android.support.v4.app.Fragment;
 import android.support.v7.app.ActionBar;
 import android.support.v7.app.AppCompatActivity;
+import android.support.v7.graphics.Palette;
 import android.support.v7.widget.LinearLayoutManager;
 import android.support.v7.widget.RecyclerView;
 import android.view.LayoutInflater;
@@ -25,6 +28,7 @@ import java.util.Collections;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.concurrent.Callable;
 
 import app.minimize.com.spotifystreamer.Activities.ContainerActivity;
 import app.minimize.com.spotifystreamer.Activities.Keys;
@@ -87,6 +91,9 @@ public class TracksFragment extends Fragment implements TracksAdapter.TracksEven
             //Get Artist info from the arguments
             Bundle activityIntent = getArguments();
             mArtistParcelable = activityIntent.getParcelable(Keys.KEY_ARTIST_PARCELABLE);
+            //load up color for actionBar and status bar
+            int vibrantColor = activityIntent.getInt(Keys.COLOR_ACTION_BAR);
+            Utility.setActionBarAndStatusBarColor(((AppCompatActivity) getActivity()),  vibrantColor);
             progressBar.setVisibility(View.VISIBLE);
             loadTracks();
         }
@@ -99,7 +106,6 @@ public class TracksFragment extends Fragment implements TracksAdapter.TracksEven
             actionBar.setTitle(getString(R.string.activity_tracks_title));
             actionBar.setSubtitle(mArtistParcelable.artistName);
         }
-
 
         ((ContainerActivity) getActivity()). //start service to retrieve the status of player
                 startServiceForStatusRetrieval();
@@ -115,8 +121,11 @@ public class TracksFragment extends Fragment implements TracksAdapter.TracksEven
         int size = mArtistParcelable.artistImageUrls.size();
 
         if (size > 0) {
-            Utility.loadImage(getActivity(), mArtistParcelable.artistImageUrls.get(size - 1)
-                    , mArtistParcelable.artistImageUrls.get(0), imageViewArtist);
+            Utility.loadImage(getActivity(),
+                    mArtistParcelable.artistImageUrls.get(size - 1),
+                    mArtistParcelable.artistImageUrls.get(0),
+                    imageViewArtist,
+                    null);
         }
 
         mTracksAdapter = new TracksAdapter(this, mData);
@@ -178,6 +187,7 @@ public class TracksFragment extends Fragment implements TracksAdapter.TracksEven
         });
     }
 
+    @TargetApi(Build.VERSION_CODES.LOLLIPOP)
     @Override
     public void trackClicked(final TrackParcelable track, final TracksAdapter.RecyclerViewHolderTracks holder) {
         //Launch the dialogFragment from here
@@ -185,8 +195,20 @@ public class TracksFragment extends Fragment implements TracksAdapter.TracksEven
         Bundle bundle = new Bundle();
         bundle.putParcelable(getString(R.string.key_tracks_parcelable), track);
         bundle.putParcelableArrayList(Keys.KEY_TRACK_PARCELABLE_LIST, mTracksAdapter.getDataSet());
+        Utility.runOnWorkerThread(new Callable() {
+            @Override
+            public Object call() throws Exception {
+                int vibrantColor = Palette.from(((BitmapDrawable) holder.imageViewAlbum.getDrawable()).getBitmap())
+                        .generate()
+                        .getVibrantColor(Color.BLACK);
+                bundle.putInt(Keys.COLOR_ACTION_BAR, vibrantColor);
+                return null;
+            }
+        });
+
         playerDialogFragment.setArguments(bundle);
-        Utility.launchFragment(((AppCompatActivity) getActivity()), R.id.container, playerDialogFragment);
+        playerDialogFragment.setImageViewAlbumTransitionName(holder.imageViewAlbum.getTransitionName());
+        Utility.launchFragmentWithSharedElements(this, playerDialogFragment, R.id.container, holder.imageViewAlbum);
     }
 
     @Override
