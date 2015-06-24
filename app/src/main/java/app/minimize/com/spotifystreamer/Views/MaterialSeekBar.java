@@ -49,6 +49,21 @@ public class MaterialSeekBar extends SeekBar {
         requestLayout();
     }
 
+    public void setProgressAndThumbColor(final int color){
+        colorsThumb[0] = color;
+        colorsThumb[1] = color;
+        mColorStateListThumb = new ColorStateList(states, colorsThumb);
+        colorsProgress[0] = color;
+        colorsProgress[1] = color;
+        mColorStateListProgress = new ColorStateList(states, colorsProgress);
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.LOLLIPOP) {
+            setThumbTintList(mColorStateListThumb);
+            setProgressTintList(mColorStateListProgress);
+        }
+        invalidate();
+        requestLayout();
+    }
+
     public MaterialSeekBar(final Context context) {
         super(context);
     }
@@ -61,8 +76,8 @@ public class MaterialSeekBar extends SeekBar {
                         R.styleable.MaterialSeekBar,
                         0, 0);
         try {
-            mThumbColor = a.getColor(R.styleable.MaterialSeekBar_thumbColor, getPrimaryColorFromSelectedTheme(context));
-            mProgressColor = a.getColor(R.styleable.MaterialSeekBar_progressColor, getPrimaryColorFromSelectedTheme(context));
+            mThumbColor = a.getColor(R.styleable.MaterialSeekBar_thumbColor, Color.BLACK);
+            mProgressColor = a.getColor(R.styleable.MaterialSeekBar_progressColor, Color.BLACK);
             colorsThumb[0] = mThumbColor;
             colorsThumb[1] = mThumbColor;
             mColorStateListThumb = new ColorStateList(states, colorsThumb);
