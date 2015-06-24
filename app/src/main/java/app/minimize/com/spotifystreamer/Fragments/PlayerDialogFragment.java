@@ -1,7 +1,10 @@
 package app.minimize.com.spotifystreamer.Fragments;
 
+import android.annotation.TargetApi;
 import android.content.Intent;
 import android.graphics.Bitmap;
+import android.graphics.Color;
+import android.os.Build;
 import android.os.Bundle;
 import android.os.SystemClock;
 import android.support.annotation.Nullable;
@@ -14,7 +17,6 @@ import android.view.View;
 import android.view.ViewGroup;
 import android.widget.Chronometer;
 import android.widget.ImageView;
-import android.widget.SeekBar;
 import android.widget.TextView;
 import android.widget.Toast;
 
@@ -30,6 +32,7 @@ import app.minimize.com.spotifystreamer.MediaPlayerService;
 import app.minimize.com.spotifystreamer.Parcelables.TrackParcelable;
 import app.minimize.com.spotifystreamer.R;
 import app.minimize.com.spotifystreamer.Utility;
+import app.minimize.com.spotifystreamer.Views.MaterialSeekBar;
 import app.minimize.com.spotifystreamer.Views.NextButton;
 import app.minimize.com.spotifystreamer.Views.PlayButton;
 import app.minimize.com.spotifystreamer.Views.PreviousButton;
@@ -47,7 +50,7 @@ public class PlayerDialogFragment extends DialogFragment {
     @InjectView(R.id.textViewTrackName)
     TextView textViewTrackName;
     @InjectView(R.id.seekBarPlayer)
-    SeekBar seekBarPlayer;
+    MaterialSeekBar seekBarPlayer;
     @InjectView(R.id.chronometerStart)
     Chronometer chronometerStart;
     @InjectView(R.id.chronometerEnd)
@@ -67,6 +70,8 @@ public class PlayerDialogFragment extends DialogFragment {
     private TrackParcelable mTrackParcelable;
     private int mAmountToUpdate = 0, currentProgress = 0;
     private Timer timer;
+    private String imageViewAlbumTransitionName;
+    private int vibrantColor = Color.BLACK;
 
     public static PlayerDialogFragment getInstance(TracksFragment tracksFragment) {
         PlayerDialogFragment playerDialogFragment = new PlayerDialogFragment();
@@ -74,11 +79,13 @@ public class PlayerDialogFragment extends DialogFragment {
         return playerDialogFragment;
     }
 
+    @TargetApi(Build.VERSION_CODES.LOLLIPOP)
     @Nullable
     @Override
     public View onCreateView(final LayoutInflater inflater, final ViewGroup container, final Bundle savedInstanceState) {
         View rootView = inflater.inflate(R.layout.fragment_player, container, false);
         ButterKnife.inject(this, rootView);
+
         ActionBar actionBar = ((AppCompatActivity) getActivity()).getSupportActionBar();
         if (actionBar != null) {
             actionBar.setTitle(R.string.title_player);
@@ -88,13 +95,21 @@ public class PlayerDialogFragment extends DialogFragment {
 
         mTrackParcelable = getArguments().getParcelable(getString(R.string.key_tracks_parcelable));
         List<TrackParcelable> trackParcelableList = getArguments().getParcelableArrayList(Keys.KEY_TRACK_PARCELABLE_LIST);
-
+        vibrantColor = getArguments().getInt(Keys.COLOR_ACTION_BAR);
+        Utility.setActionBarAndStatusBarColor(((AppCompatActivity) getActivity()), vibrantColor);
         Toast.makeText(getActivity(), trackParcelableList.indexOf(mTrackParcelable) + "", Toast.LENGTH_SHORT)
                 .show();
 
         imageViewPlay.setOnClickListener(v -> {
             toggleTrack();
         });
+
+        imageViewPlay.setButtonBackgroundColor(getActivity(), vibrantColor);
+        seekBarPlayer.setProgressAndThumbColor(vibrantColor);
+
+        if (Utility.isVersionLollipopAndAbove())
+            imageViewAlbum.setTransitionName(imageViewAlbumTransitionName);
+
         if (mTrackParcelable != null) {
             textViewTrackName.setText(mTrackParcelable.songName);
             textViewTrackAlbum.setText(mTrackParcelable.albumName);
@@ -103,15 +118,11 @@ public class PlayerDialogFragment extends DialogFragment {
                 Utility.loadImage(getActivity(),
                         mTrackParcelable.albumImageUrls.get(size - 1),
                         mTrackParcelable.albumImageUrls.get(0),
-                        imageViewAlbum);
+                        imageViewAlbum,
+                        null);
             }
-//            new Thread(this::playTrack).start();
             playTrack();
-
         }
-//        int colorPrimary = Utility.getPrimaryColorFromSelectedTheme(getActivity());
-//        DrawableCompat.setTint(seekBarPlayer.getThumb(), colorPrimary);
-//        DrawableCompat.setTint(seekBarPlayer.getProgressDrawable(), colorPrimary);
         return rootView;
     }
 
@@ -235,6 +246,7 @@ public class PlayerDialogFragment extends DialogFragment {
         super.onDestroyView();
         ButterKnife.reset(this);
     }
+
     public Bitmap fastblur(Bitmap sentBitmap, int radius) {
 
         // Stack Blur v1.0 from
@@ -416,7 +428,7 @@ public class PlayerDialogFragment extends DialogFragment {
             stackpointer = radius;
             for (y = 0; y < h; y++) {
                 // Preserve alpha channel: ( 0xff000000 & pix[yi] )
-                pix[yi] = ( 0xff000000 & pix[yi] ) | ( dv[rsum] << 16 ) | ( dv[gsum] << 8 ) | dv[bsum];
+                pix[yi] = (0xff000000 & pix[yi]) | (dv[rsum] << 16) | (dv[gsum] << 8) | dv[bsum];
 
                 rsum -= routsum;
                 gsum -= goutsum;
@@ -465,5 +477,9 @@ public class PlayerDialogFragment extends DialogFragment {
         bitmap.setPixels(pix, 0, w, 0, 0, w, h);
 
         return (bitmap);
+    }
+
+    public void setImageViewAlbumTransitionName(String imageViewAlbumTransitionName) {
+        this.imageViewAlbumTransitionName = imageViewAlbumTransitionName;
     }
 }

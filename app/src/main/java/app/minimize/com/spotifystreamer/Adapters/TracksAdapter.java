@@ -1,6 +1,8 @@
 package app.minimize.com.spotifystreamer.Adapters;
 
+import android.annotation.TargetApi;
 import android.content.Context;
+import android.os.Build;
 import android.os.Parcelable;
 import android.support.v7.widget.RecyclerView;
 import android.view.LayoutInflater;
@@ -17,6 +19,7 @@ import java.util.List;
 
 import app.minimize.com.spotifystreamer.Parcelables.TrackParcelable;
 import app.minimize.com.spotifystreamer.R;
+import app.minimize.com.spotifystreamer.Utility;
 
 /**
  * Created by ahmedrizwan on 6/9/15.
@@ -27,6 +30,7 @@ public class TracksAdapter extends RecyclerView.Adapter<TracksAdapter.RecyclerVi
     private List<TrackParcelable> mData = Collections.emptyList();
 
     private TracksEventListener tracksEventListener;
+    private final boolean lollipopAndAbove = Utility.isVersionLollipopAndAbove();
 
     public TracksAdapter(TracksEventListener tracksEventListener, List<TrackParcelable> data) {
         this.tracksEventListener = tracksEventListener;
@@ -47,6 +51,7 @@ public class TracksAdapter extends RecyclerView.Adapter<TracksAdapter.RecyclerVi
         return new RecyclerViewHolderTracks(view);
     }
 
+    @TargetApi(Build.VERSION_CODES.LOLLIPOP)
     @Override
     public void onBindViewHolder(final RecyclerViewHolderTracks holder, final int position) {
         TrackParcelable track = (TrackParcelable) mData.get(position);
@@ -67,6 +72,9 @@ public class TracksAdapter extends RecyclerView.Adapter<TracksAdapter.RecyclerVi
             (holder).imageViewAlbum.setImageDrawable(context.getResources()
                     .getDrawable(R.drawable.ic_not_available));
         }
+
+        if(lollipopAndAbove)
+            holder.imageViewAlbum.setTransitionName(context.getString(R.string.album_image_transition)+position);
 
         holder.itemView.setOnClickListener(view -> {
             tracksEventListener.trackClicked(track, (holder));
@@ -93,9 +101,9 @@ public class TracksAdapter extends RecyclerView.Adapter<TracksAdapter.RecyclerVi
 
     public class RecyclerViewHolderTracks extends RecyclerView.ViewHolder {
 
-        TextView textViewTrackName;
-        TextView textViewTrackAlbum;
-        ImageView imageViewAlbum;
+        public TextView textViewTrackName;
+        public TextView textViewTrackAlbum;
+        public ImageView imageViewAlbum;
 
         public RecyclerViewHolderTracks(final View itemView) {
             super(itemView);

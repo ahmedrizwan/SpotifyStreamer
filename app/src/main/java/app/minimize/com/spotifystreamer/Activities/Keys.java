@@ -36,4 +36,5 @@ public class Keys {
     public static final String KEY_ARTIST_PARCELABLE = "ArtistParcelable";
     public static final int SMOOTHNESS_FACTOR = 500;
     public static final String KEY_TRACK_PARCELABLE_LIST = "TracksParcelableList";
+    public static final String COLOR_ACTION_BAR = "ActionBarColor";
 }

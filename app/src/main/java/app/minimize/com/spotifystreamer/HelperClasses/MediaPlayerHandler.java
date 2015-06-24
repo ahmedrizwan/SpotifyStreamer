@@ -139,23 +139,25 @@ public class MediaPlayerHandler implements AudioManager.OnAudioFocusChangeListen
 
     private void playUrl() throws IOException, IllegalStateException {
         mMediaPlayer = new MediaPlayer();
-        new Thread(()-> {
-                if (mMediaPlayer.isPlaying()) {
-                    mMediaPlayer.stop();
-                    mMediaPlayer.release();
-                }
-                mMediaPlayer.setAudioStreamType(AudioManager.STREAM_MUSIC);
-                try {
-                    mMediaPlayer.setDataSource(mContext, Uri.parse(mTrackUrl));
-                    mMediaPlayer.setOnPreparedListener(this);
-                    mMediaPlayer.setOnCompletionListener(this);
-                    mMediaPlayer.prepare();
-                } catch (IOException e) {
-                    e.printStackTrace();
-                }
+        new Thread(() -> {
+            if (mMediaPlayer.isPlaying()) {
+                mMediaPlayer.stop();
+                mMediaPlayer.release();
             }
+            mMediaPlayer.setAudioStreamType(AudioManager.STREAM_MUSIC);
+            try {
+                mMediaPlayer.setDataSource(mContext, Uri.parse(mTrackUrl));
+                mMediaPlayer.setOnPreparedListener(this);
+                mMediaPlayer.setOnCompletionListener(this);
+                mMediaPlayer.prepare();
+            } catch (IOException e) {
+                e.printStackTrace();
+            }
+        }
         ).start();
     }
+
+
 
     @Override
     public void onAudioFocusChange(final int focusChange) {

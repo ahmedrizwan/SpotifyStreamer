@@ -1,13 +1,20 @@
 package app.minimize.com.spotifystreamer;
 
+import android.annotation.TargetApi;
 import android.content.Context;
 import android.content.res.TypedArray;
 import android.graphics.Color;
+import android.graphics.drawable.ColorDrawable;
 import android.os.Build;
 import android.support.v4.app.Fragment;
 import android.support.v4.app.FragmentTransaction;
 import android.support.v7.app.AppCompatActivity;
+import android.transition.ChangeBounds;
+import android.transition.ChangeImageTransform;
+import android.transition.ChangeTransform;
+import android.transition.TransitionSet;
 import android.util.Log;
+import android.view.View;
 import android.widget.ImageView;
 
 import com.squareup.picasso.Callback;
@@ -52,7 +59,36 @@ public class Utility {
         trans.commit();
     }
 
-    public static void launchFragmentWithSharedElements(final Fragment fromFragment, final Fragment toFragment) {
+    @TargetApi(Build.VERSION_CODES.LOLLIPOP)
+    public static void launchFragmentWithSharedElements(final Fragment fromFragment,
+                                                        final Fragment toFragment,
+                                                        final int container,
+                                                        final View... views) {
+        if (isVersionLollipopAndAbove()) {
+            final TransitionSet transitionSet = new TransitionSet();
+            transitionSet.addTransition(new ChangeImageTransform());
+            transitionSet.addTransition(new ChangeBounds());
+            transitionSet.addTransition(new ChangeTransform());
+            transitionSet.setDuration(300);
+            fromFragment.setSharedElementReturnTransition(transitionSet);
+            fromFragment.setSharedElementEnterTransition(transitionSet);
+            toFragment.setSharedElementEnterTransition(transitionSet);
+            toFragment.setSharedElementReturnTransition(transitionSet);
+            FragmentTransaction fragmentTransaction = fromFragment.getActivity()
+                    .getSupportFragmentManager()
+                    .beginTransaction();
+
+            for (View view : views) {
+                fragmentTransaction.addSharedElement(view, view.getTransitionName());
+            }
+
+            fragmentTransaction
+                    .replace(container, toFragment)
+                    .addToBackStack(null)
+                    .commit();
+        } else {
+            Utility.launchFragment(((AppCompatActivity) fromFragment.getActivity()), container, toFragment);
+        }
 
     }
 
@@ -76,23 +112,50 @@ public class Utility {
     }
 
     public static void loadImage(Context context, String smallImageUrl,
-                                 String largeImageUrl, ImageView imageView) {
+                                 String largeImageUrl, ImageView imageView, Callable<Void> onSuccess) {
 
         Picasso.with(context)
                 .load(smallImageUrl) // thumbnail url goes here
                 .placeholder(R.drawable.ic_not_available)
-                .into(imageView, new Callback(  ) {
+                .into(imageView, new Callback() {
                     @Override
                     public void onSuccess() {
                         Picasso.with(context)
                                 .load(largeImageUrl) // image url goes here
                                 .placeholder(imageView.getDrawable())
-                                .into(imageView);
+                                .into(imageView, new Callback() {
+                                    @Override
+                                    public void onSuccess() {
+                                        try {
+                                            onSuccess.call();
+                                        } catch (Exception e) {
+                                            e.printStackTrace();
+                                        }
+                                    }
+
+                                    @Override
+                                    public void onError() {
+
+                                    }
+                                });
                     }
 
                     @Override
                     public void onError() {
                     }
                 });
+    }
+
+    @TargetApi(Build.VERSION_CODES.LOLLIPOP)
+    public static void setActionBarAndStatusBarColor(final AppCompatActivity activity, final int vibrantColor) {
+        activity.getSupportActionBar()
+                .setBackgroundDrawable(new ColorDrawable(vibrantColor));
+        float[] hsv = new float[3];
+        Color.colorToHSV(vibrantColor, hsv);
+        hsv[2] *= 0.8f; // value component
+        int darkColor = Color.HSVToColor(hsv);
+        if (isVersionLollipopAndAbove())
+            activity.getWindow()
+                    .setStatusBarColor(darkColor);
     }
 }

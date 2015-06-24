@@ -12,14 +12,13 @@ import app.minimize.com.spotifystreamer.Utility;
  * Created by ahmedrizwan on 6/22/15.
  */
 public class CircularEmptyButton extends EmptyButton {
-
+    int buttonColor = Color.BLACK;
     public CircularEmptyButton(final Context context) {
         super(context);
     }
 
     public CircularEmptyButton(final Context context, final AttributeSet attrs) {
         super(context, attrs);
-                int buttonColor;
         try {
             String background = attrs.getAttributeValue("http://schemas.android.com/apk/res/android", "background");
             background = background.replaceAll("\\D+", "");
