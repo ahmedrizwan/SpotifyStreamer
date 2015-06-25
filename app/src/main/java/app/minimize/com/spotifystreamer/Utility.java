@@ -60,32 +60,41 @@ public class Utility {
     }
 
     @TargetApi(Build.VERSION_CODES.LOLLIPOP)
-    public static void launchFragmentWithSharedElements(final Fragment fromFragment,
+    public static void launchFragmentWithSharedElements(final boolean isTwoPane, final Fragment fromFragment,
                                                         final Fragment toFragment,
                                                         final int container,
                                                         final View... views) {
         if (isVersionLollipopAndAbove()) {
-            final TransitionSet transitionSet = new TransitionSet();
-            transitionSet.addTransition(new ChangeImageTransform());
-            transitionSet.addTransition(new ChangeBounds());
-            transitionSet.addTransition(new ChangeTransform());
-            transitionSet.setDuration(300);
-            fromFragment.setSharedElementReturnTransition(transitionSet);
-            fromFragment.setSharedElementEnterTransition(transitionSet);
-            toFragment.setSharedElementEnterTransition(transitionSet);
-            toFragment.setSharedElementReturnTransition(transitionSet);
             FragmentTransaction fragmentTransaction = fromFragment.getActivity()
                     .getSupportFragmentManager()
                     .beginTransaction();
+            if (!isTwoPane) {
+                final TransitionSet transitionSet = new TransitionSet();
+                transitionSet.addTransition(new ChangeImageTransform());
+                transitionSet.addTransition(new ChangeBounds());
+                transitionSet.addTransition(new ChangeTransform());
+                transitionSet.setDuration(300);
+                fromFragment.setSharedElementReturnTransition(transitionSet);
+                fromFragment.setSharedElementEnterTransition(transitionSet);
+                toFragment.setSharedElementEnterTransition(transitionSet);
+                toFragment.setSharedElementReturnTransition(transitionSet);
 
-            for (View view : views) {
-                fragmentTransaction.addSharedElement(view, view.getTransitionName());
+                for (View view : views) {
+                    fragmentTransaction.addSharedElement(view, view.getTransitionName());
+                }
+
+                fragmentTransaction
+                        .replace(container, toFragment)
+                        .addToBackStack(null)
+                        .commit();
+            } else {
+
+                fragmentTransaction
+                        .replace(container, toFragment)
+                        .addToBackStack(null)
+                        .commit();
             }
 
-            fragmentTransaction
-                    .replace(container, toFragment)
-                    .addToBackStack(null)
-                    .commit();
         } else {
             Utility.launchFragment(((AppCompatActivity) fromFragment.getActivity()), container, toFragment);
         }
@@ -150,12 +159,15 @@ public class Utility {
     public static void setActionBarAndStatusBarColor(final AppCompatActivity activity, final int vibrantColor) {
         activity.getSupportActionBar()
                 .setBackgroundDrawable(new ColorDrawable(vibrantColor));
-        float[] hsv = new float[3];
-        Color.colorToHSV(vibrantColor, hsv);
-        hsv[2] *= 0.8f; // value component
-        int darkColor = Color.HSVToColor(hsv);
-        if (isVersionLollipopAndAbove())
+
+        if (isVersionLollipopAndAbove()) {
+            float[] hsv = new float[3];
+            Color.colorToHSV(vibrantColor, hsv);
+            hsv[2] *= 0.8f; // value component
+            int darkColor = Color.HSVToColor(hsv);
             activity.getWindow()
                     .setStatusBarColor(darkColor);
+
+        }
     }
 }

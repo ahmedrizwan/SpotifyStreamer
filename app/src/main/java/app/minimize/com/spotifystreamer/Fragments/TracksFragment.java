@@ -16,6 +16,7 @@ import android.support.v7.app.AppCompatActivity;
 import android.support.v7.graphics.Palette;
 import android.support.v7.widget.LinearLayoutManager;
 import android.support.v7.widget.RecyclerView;
+import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
@@ -53,6 +54,7 @@ public class TracksFragment extends Fragment implements TracksAdapter.TracksEven
     public static final String ARTIST_NAME = "ArtistName";
     public static final String ARTIST_ID = "ArtistId";
     private static final String TRACKS = "Tracks";
+    private static final String TAG = "TracksFragment";
 
     @InjectView(R.id.recyclerViewTracks)
     RecyclerView recyclerViewTracks;
@@ -74,6 +76,8 @@ public class TracksFragment extends Fragment implements TracksAdapter.TracksEven
     private String imageTransitionName;
     private String textTransitionName;
     private ArtistParcelable mArtistParcelable;
+    private boolean isTwoPane = false;
+    private int vibrantColor = Color.BLACK;
 
     @TargetApi(Build.VERSION_CODES.LOLLIPOP)
     @Override
@@ -81,43 +85,56 @@ public class TracksFragment extends Fragment implements TracksAdapter.TracksEven
                              Bundle savedInstanceState) {
         View rootView = inflater.inflate(R.layout.fragment_tracks, container, false);
         ButterKnife.inject(this, rootView);
+
         //Restore state
         if (savedInstanceState != null) {
+            //Artist
             mArtistParcelable = savedInstanceState.getParcelable(Keys.KEY_ARTIST_PARCELABLE);
+            //Tracks
             mData = savedInstanceState.getParcelableArrayList(TRACKS);
-            if ((mData != null ? mData.size() : 0) == 0)
-                textViewError.setVisibility(View.VISIBLE);
+
         } else {
             //Get Artist info from the arguments
             Bundle activityIntent = getArguments();
             mArtistParcelable = activityIntent.getParcelable(Keys.KEY_ARTIST_PARCELABLE);
             //load up color for actionBar and status bar
-            int vibrantColor = activityIntent.getInt(Keys.COLOR_ACTION_BAR);
-            Utility.setActionBarAndStatusBarColor(((AppCompatActivity) getActivity()),  vibrantColor);
+            vibrantColor = activityIntent.getInt(Keys.COLOR_ACTION_BAR);
+            //First launch so load tracks
             progressBar.setVisibility(View.VISIBLE);
             loadTracks();
         }
 
+        isTwoPane = ((ContainerActivity) getActivity()).isTwoPane();
+        Log.e(TAG, "onCreateView " + vibrantColor);
         //ActionBar
-        ((AppCompatActivity) getActivity()).setTitle(getString(R.string.activity_tracks_title));
-        ActionBar actionBar = ((AppCompatActivity) getActivity()).getSupportActionBar();
-        if (actionBar != null) {
-            actionBar.setDisplayHomeAsUpEnabled(true);
-            actionBar.setTitle(getString(R.string.activity_tracks_title));
-            actionBar.setSubtitle(mArtistParcelable.artistName);
-        }
+        refreshActionBar();
 
-        ((ContainerActivity) getActivity()). //start service to retrieve the status of player
-                startServiceForStatusRetrieval();
+        //Message TextView
+        if ((mData != null ? mData.size() : 0) == 0)
+            textViewError.setVisibility(View.VISIBLE);
 
-        recyclerViewTracks.hasFixedSize();
-        recyclerViewTracks.setLayoutManager(new LinearLayoutManager(getActivity()));
-
-
+        //Transition
         if (Utility.isVersionLollipopAndAbove()) {
             imageViewArtist.setTransitionName(imageTransitionName);
         }
 
+        //Artist Image
+        loadArtistImage();
+
+        //RecyclerView
+        recyclerViewTracks.hasFixedSize();
+        recyclerViewTracks.setLayoutManager(new LinearLayoutManager(getActivity()));
+        mTracksAdapter = new TracksAdapter(this, mData);
+        recyclerViewTracks.setAdapter(mTracksAdapter);
+
+        //NowPlaying view check if should be visible or not
+        ((ContainerActivity) getActivity()).
+                startServiceForStatusRetrieval();
+
+        return rootView;
+    }
+
+    private void loadArtistImage() {
         int size = mArtistParcelable.artistImageUrls.size();
 
         if (size > 0) {
@@ -127,11 +144,6 @@ public class TracksFragment extends Fragment implements TracksAdapter.TracksEven
                     imageViewArtist,
                     null);
         }
-
-        mTracksAdapter = new TracksAdapter(this, mData);
-        recyclerViewTracks.setAdapter(mTracksAdapter);
-
-        return rootView;
     }
 
     @Override
@@ -190,25 +202,45 @@ public class TracksFragment extends Fragment implements TracksAdapter.TracksEven
     @TargetApi(Build.VERSION_CODES.LOLLIPOP)
     @Override
     public void trackClicked(final TrackParcelable track, final TracksAdapter.RecyclerViewHolderTracks holder) {
-        //Launch the dialogFragment from here
-        PlayerDialogFragment playerDialogFragment = PlayerDialogFragment.getInstance(this);
-        Bundle bundle = new Bundle();
-        bundle.putParcelable(getString(R.string.key_tracks_parcelable), track);
-        bundle.putParcelableArrayList(Keys.KEY_TRACK_PARCELABLE_LIST, mTracksAdapter.getDataSet());
-        Utility.runOnWorkerThread(new Callable() {
-            @Override
-            public Object call() throws Exception {
-                int vibrantColor = Palette.from(((BitmapDrawable) holder.imageViewAlbum.getDrawable()).getBitmap())
+        if (isTwoPane) {
+            //launch playerDialogFragment
+            PlayerDialogFragment playerDialogFragment = PlayerDialogFragment.getInstance(this);
+            Bundle bundle = new Bundle();
+            bundle.putParcelable(getString(R.string.key_tracks_parcelable), track);
+            bundle.putParcelableArrayList(Keys.KEY_TRACK_PARCELABLE_LIST, mTracksAdapter.getDataSet());
+            Utility.runOnWorkerThread(() -> {
+                int vibrantColor1 = Palette.from(((BitmapDrawable) holder.imageViewAlbum.getDrawable()).getBitmap())
                         .generate()
                         .getVibrantColor(Color.BLACK);
-                bundle.putInt(Keys.COLOR_ACTION_BAR, vibrantColor);
+                bundle.putInt(Keys.COLOR_ACTION_BAR, vibrantColor1);
+                playerDialogFragment.setArguments(bundle);
+                playerDialogFragment.show(((AppCompatActivity) getActivity()).getSupportFragmentManager(), "Player");
                 return null;
-            }
-        });
+            });
 
-        playerDialogFragment.setArguments(bundle);
-        playerDialogFragment.setImageViewAlbumTransitionName(holder.imageViewAlbum.getTransitionName());
-        Utility.launchFragmentWithSharedElements(this, playerDialogFragment, R.id.container, holder.imageViewAlbum);
+
+        } else {
+            //Launch the dialogFragment from here
+            PlayerDialogFragment playerDialogFragment = PlayerDialogFragment.getInstance(this);
+            Bundle bundle = new Bundle();
+            bundle.putParcelable(getString(R.string.key_tracks_parcelable), track);
+            bundle.putParcelableArrayList(Keys.KEY_TRACK_PARCELABLE_LIST, mTracksAdapter.getDataSet());
+            Utility.runOnWorkerThread(new Callable() {
+                @Override
+                public Object call() throws Exception {
+                    int vibrantColor = Palette.from(((BitmapDrawable) holder.imageViewAlbum.getDrawable()).getBitmap())
+                            .generate()
+                            .getVibrantColor(Color.BLACK);
+                    bundle.putInt(Keys.COLOR_ACTION_BAR, vibrantColor);
+                    return null;
+                }
+            });
+
+            playerDialogFragment.setArguments(bundle);
+            playerDialogFragment.setImageViewAlbumTransitionName(holder.imageViewAlbum.getTransitionName());
+            Utility.launchFragmentWithSharedElements(isTwoPane, this,
+                    playerDialogFragment, R.id.container, holder.imageViewAlbum);
+        }
     }
 
     @Override
@@ -228,5 +260,28 @@ public class TracksFragment extends Fragment implements TracksAdapter.TracksEven
     public void onDestroyView() {
         super.onDestroyView();
         ButterKnife.reset(this);
+    }
+
+    @Override
+    public void onResume() {
+        super.onResume();
+        Log.e(TAG, "onResume TracksFragment");
+    }
+
+    public void refreshActionBar() {
+        //ActionBar
+        ((AppCompatActivity) getActivity()).setTitle(getString(R.string.activity_tracks_title));
+        ActionBar actionBar = ((AppCompatActivity) getActivity()).getSupportActionBar();
+        if (actionBar != null) {
+            if (isTwoPane) {
+                //handle tablets here
+
+            } else {
+                actionBar.setDisplayHomeAsUpEnabled(true);
+                Utility.setActionBarAndStatusBarColor(((AppCompatActivity) getActivity()), vibrantColor);
+            }
+            actionBar.setTitle(getString(R.string.activity_tracks_title));
+            actionBar.setSubtitle(mArtistParcelable.artistName);
+        }
     }
 }

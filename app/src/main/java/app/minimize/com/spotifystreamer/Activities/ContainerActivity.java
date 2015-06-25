@@ -25,6 +25,7 @@ import app.minimize.com.spotifystreamer.Parcelables.TrackParcelable;
 import app.minimize.com.spotifystreamer.R;
 import butterknife.ButterKnife;
 import butterknife.InjectView;
+import butterknife.Optional;
 import de.greenrobot.event.EventBus;
 import de.greenrobot.event.Subscribe;
 
@@ -35,6 +36,7 @@ public class ContainerActivity extends AppCompatActivity {
     TextView textViewArtistName;
     @InjectView(R.id.mainToolbar)
     Toolbar mainToolbar;
+    @Optional
     @InjectView(R.id.container)
     LinearLayout container;
     @InjectView(R.id.imageViewAlbum)
@@ -50,8 +52,10 @@ public class ContainerActivity extends AppCompatActivity {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_container);
         ButterKnife.inject(this);
+
         //ActionBar
         setSupportActionBar(mainToolbar);
+
         //Check for twoPanes
         if (findViewById(R.id.tracksContainer) != null) {
             mTwoPane = true;
@@ -64,6 +68,8 @@ public class ContainerActivity extends AppCompatActivity {
                         .commit();
             }
         }
+
+
         //start service to retrieve the status of player
         startServiceForStatusRetrieval();
     }

@@ -150,7 +150,7 @@ public class MediaPlayerHandler implements AudioManager.OnAudioFocusChangeListen
                 mMediaPlayer.setOnPreparedListener(this);
                 mMediaPlayer.setOnCompletionListener(this);
                 mMediaPlayer.prepare();
-            } catch (IOException e) {
+            } catch (Exception e) {
                 e.printStackTrace();
             }
         }

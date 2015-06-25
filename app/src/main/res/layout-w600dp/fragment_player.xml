@@ -1,5 +1,6 @@
 <?xml version="1.0" encoding="utf-8"?>
 <LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+              xmlns:app="http://schemas.android.com/apk/res-auto"
               android:orientation="vertical"
               android:layout_width="match_parent"
               android:layout_height="match_parent"
@@ -7,8 +8,7 @@
 
     <ImageView
         android:layout_width="match_parent"
-        android:layout_height="0dp"
-        android:layout_weight="1"
+        android:layout_height="400sp"
         android:scaleType="fitXY"
         android:id="@+id/imageViewAlbum"
         android:src="@drawable/ic_not_available"/>
@@ -44,9 +44,10 @@
             android:id="@+id/seekBarPlayer"
             android:layout_width="fill_parent"
             android:layout_height="wrap_content"
+            app:thumbColor="@android:color/black"
+            app:progressColor="@android:color/black"
             android:layout_below="@id/textViewTrackAlbum"
             android:layout_centerVertical="true"
-            android:maxHeight="300dip"
             android:layout_gravity="center"
             />
 
