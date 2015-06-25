@@ -55,7 +55,7 @@ import retrofit.RetrofitError;
 import retrofit.client.Response;
 
 
-public class ArtistsFragment extends Fragment implements ArtistsAdapter.ArtistsEventListener, TextWatcher {
+public class ArtistsFragment extends Fragment implements ArtistsAdapter.ArtistsEventListener, TextWatcher, View.OnKeyListener {
 
     private static final String ARTIST = "Artists";
     public static final String SELECTED_ARTIST = "SelectedArtist";
@@ -78,6 +78,7 @@ public class ArtistsFragment extends Fragment implements ArtistsAdapter.ArtistsE
     List<ArtistParcelable> mArtists = Collections.emptyList();
     ArtistsAdapter mArtistsAdapter;
 
+
     @OnClick(R.id.imageButtonClear)
     public void imageButtonClearOnClick() {
         clearState();
@@ -91,8 +92,19 @@ public class ArtistsFragment extends Fragment implements ArtistsAdapter.ArtistsE
         textViewError.setText(getString(R.string.search_artists_begin));
         textViewError.setVisibility(View.VISIBLE);
         progressBar.setVisibility(View.GONE);
+        setActionBarTitle();
     }
 
+    private void setActionBarTitle() {
+        ActionBar actionBar = ((AppCompatActivity) getActivity()).getSupportActionBar();
+        if(actionBar!=null) {
+            actionBar.setSubtitle("");
+            actionBar.setTitle(getString(R.string.app_name));
+            actionBar.setDisplayHomeAsUpEnabled(false);
+        }
+    }
+
+    boolean isTwoPane = false;
 
     @Nullable
     @Override
@@ -100,15 +112,37 @@ public class ArtistsFragment extends Fragment implements ArtistsAdapter.ArtistsE
         View rootView = inflater.inflate(R.layout.fragment_artists, container, false);
         ButterKnife.inject(this, rootView);
 
-        getActivity().setTitle(getString(R.string.app_name));
-        ActionBar actionBar = ((AppCompatActivity) getActivity()).getSupportActionBar();
+        //ActionBar
+        setActionBarTitle();
 
-        if (actionBar != null) {
-            actionBar.setDisplayHomeAsUpEnabled(false);
-            //Clear the subtitle, as I'm re-using the actionBar for both fragments
-            actionBar.setSubtitle("");
+        //is it twoPane
+        isTwoPane = ((ContainerActivity) getActivity()).isTwoPane();
+
+        if (isTwoPane) {
+            //handle everything related to tablets here
+
+        } else  {
+            //change actionBar and statusBar color
+            Utility.setActionBarAndStatusBarColor(((AppCompatActivity) getActivity()),
+                    Utility.getPrimaryColorFromSelectedTheme(getActivity()));
         }
-        Utility.setActionBarAndStatusBarColor(((AppCompatActivity) getActivity()),  Utility.getPrimaryColorFromSelectedTheme(getActivity()));
+        //retore state
+        restoreState(savedInstanceState);
+
+        editTextSearch.setOnKeyListener(this);
+
+        editTextSearch.addTextChangedListener(this);
+
+        recyclerViewArtists.setLayoutManager(new LinearLayoutManager(getActivity()));
+
+        recyclerViewArtists.setAdapter(mArtistsAdapter);
+
+        showTextViewSearchArtists();
+
+        return rootView;
+    }
+
+    private void restoreState(final Bundle savedInstanceState) {
         if (savedInstanceState != null) {
             mArtists = savedInstanceState.getParcelableArrayList(ARTIST);
             if (mArtists == null)
@@ -120,32 +154,6 @@ public class ArtistsFragment extends Fragment implements ArtistsAdapter.ArtistsE
         } else {
             mArtistsAdapter = new ArtistsAdapter(this, mArtists);
         }
-
-        editTextSearch.setOnKeyListener((v, keyCode, event) -> {
-            // If the event is a key-down event on the "enter" button
-            if ((event.getAction() == KeyEvent.ACTION_DOWN) &&
-                    (keyCode == KeyEvent.KEYCODE_ENTER)) {
-                // Perform action on key press
-                searchForArtists(editTextSearch.getText()
-                        .toString());
-                // code to hide the soft keyboard
-                InputMethodManager inputMethodManager = (InputMethodManager) getActivity().getSystemService(
-                        Context.INPUT_METHOD_SERVICE);
-                inputMethodManager.hideSoftInputFromWindow(editTextSearch.getApplicationWindowToken(), 0);
-                return true;
-            }
-            return false;
-        });
-
-        editTextSearch.addTextChangedListener(this);
-
-        recyclerViewArtists.setLayoutManager(new LinearLayoutManager(getActivity()));
-
-        recyclerViewArtists.setAdapter(mArtistsAdapter);
-
-        showTextViewSearchArtists();
-
-        return rootView;
     }
 
     @Override
@@ -245,7 +253,6 @@ public class ArtistsFragment extends Fragment implements ArtistsAdapter.ArtistsE
     }
 
 
-
     @Override
     public Context getContext() {
         return getActivity();
@@ -326,8 +333,25 @@ public class ArtistsFragment extends Fragment implements ArtistsAdapter.ArtistsE
         });
 
         tracksFragment.setArguments(bundle);
-        Utility.launchFragmentWithSharedElements(this, tracksFragment, container, holder.imageViewArtist);
+
+        Utility.launchFragmentWithSharedElements(isTwoPane, this, tracksFragment, container, holder.imageViewArtist);
 
     }
 
+    @Override
+    public boolean onKey(final View v, final int keyCode, final KeyEvent event) {
+        // If the event is a key-down event on the "enter" button
+        if ((event.getAction() == KeyEvent.ACTION_DOWN) &&
+                (keyCode == KeyEvent.KEYCODE_ENTER)) {
+            // Perform action on key press
+            searchForArtists(editTextSearch.getText()
+                    .toString());
+            // code to hide the soft keyboard
+            InputMethodManager inputMethodManager = (InputMethodManager) getActivity().getSystemService(
+                    Context.INPUT_METHOD_SERVICE);
+            inputMethodManager.hideSoftInputFromWindow(editTextSearch.getApplicationWindowToken(), 0);
+            return true;
+        }
+        return false;
+    }
 }

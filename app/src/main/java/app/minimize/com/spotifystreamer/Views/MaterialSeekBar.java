@@ -13,6 +13,7 @@ import app.minimize.com.spotifystreamer.R;
 
 /**
  * Created by ahmedrizwan on 6/21/15.
+ *
  */
 public class MaterialSeekBar extends SeekBar {
 

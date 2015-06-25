@@ -21,11 +21,11 @@ public class PlayButton extends CircularEmptyButton {
     int widthHeight;
     boolean pauseMode = false;
 
-    public PlayButton(Context context) {
+    public PlayButton(final Context context) {
         super(context);
     }
 
-    public PlayButton(Context context, AttributeSet attrs) {
+    public PlayButton(final Context context, final AttributeSet attrs) {
         super(context, attrs);
         mPaint = new Paint();
         mPaint.setStyle(Paint.Style.FILL);
@@ -55,7 +55,6 @@ public class PlayButton extends CircularEmptyButton {
         mPath.lineTo(point1x, point1y);
         mPath.close();
     }
-
 
 
     @Override
