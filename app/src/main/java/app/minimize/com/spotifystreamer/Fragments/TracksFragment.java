@@ -105,9 +105,9 @@ public class TracksFragment extends Fragment implements TracksAdapter.TracksEven
         }
 
         isTwoPane = ((ContainerActivity) getActivity()).isTwoPane();
+        Log.e(TAG, "onCreateView " + vibrantColor);
         //ActionBar
         refreshActionBar();
-
 
         //Message TextView
         if ((mData != null ? mData.size() : 0) == 0)
@@ -214,7 +214,7 @@ public class TracksFragment extends Fragment implements TracksAdapter.TracksEven
                         .getVibrantColor(Color.BLACK);
                 bundle.putInt(Keys.COLOR_ACTION_BAR, vibrantColor1);
                 playerDialogFragment.setArguments(bundle);
-                playerDialogFragment.show(((AppCompatActivity) getActivity()).getSupportFragmentManager(),"Player");
+                playerDialogFragment.show(((AppCompatActivity) getActivity()).getSupportFragmentManager(), "Player");
                 return null;
             });
 
