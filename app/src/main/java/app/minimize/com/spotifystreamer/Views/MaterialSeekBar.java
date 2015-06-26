@@ -199,17 +199,17 @@ public class MaterialSeekBar extends SeekBar implements View.OnTouchListener {
     public void setProgressAndThumbColor(final int vibrantColor) {
 
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.LOLLIPOP) {
-            colorsThumb[0] = mThumbColor;
-            colorsThumb[1] = mThumbColor;
+            colorsThumb[0] = vibrantColor;
+            colorsThumb[1] = vibrantColor;
             mColorStateListThumb = new ColorStateList(states, colorsThumb);
-            colorsProgress[0] = mProgressColor;
-            colorsProgress[1] = mProgressColor;
+            colorsProgress[0] = vibrantColor;
+            colorsProgress[1] = vibrantColor;
             mColorStateListProgress = new ColorStateList(states, colorsProgress);
             setThumbTintList(mColorStateListThumb);
             setProgressTintList(mColorStateListProgress);
         } else {
             //load up the drawable and apply color
-            mThumb.setColorFilter(mThumbColor, PorterDuff.Mode.MULTIPLY);
+            mThumb.setColorFilter(vibrantColor, PorterDuff.Mode.MULTIPLY);
             setThumb(mThumb);
             LayerDrawable ld = (LayerDrawable) getProgressDrawable();
             ld.setColorFilter(mProgressColor, PorterDuff.Mode.SRC_IN);
