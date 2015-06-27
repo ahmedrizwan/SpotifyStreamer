@@ -38,9 +38,9 @@ import java.util.concurrent.TimeUnit;
 import app.minimize.com.spotifystreamer.Activities.ContainerActivity;
 import app.minimize.com.spotifystreamer.Activities.Keys;
 import app.minimize.com.spotifystreamer.Adapters.ArtistsAdapter;
-import app.minimize.com.spotifystreamer.HelperClasses.MyObservables;
 import app.minimize.com.spotifystreamer.Parcelables.ArtistParcelable;
 import app.minimize.com.spotifystreamer.R;
+import app.minimize.com.spotifystreamer.Rx.RxObservables;
 import app.minimize.com.spotifystreamer.Utility;
 import butterknife.ButterKnife;
 import butterknife.InjectView;
@@ -133,7 +133,7 @@ public class ArtistsFragment extends Fragment implements ArtistsAdapter.ArtistsE
 
         editTextSearch.setOnKeyListener(this);
 
-        Observable.create(MyObservables.getSearchObservable(editTextSearch))
+        Observable.create(RxObservables.getSearchObservable(editTextSearch))
                 .debounce(600, TimeUnit.MILLISECONDS)
                 .subscribeOn(AndroidSchedulers.mainThread())
                 .observeOn(AndroidSchedulers.mainThread())

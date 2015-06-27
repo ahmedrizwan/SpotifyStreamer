@@ -1,4 +1,4 @@
-package app.minimize.com.spotifystreamer.HelperClasses;
+package app.minimize.com.spotifystreamer.Rx;
 
 import android.text.Editable;
 import android.text.TextWatcher;
@@ -9,7 +9,7 @@ import rx.Observable;
 /**
  * Created by ahmedrizwan on 6/27/15.
  */
-public class MyObservables {
+public class RxObservables {
 
     public static Observable.OnSubscribe<String> getSearchObservable(EditText editText){
         return subscriber -> {

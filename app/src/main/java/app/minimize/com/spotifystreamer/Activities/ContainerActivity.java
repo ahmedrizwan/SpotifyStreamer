@@ -23,11 +23,13 @@ import app.minimize.com.spotifystreamer.HelperClasses.MediaPlayerHandler;
 import app.minimize.com.spotifystreamer.MediaPlayerService;
 import app.minimize.com.spotifystreamer.Parcelables.TrackParcelable;
 import app.minimize.com.spotifystreamer.R;
+import app.minimize.com.spotifystreamer.Rx.RxBus;
 import butterknife.ButterKnife;
 import butterknife.InjectView;
 import butterknife.Optional;
-import de.greenrobot.event.EventBus;
-import de.greenrobot.event.Subscribe;
+import rx.Subscriber;
+import rx.android.schedulers.AndroidSchedulers;
+import rx.schedulers.Schedulers;
 
 public class ContainerActivity extends AppCompatActivity {
 
@@ -71,6 +73,27 @@ public class ContainerActivity extends AppCompatActivity {
 
         //start service to retrieve the status of player
         startServiceForStatusRetrieval();
+
+        RxBus.getInstance().toObserverable().observeOn(Schedulers.newThread())
+                .observeOn(AndroidSchedulers.mainThread())
+                .subscribe(new Subscriber<Object>() {
+                    @Override
+                    public void onCompleted() {
+
+                    }
+
+                    @Override
+                    public void onError(final Throwable e) {
+
+                    }
+
+                    @Override
+                    public void onNext(final Object o) {
+                        if(o instanceof TrackParcelable){
+                            onEventMainThread(((TrackParcelable) o));
+                        }
+                    }
+                });
     }
 
 
@@ -124,18 +147,17 @@ public class ContainerActivity extends AppCompatActivity {
     @Override
     public void onStart() {
         super.onStart();
-        EventBus.getDefault()
-                .register(this);
+//        EventBus.getDefault()
+//                .register(this);
     }
 
     @Override
     public void onStop() {
-        EventBus.getDefault()
-                .unregister(this);
+//        EventBus.getDefault()
+//                .unregister(this);
         super.onStop();
     }
 
-    @Subscribe
     public void onEventMainThread(TrackParcelable trackParcelable) {
         if (MediaPlayerHandler.getPlayerState() == MediaPlayerHandler.MediaPlayerState.Idle) {
             //Hide the NowPlaying
