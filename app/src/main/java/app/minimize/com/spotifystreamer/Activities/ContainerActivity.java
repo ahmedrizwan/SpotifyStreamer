@@ -69,7 +69,6 @@ public class ContainerActivity extends AppCompatActivity {
             }
         }
 
-
         //start service to retrieve the status of player
         startServiceForStatusRetrieval();
     }

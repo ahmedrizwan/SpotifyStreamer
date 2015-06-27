@@ -8,7 +8,6 @@ import android.graphics.drawable.BitmapDrawable;
 import android.os.Build;
 import android.os.Bundle;
 import android.os.Parcelable;
-import android.support.annotation.NonNull;
 import android.support.annotation.Nullable;
 import android.support.v4.app.Fragment;
 import android.support.v7.app.ActionBar;
@@ -17,8 +16,6 @@ import android.support.v7.graphics.Palette;
 import android.support.v7.widget.LinearLayoutManager;
 import android.support.v7.widget.RecyclerView;
 import android.support.v7.widget.Toolbar;
-import android.text.Editable;
-import android.text.TextWatcher;
 import android.view.KeyEvent;
 import android.view.LayoutInflater;
 import android.view.View;
@@ -36,10 +33,12 @@ import android.widget.TextView;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
+import java.util.concurrent.TimeUnit;
 
 import app.minimize.com.spotifystreamer.Activities.ContainerActivity;
 import app.minimize.com.spotifystreamer.Activities.Keys;
 import app.minimize.com.spotifystreamer.Adapters.ArtistsAdapter;
+import app.minimize.com.spotifystreamer.HelperClasses.MyObservables;
 import app.minimize.com.spotifystreamer.Parcelables.ArtistParcelable;
 import app.minimize.com.spotifystreamer.R;
 import app.minimize.com.spotifystreamer.Utility;
@@ -53,9 +52,12 @@ import kaaes.spotify.webapi.android.models.ArtistsPager;
 import retrofit.Callback;
 import retrofit.RetrofitError;
 import retrofit.client.Response;
+import rx.Observable;
+import rx.Subscriber;
+import rx.android.schedulers.AndroidSchedulers;
 
 
-public class ArtistsFragment extends Fragment implements ArtistsAdapter.ArtistsEventListener, TextWatcher, View.OnKeyListener {
+public class ArtistsFragment extends Fragment implements ArtistsAdapter.ArtistsEventListener, View.OnKeyListener {
 
     private static final String ARTIST = "Artists";
     public static final String SELECTED_ARTIST = "SelectedArtist";
@@ -97,7 +99,7 @@ public class ArtistsFragment extends Fragment implements ArtistsAdapter.ArtistsE
 
     private void setActionBarTitle() {
         ActionBar actionBar = ((AppCompatActivity) getActivity()).getSupportActionBar();
-        if(actionBar!=null) {
+        if (actionBar != null) {
             actionBar.setSubtitle("");
             actionBar.setTitle(getString(R.string.app_name));
             actionBar.setDisplayHomeAsUpEnabled(false);
@@ -121,7 +123,7 @@ public class ArtistsFragment extends Fragment implements ArtistsAdapter.ArtistsE
         if (isTwoPane) {
             //handle everything related to tablets here
 
-        } else  {
+        } else {
             //change actionBar and statusBar color
             Utility.setActionBarAndStatusBarColor(((AppCompatActivity) getActivity()),
                     Utility.getPrimaryColorFromSelectedTheme(getActivity()));
@@ -131,7 +133,28 @@ public class ArtistsFragment extends Fragment implements ArtistsAdapter.ArtistsE
 
         editTextSearch.setOnKeyListener(this);
 
-        editTextSearch.addTextChangedListener(this);
+        Observable.create(MyObservables.getSearchObservable(editTextSearch))
+                .debounce(600, TimeUnit.MILLISECONDS)
+                .subscribeOn(AndroidSchedulers.mainThread())
+                .observeOn(AndroidSchedulers.mainThread())
+                .subscribe(new Subscriber<String>() {
+                    @Override
+                    public void onCompleted() {
+
+                    }
+
+                    @Override
+                    public void onError(final Throwable e) {
+
+                    }
+
+                    @Override
+                    public void onNext(final String textArtistName) {
+                        searchForArtists(textArtistName);
+                        showOrHideCancel(textArtistName);
+                    }
+                });
+
 
         recyclerViewArtists.setLayoutManager(new LinearLayoutManager(getActivity()));
 
@@ -140,6 +163,43 @@ public class ArtistsFragment extends Fragment implements ArtistsAdapter.ArtistsE
         showTextViewSearchArtists();
 
         return rootView;
+    }
+
+    private void showOrHideCancel(final String textArtistName) {
+        //show clear button if there is text in EditText
+        if (textArtistName.length() > 0 && imageButtonClear.getVisibility() == View.GONE) {
+            ScaleAnimation animation = new ScaleAnimation(0, 1, 0, 1, Animation.RELATIVE_TO_SELF,
+                    (float) 0.5, Animation.RELATIVE_TO_SELF, (float) 0.5);
+            animation.setInterpolator(new BounceInterpolator());
+            animation.setDuration(500);
+            imageButtonClear.setVisibility(View.VISIBLE);
+            imageButtonClear.startAnimation(animation);
+        } else if (textArtistName.length() == 0) {
+            ScaleAnimation animation = new ScaleAnimation(1, 0, 1, 0, Animation.RELATIVE_TO_SELF,
+                    (float) 0.5, Animation.RELATIVE_TO_SELF, (float) 0.5);
+            animation.setInterpolator(new BounceInterpolator());
+            animation.setDuration(500);
+            imageButtonClear.setVisibility(View.VISIBLE);
+            imageButtonClear.startAnimation(animation);
+
+            animation.setAnimationListener(new Animation.AnimationListener() {
+                @Override
+                public void onAnimationStart(final Animation animation) {
+
+                }
+
+                @Override
+                public void onAnimationEnd(final Animation animation) {
+                    imageButtonClear.setVisibility(View.GONE);
+                }
+
+                @Override
+                public void onAnimationRepeat(final Animation animation) {
+
+                }
+            });
+
+        }
     }
 
     private void restoreState(final Bundle savedInstanceState) {
@@ -258,56 +318,6 @@ public class ArtistsFragment extends Fragment implements ArtistsAdapter.ArtistsE
         return getActivity();
     }
 
-
-    @Override
-    public void beforeTextChanged(final CharSequence charSequence, final int i, final int i1, final int i2) {
-
-    }
-
-    @Override
-    public void onTextChanged(@NonNull final CharSequence charSequence, final int i, final int i1, final int i2) {
-        //show clear button if there is text in EditText
-        if (editTextSearch.getText()
-                .length() > 0 && imageButtonClear.getVisibility() == View.GONE) {
-            ScaleAnimation animation = new ScaleAnimation(0, 1, 0, 1, Animation.RELATIVE_TO_SELF,
-                    (float) 0.5, Animation.RELATIVE_TO_SELF, (float) 0.5);
-            animation.setInterpolator(new BounceInterpolator());
-            animation.setDuration(500);
-            imageButtonClear.setVisibility(View.VISIBLE);
-            imageButtonClear.startAnimation(animation);
-        } else if (editTextSearch.getText()
-                .length() == 0) {
-            ScaleAnimation animation = new ScaleAnimation(1, 0, 1, 0, Animation.RELATIVE_TO_SELF,
-                    (float) 0.5, Animation.RELATIVE_TO_SELF, (float) 0.5);
-            animation.setInterpolator(new BounceInterpolator());
-            animation.setDuration(500);
-            imageButtonClear.setVisibility(View.VISIBLE);
-            imageButtonClear.startAnimation(animation);
-
-            animation.setAnimationListener(new Animation.AnimationListener() {
-                @Override
-                public void onAnimationStart(final Animation animation) {
-
-                }
-
-                @Override
-                public void onAnimationEnd(final Animation animation) {
-                    imageButtonClear.setVisibility(View.GONE);
-                }
-
-                @Override
-                public void onAnimationRepeat(final Animation animation) {
-
-                }
-            });
-
-        }
-    }
-
-    @Override
-    public void afterTextChanged(final Editable editable) {
-
-    }
 
     @Override
     public void onDestroyView() {
