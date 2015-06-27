@@ -216,6 +216,7 @@ public class MaterialSeekBar extends SeekBar implements View.OnTouchListener {
         }
 
         setLayoutParams(getLayoutParams());
+
     }
 
 //    @Override
