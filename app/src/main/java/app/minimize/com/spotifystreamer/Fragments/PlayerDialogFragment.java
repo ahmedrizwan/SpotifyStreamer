@@ -31,15 +31,17 @@ import app.minimize.com.spotifystreamer.HelperClasses.SeekbarChangeListener;
 import app.minimize.com.spotifystreamer.MediaPlayerService;
 import app.minimize.com.spotifystreamer.Parcelables.TrackParcelable;
 import app.minimize.com.spotifystreamer.R;
+import app.minimize.com.spotifystreamer.Rx.RxBus;
 import app.minimize.com.spotifystreamer.Utility;
 import app.minimize.com.spotifystreamer.Views.MaterialSeekBar;
 import app.minimize.com.spotifystreamer.Views.NextButton;
 import app.minimize.com.spotifystreamer.Views.PlayButton;
 import app.minimize.com.spotifystreamer.Views.PreviousButton;
+import butterknife.Bind;
 import butterknife.ButterKnife;
-import butterknife.InjectView;
-import de.greenrobot.event.EventBus;
-import de.greenrobot.event.Subscribe;
+import rx.Subscriber;
+import rx.android.schedulers.AndroidSchedulers;
+import rx.schedulers.Schedulers;
 
 /**
  * Created by ahmedrizwan on 6/15/15.
@@ -47,23 +49,23 @@ import de.greenrobot.event.Subscribe;
 public class PlayerDialogFragment extends DialogFragment {
 
 
-    @InjectView(R.id.textViewTrackName)
+    @Bind(R.id.textViewTrackName)
     TextView textViewTrackName;
-    @InjectView(R.id.seekBarPlayer)
+    @Bind(R.id.seekBarPlayer)
     MaterialSeekBar seekBarPlayer;
-    @InjectView(R.id.chronometerStart)
+    @Bind(R.id.chronometerStart)
     Chronometer chronometerStart;
-    @InjectView(R.id.chronometerEnd)
+    @Bind(R.id.chronometerEnd)
     Chronometer chronometerEnd;
-    @InjectView(R.id.imageViewPrevious)
+    @Bind(R.id.imageViewPrevious)
     PreviousButton imageViewPrevious;
-    @InjectView(R.id.imageViewPlay)
+    @Bind(R.id.imageViewPlay)
     PlayButton imageViewPlay;
-    @InjectView(R.id.imageViewNext)
+    @Bind(R.id.imageViewNext)
     NextButton imageViewNext;
-    @InjectView(R.id.textViewTrackAlbum)
+    @Bind(R.id.textViewTrackAlbum)
     TextView textViewTrackAlbum;
-    @InjectView(R.id.imageViewAlbum)
+    @Bind(R.id.imageViewAlbum)
     ImageView imageViewAlbum;
 
     private TracksFragment tracksFragment;
@@ -72,7 +74,7 @@ public class PlayerDialogFragment extends DialogFragment {
     private Timer timer;
     private String imageViewAlbumTransitionName;
     private int vibrantColor = Color.BLACK;
-    private boolean isTwoPane=false;
+    private boolean isTwoPane = false;
 
     public static PlayerDialogFragment getInstance(TracksFragment tracksFragment) {
         PlayerDialogFragment playerDialogFragment = new PlayerDialogFragment();
@@ -85,16 +87,17 @@ public class PlayerDialogFragment extends DialogFragment {
     @Override
     public View onCreateView(final LayoutInflater inflater, final ViewGroup container, final Bundle savedInstanceState) {
         View rootView = inflater.inflate(R.layout.fragment_player, container, false);
-        ButterKnife.inject(this, rootView);
+        ButterKnife.bind(this, rootView);
 
         isTwoPane = ((ContainerActivity) getActivity()).isTwoPane();
         mTrackParcelable = getArguments().getParcelable(getString(R.string.key_tracks_parcelable));
         List<TrackParcelable> trackParcelableList = getArguments().getParcelableArrayList(Keys.KEY_TRACK_PARCELABLE_LIST);
         vibrantColor = getArguments().getInt(Keys.COLOR_ACTION_BAR);
 
-        if(isTwoPane){
-            getDialog().getWindow().requestFeature(Window.FEATURE_NO_TITLE);
-        } else{
+        if (isTwoPane) {
+            getDialog().getWindow()
+                    .requestFeature(Window.FEATURE_NO_TITLE);
+        } else {
             Utility.setActionBarAndStatusBarColor(((AppCompatActivity) getActivity()), vibrantColor);
         }
 
@@ -128,6 +131,33 @@ public class PlayerDialogFragment extends DialogFragment {
             }
             playTrack();
         }
+
+        RxBus.getInstance()
+                .toObserverable()
+                .subscribeOn(Schedulers.newThread())
+                .observeOn(AndroidSchedulers.mainThread())
+                .subscribe(new Subscriber<Object>() {
+                    @Override
+                    public void onCompleted() {
+
+                    }
+
+                    @Override
+                    public void onError(final Throwable e) {
+
+                    }
+
+                    @Override
+                    public void onNext(final Object o) {
+                        if (o instanceof MediaPlayerHandler.PlayingEvent) {
+                            onEventMainThread(((MediaPlayerHandler.PlayingEvent) o));
+                        } else if (o instanceof MediaPlayerHandler.PausedEvent) {
+                            onEventMainThread(((MediaPlayerHandler.PausedEvent) o));
+                        } else if (o instanceof MediaPlayerHandler.StoppedEvent) {
+                            onEventMainThread(((MediaPlayerHandler.StoppedEvent) o));
+                        }
+                    }
+                });
         return rootView;
     }
 
@@ -154,18 +184,17 @@ public class PlayerDialogFragment extends DialogFragment {
     @Override
     public void onStart() {
         super.onStart();
-        EventBus.getDefault()
-                .register(this);
+//        EventBus.getDefault()
+//                .register(this);
     }
 
     @Override
     public void onStop() {
-        EventBus.getDefault()
-                .unregister(this);
+//        EventBus.getDefault()
+//                .unregister(this);
         super.onStop();
     }
 
-    @Subscribe
     public void onEventMainThread(MediaPlayerHandler.StoppedEvent stoppedEvent) {
         imageViewPlay.setPauseMode(false);
         if (chronometerStart != null) {
@@ -178,7 +207,6 @@ public class PlayerDialogFragment extends DialogFragment {
         seekBarPlayer.setProgress(0);
     }
 
-    @Subscribe
     public void onEventMainThread(MediaPlayerHandler.PausedEvent pausedEvent) {
         imageViewPlay.setPauseMode(false);
         if (chronometerStart != null) {
@@ -187,7 +215,6 @@ public class PlayerDialogFragment extends DialogFragment {
         }
     }
 
-    @Subscribe
     public void onEventMainThread(MediaPlayerHandler.PlayingEvent playingEvent) {
         try {
             imageViewPlay.setPauseMode(true);
@@ -249,7 +276,7 @@ public class PlayerDialogFragment extends DialogFragment {
     @Override
     public void onDestroyView() {
         super.onDestroyView();
-        ButterKnife.reset(this);
+        ButterKnife.unbind(this);
     }
 
     public void setImageViewAlbumTransitionName(String imageViewAlbumTransitionName) {

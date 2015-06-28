@@ -2,6 +2,7 @@ package app.minimize.com.spotifystreamer.Activities;
 
 import android.content.Intent;
 import android.os.Bundle;
+import android.support.annotation.Nullable;
 import android.support.v4.content.ContextCompat;
 import android.support.v7.app.AlertDialog;
 import android.support.v7.app.AppCompatActivity;
@@ -23,27 +24,28 @@ import app.minimize.com.spotifystreamer.HelperClasses.MediaPlayerHandler;
 import app.minimize.com.spotifystreamer.MediaPlayerService;
 import app.minimize.com.spotifystreamer.Parcelables.TrackParcelable;
 import app.minimize.com.spotifystreamer.R;
+import app.minimize.com.spotifystreamer.Rx.RxBus;
+import butterknife.Bind;
 import butterknife.ButterKnife;
-import butterknife.InjectView;
-import butterknife.Optional;
-import de.greenrobot.event.EventBus;
-import de.greenrobot.event.Subscribe;
+import rx.Subscriber;
+import rx.android.schedulers.AndroidSchedulers;
+import rx.schedulers.Schedulers;
 
 public class ContainerActivity extends AppCompatActivity {
 
     boolean mTwoPane;
-    @InjectView(R.id.textViewArtistName)
+    @Bind(R.id.textViewArtistName)
     TextView textViewArtistName;
-    @InjectView(R.id.mainToolbar)
+    @Bind(R.id.mainToolbar)
     Toolbar mainToolbar;
-    @Optional
-    @InjectView(R.id.container)
+    @Nullable
+    @Bind(R.id.container)
     LinearLayout container;
-    @InjectView(R.id.imageViewAlbum)
+    @Bind(R.id.imageViewAlbum)
     ImageView imageViewAlbum;
-    @InjectView(R.id.textViewTrackName)
+    @Bind(R.id.textViewTrackName)
     TextView textViewTrackName;
-    @InjectView(R.id.layoutNowPlaying)
+    @Bind(R.id.layoutNowPlaying)
     ViewGroup layoutNowPlaying;
 
     @Override
@@ -51,7 +53,7 @@ public class ContainerActivity extends AppCompatActivity {
         setTheme(R.style.AppTheme_GreenTheme);
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_container);
-        ButterKnife.inject(this);
+        ButterKnife.bind(this);
 
         //ActionBar
         setSupportActionBar(mainToolbar);
@@ -71,6 +73,27 @@ public class ContainerActivity extends AppCompatActivity {
 
         //start service to retrieve the status of player
         startServiceForStatusRetrieval();
+
+        RxBus.getInstance().toObserverable().observeOn(Schedulers.newThread())
+                .observeOn(AndroidSchedulers.mainThread())
+                .subscribe(new Subscriber<Object>() {
+                    @Override
+                    public void onCompleted() {
+
+                    }
+
+                    @Override
+                    public void onError(final Throwable e) {
+
+                    }
+
+                    @Override
+                    public void onNext(final Object o) {
+                        if(o instanceof TrackParcelable){
+                            onEventMainThread(((TrackParcelable) o));
+                        }
+                    }
+                });
     }
 
 
@@ -124,18 +147,17 @@ public class ContainerActivity extends AppCompatActivity {
     @Override
     public void onStart() {
         super.onStart();
-        EventBus.getDefault()
-                .register(this);
+//        EventBus.getDefault()
+//                .register(this);
     }
 
     @Override
     public void onStop() {
-        EventBus.getDefault()
-                .unregister(this);
+//        EventBus.getDefault()
+//                .unregister(this);
         super.onStop();
     }
 
-    @Subscribe
     public void onEventMainThread(TrackParcelable trackParcelable) {
         if (MediaPlayerHandler.getPlayerState() == MediaPlayerHandler.MediaPlayerState.Idle) {
             //Hide the NowPlaying
@@ -166,5 +188,11 @@ public class ContainerActivity extends AppCompatActivity {
 
     private void logHelper(final String message) {
         Log.e("Container Activity", message);
+    }
+
+    @Override
+    protected void onDestroy() {
+        super.onDestroy();
+        ButterKnife.unbind(this);
     }
 }
