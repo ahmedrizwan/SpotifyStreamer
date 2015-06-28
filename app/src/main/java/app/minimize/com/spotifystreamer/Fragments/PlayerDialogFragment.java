@@ -37,8 +37,8 @@ import app.minimize.com.spotifystreamer.Views.MaterialSeekBar;
 import app.minimize.com.spotifystreamer.Views.NextButton;
 import app.minimize.com.spotifystreamer.Views.PlayButton;
 import app.minimize.com.spotifystreamer.Views.PreviousButton;
+import butterknife.Bind;
 import butterknife.ButterKnife;
-import butterknife.InjectView;
 import rx.Subscriber;
 import rx.android.schedulers.AndroidSchedulers;
 import rx.schedulers.Schedulers;
@@ -49,23 +49,23 @@ import rx.schedulers.Schedulers;
 public class PlayerDialogFragment extends DialogFragment {
 
 
-    @InjectView(R.id.textViewTrackName)
+    @Bind(R.id.textViewTrackName)
     TextView textViewTrackName;
-    @InjectView(R.id.seekBarPlayer)
+    @Bind(R.id.seekBarPlayer)
     MaterialSeekBar seekBarPlayer;
-    @InjectView(R.id.chronometerStart)
+    @Bind(R.id.chronometerStart)
     Chronometer chronometerStart;
-    @InjectView(R.id.chronometerEnd)
+    @Bind(R.id.chronometerEnd)
     Chronometer chronometerEnd;
-    @InjectView(R.id.imageViewPrevious)
+    @Bind(R.id.imageViewPrevious)
     PreviousButton imageViewPrevious;
-    @InjectView(R.id.imageViewPlay)
+    @Bind(R.id.imageViewPlay)
     PlayButton imageViewPlay;
-    @InjectView(R.id.imageViewNext)
+    @Bind(R.id.imageViewNext)
     NextButton imageViewNext;
-    @InjectView(R.id.textViewTrackAlbum)
+    @Bind(R.id.textViewTrackAlbum)
     TextView textViewTrackAlbum;
-    @InjectView(R.id.imageViewAlbum)
+    @Bind(R.id.imageViewAlbum)
     ImageView imageViewAlbum;
 
     private TracksFragment tracksFragment;
@@ -87,7 +87,7 @@ public class PlayerDialogFragment extends DialogFragment {
     @Override
     public View onCreateView(final LayoutInflater inflater, final ViewGroup container, final Bundle savedInstanceState) {
         View rootView = inflater.inflate(R.layout.fragment_player, container, false);
-        ButterKnife.inject(this, rootView);
+        ButterKnife.bind(this, rootView);
 
         isTwoPane = ((ContainerActivity) getActivity()).isTwoPane();
         mTrackParcelable = getArguments().getParcelable(getString(R.string.key_tracks_parcelable));
@@ -276,7 +276,7 @@ public class PlayerDialogFragment extends DialogFragment {
     @Override
     public void onDestroyView() {
         super.onDestroyView();
-        ButterKnife.reset(this);
+        ButterKnife.unbind(this);
     }
 
     public void setImageViewAlbumTransitionName(String imageViewAlbumTransitionName) {

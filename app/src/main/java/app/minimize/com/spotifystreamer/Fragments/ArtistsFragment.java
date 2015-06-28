@@ -42,8 +42,8 @@ import app.minimize.com.spotifystreamer.Parcelables.ArtistParcelable;
 import app.minimize.com.spotifystreamer.R;
 import app.minimize.com.spotifystreamer.Rx.RxObservables;
 import app.minimize.com.spotifystreamer.Utility;
+import butterknife.Bind;
 import butterknife.ButterKnife;
-import butterknife.InjectView;
 import butterknife.OnClick;
 import kaaes.spotify.webapi.android.SpotifyApi;
 import kaaes.spotify.webapi.android.SpotifyService;
@@ -62,19 +62,19 @@ public class ArtistsFragment extends Fragment implements ArtistsAdapter.ArtistsE
     private static final String ARTIST = "Artists";
     public static final String SELECTED_ARTIST = "SelectedArtist";
 
-    @InjectView(R.id.imageViewSearch)
+    @Bind(R.id.imageViewSearch)
     ImageView imageViewSearch;
-    @InjectView(R.id.imageButtonClear)
+    @Bind(R.id.imageButtonClear)
     ImageButton imageButtonClear;
-    @InjectView(R.id.editTextSearch)
+    @Bind(R.id.editTextSearch)
     EditText editTextSearch;
-    @InjectView(R.id.secondaryToolbar)
+    @Bind(R.id.secondaryToolbar)
     Toolbar secondaryToolbar;
-    @InjectView(R.id.recyclerViewArtists)
+    @Bind(R.id.recyclerViewArtists)
     RecyclerView recyclerViewArtists;
-    @InjectView(R.id.progressBar)
+    @Bind(R.id.progressBar)
     ProgressBar progressBar;
-    @InjectView(R.id.textViewError)
+    @Bind(R.id.textViewError)
     TextView textViewError;
 
     List<ArtistParcelable> mArtists = Collections.emptyList();
@@ -112,7 +112,7 @@ public class ArtistsFragment extends Fragment implements ArtistsAdapter.ArtistsE
     @Override
     public View onCreateView(final LayoutInflater inflater, final ViewGroup container, final Bundle savedInstanceState) {
         View rootView = inflater.inflate(R.layout.fragment_artists, container, false);
-        ButterKnife.inject(this, rootView);
+        ButterKnife.bind(this, rootView);
 
         //ActionBar
         setActionBarTitle();
@@ -322,7 +322,7 @@ public class ArtistsFragment extends Fragment implements ArtistsAdapter.ArtistsE
     @Override
     public void onDestroyView() {
         super.onDestroyView();
-        ButterKnife.reset(this);
+        ButterKnife.unbind(this);
     }
 
     @TargetApi(Build.VERSION_CODES.LOLLIPOP)

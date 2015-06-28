@@ -38,8 +38,8 @@ import app.minimize.com.spotifystreamer.Parcelables.ArtistParcelable;
 import app.minimize.com.spotifystreamer.Parcelables.TrackParcelable;
 import app.minimize.com.spotifystreamer.R;
 import app.minimize.com.spotifystreamer.Utility;
+import butterknife.Bind;
 import butterknife.ButterKnife;
-import butterknife.InjectView;
 import kaaes.spotify.webapi.android.SpotifyApi;
 import kaaes.spotify.webapi.android.SpotifyService;
 import kaaes.spotify.webapi.android.models.Track;
@@ -56,19 +56,19 @@ public class TracksFragment extends Fragment implements TracksAdapter.TracksEven
     private static final String TRACKS = "Tracks";
     private static final String TAG = "TracksFragment";
 
-    @InjectView(R.id.recyclerViewTracks)
+    @Bind(R.id.recyclerViewTracks)
     RecyclerView recyclerViewTracks;
-    @InjectView(R.id.progressBar)
+    @Bind(R.id.progressBar)
     ProgressBar progressBar;
-    @InjectView(R.id.textViewError)
+    @Bind(R.id.textViewError)
     TextView textViewError;
-    @InjectView(R.id.imageViewArtist)
+    @Bind(R.id.imageViewArtist)
     ImageView imageViewArtist;
-    @InjectView(R.id.collapsingToolbarLayout)
+    @Bind(R.id.collapsingToolbarLayout)
     CollapsingToolbarLayout collapsingToolbarLayout;
-    @InjectView(R.id.appbar)
+    @Bind(R.id.appbar)
     AppBarLayout appbar;
-    @InjectView(R.id.main_content)
+    @Bind(R.id.main_content)
     CoordinatorLayout mainContent;
 
     private TracksAdapter mTracksAdapter;
@@ -84,7 +84,7 @@ public class TracksFragment extends Fragment implements TracksAdapter.TracksEven
     public View onCreateView(LayoutInflater inflater, ViewGroup container,
                              Bundle savedInstanceState) {
         View rootView = inflater.inflate(R.layout.fragment_tracks, container, false);
-        ButterKnife.inject(this, rootView);
+        ButterKnife.bind(this, rootView);
 
         //Restore state
         if (savedInstanceState != null) {
@@ -259,7 +259,7 @@ public class TracksFragment extends Fragment implements TracksAdapter.TracksEven
     @Override
     public void onDestroyView() {
         super.onDestroyView();
-        ButterKnife.reset(this);
+        ButterKnife.unbind(this);
     }
 
     @Override
