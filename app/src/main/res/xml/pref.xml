@@ -1,0 +1,10 @@
+<?xml version="1.0" encoding="utf-8"?>
+<PreferenceScreen xmlns:android="http://schemas.android.com/apk/res/android">
+    <!-- NOTE: ListPreference's summary should be set to its value by the activity code. -->
+    <PreferenceCategory android:title="Location Settings">
+        <Preference
+            android:key="@string/preference_location_key"
+            android:title="@string/preference_location_title"
+            />
+    </PreferenceCategory>
+</PreferenceScreen>

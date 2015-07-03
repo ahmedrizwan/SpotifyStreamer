@@ -29,7 +29,6 @@ import java.util.Collections;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
-import java.util.concurrent.Callable;
 
 import app.minimize.com.spotifystreamer.Activities.ContainerActivity;
 import app.minimize.com.spotifystreamer.Activities.Keys;
@@ -208,38 +207,27 @@ public class TracksFragment extends Fragment implements TracksAdapter.TracksEven
             Bundle bundle = new Bundle();
             bundle.putParcelable(getString(R.string.key_tracks_parcelable), track);
             bundle.putParcelableArrayList(Keys.KEY_TRACK_PARCELABLE_LIST, mTracksAdapter.getDataSet());
-            Utility.runOnWorkerThread(() -> {
                 int vibrantColor1 = Palette.from(((BitmapDrawable) holder.imageViewAlbum.getDrawable()).getBitmap())
                         .generate()
                         .getVibrantColor(Color.BLACK);
                 bundle.putInt(Keys.COLOR_ACTION_BAR, vibrantColor1);
                 playerDialogFragment.setArguments(bundle);
                 playerDialogFragment.show(((AppCompatActivity) getActivity()).getSupportFragmentManager(), "Player");
-                return null;
-            });
-
-
         } else {
             //Launch the dialogFragment from here
             PlayerDialogFragment playerDialogFragment = PlayerDialogFragment.getInstance(this);
             Bundle bundle = new Bundle();
             bundle.putParcelable(getString(R.string.key_tracks_parcelable), track);
             bundle.putParcelableArrayList(Keys.KEY_TRACK_PARCELABLE_LIST, mTracksAdapter.getDataSet());
-            Utility.runOnWorkerThread(new Callable() {
-                @Override
-                public Object call() throws Exception {
-                    int vibrantColor = Palette.from(((BitmapDrawable) holder.imageViewAlbum.getDrawable()).getBitmap())
-                            .generate()
-                            .getVibrantColor(Color.BLACK);
-                    bundle.putInt(Keys.COLOR_ACTION_BAR, vibrantColor);
-                    return null;
-                }
-            });
-
-            playerDialogFragment.setArguments(bundle);
-            playerDialogFragment.setImageViewAlbumTransitionName(holder.imageViewAlbum.getTransitionName());
-            Utility.launchFragmentWithSharedElements(isTwoPane, this,
-                    playerDialogFragment, R.id.container, holder.imageViewAlbum);
+                int vibrantColor1 = Palette.from(((BitmapDrawable) holder.imageViewAlbum.getDrawable()).getBitmap())
+                        .generate()
+                        .getVibrantColor(Color.BLACK);
+                bundle.putInt(Keys.COLOR_ACTION_BAR, vibrantColor1);
+                playerDialogFragment.setArguments(bundle);
+                if (Utility.isVersionLollipopAndAbove())
+                    playerDialogFragment.setImageViewAlbumTransitionName(holder.imageViewAlbum.getTransitionName());
+                Utility.launchFragmentWithSharedElements(isTwoPane, this,
+                        playerDialogFragment, R.id.container, holder.imageViewAlbum);
         }
     }
 

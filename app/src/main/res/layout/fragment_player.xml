@@ -39,15 +39,13 @@
             android:layout_below="@id/textViewTrackName"
             android:id="@+id/textViewTrackAlbum"/>
 
-
-        <app.minimize.com.spotifystreamer.Views.MaterialSeekBar
+        <app.minimize.com.seek_bar_compat.SeekBarCompat
             android:id="@+id/seekBarPlayer"
             android:layout_width="fill_parent"
             android:layout_height="wrap_content"
             android:layout_below="@id/textViewTrackAlbum"
             android:layout_centerVertical="true"
-            android:maxHeight="300dip"
-            android:layout_gravity="center"
+            android:maxHeight="300sp"
             />
 
         <Chronometer

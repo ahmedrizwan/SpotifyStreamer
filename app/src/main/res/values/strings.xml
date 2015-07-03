@@ -19,4 +19,15 @@
     <string name="key_tracks_parcelable">TrackParcelable</string>
     <string name="title_player">Player</string>
     <string name="album_image_transition">albumImageTransition</string>
+    <string name="preference_location_key">preferenceLocationKey</string>
+    <string name="preference_location_title">Location</string>
+
+
+    <string-array name="country_names">
+
+    </string-array>
+
+    <string-array name="country_code">
+
+    </string-array>
 </resources>
