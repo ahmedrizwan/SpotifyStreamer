@@ -331,7 +331,8 @@ public class ArtistsFragment extends Fragment implements ArtistsAdapter.ArtistsE
         int container = ((ContainerActivity) getActivity()).isTwoPane() ? R.id.tracksContainer : R.id.container;
         //Shared Element transition using fragments if lollipop and above
         TracksFragment tracksFragment = new TracksFragment();
-        tracksFragment.setImageTransitionName(holder.imageViewArtist.getTransitionName());
+        if (Utility.isVersionLollipopAndAbove())
+            tracksFragment.setImageTransitionName(holder.imageViewArtist.getTransitionName());
         Bundle bundle = new Bundle();
         bundle.putParcelable(Keys.KEY_ARTIST_PARCELABLE, artistParcelable);
         Utility.runOnWorkerThread(() -> {
@@ -339,13 +340,10 @@ public class ArtistsFragment extends Fragment implements ArtistsAdapter.ArtistsE
                     .generate()
                     .getVibrantColor(Color.BLACK);
             bundle.putInt(Keys.COLOR_ACTION_BAR, vibrantColor);
+            tracksFragment.setArguments(bundle);
+            Utility.launchFragmentWithSharedElements(isTwoPane, this, tracksFragment, container, holder.imageViewArtist);
             return null;
         });
-
-        tracksFragment.setArguments(bundle);
-
-        Utility.launchFragmentWithSharedElements(isTwoPane, this, tracksFragment, container, holder.imageViewArtist);
-
     }
 
     @Override

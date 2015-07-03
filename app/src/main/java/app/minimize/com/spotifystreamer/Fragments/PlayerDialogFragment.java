@@ -24,6 +24,7 @@ import java.util.List;
 import java.util.Timer;
 import java.util.TimerTask;
 
+import app.minimize.com.seek_bar_compat.SeekBarCompat;
 import app.minimize.com.spotifystreamer.Activities.ContainerActivity;
 import app.minimize.com.spotifystreamer.Activities.Keys;
 import app.minimize.com.spotifystreamer.HelperClasses.MediaPlayerHandler;
@@ -33,7 +34,6 @@ import app.minimize.com.spotifystreamer.Parcelables.TrackParcelable;
 import app.minimize.com.spotifystreamer.R;
 import app.minimize.com.spotifystreamer.Rx.RxBus;
 import app.minimize.com.spotifystreamer.Utility;
-import app.minimize.com.spotifystreamer.Views.MaterialSeekBar;
 import app.minimize.com.spotifystreamer.Views.NextButton;
 import app.minimize.com.spotifystreamer.Views.PlayButton;
 import app.minimize.com.spotifystreamer.Views.PreviousButton;
@@ -52,7 +52,7 @@ public class PlayerDialogFragment extends DialogFragment {
     @Bind(R.id.textViewTrackName)
     TextView textViewTrackName;
     @Bind(R.id.seekBarPlayer)
-    MaterialSeekBar seekBarPlayer;
+    SeekBarCompat seekBarPlayer;
     @Bind(R.id.chronometerStart)
     Chronometer chronometerStart;
     @Bind(R.id.chronometerEnd)
@@ -93,7 +93,7 @@ public class PlayerDialogFragment extends DialogFragment {
         mTrackParcelable = getArguments().getParcelable(getString(R.string.key_tracks_parcelable));
         List<TrackParcelable> trackParcelableList = getArguments().getParcelableArrayList(Keys.KEY_TRACK_PARCELABLE_LIST);
         vibrantColor = getArguments().getInt(Keys.COLOR_ACTION_BAR);
-
+        Log.e("Vibrant Color", vibrantColor + "");
         if (isTwoPane) {
             getDialog().getWindow()
                     .requestFeature(Window.FEATURE_NO_TITLE);
@@ -113,7 +113,8 @@ public class PlayerDialogFragment extends DialogFragment {
         });
 
         imageViewPlay.setButtonBackgroundColor(getActivity(), vibrantColor);
-        seekBarPlayer.setProgressAndThumbColor(vibrantColor);
+        seekBarPlayer.setProgressColor(vibrantColor);
+        seekBarPlayer.setThumbColor(vibrantColor);
 
         if (Utility.isVersionLollipopAndAbove())
             imageViewAlbum.setTransitionName(imageViewAlbumTransitionName);

@@ -25,6 +25,7 @@ import app.minimize.com.spotifystreamer.MediaPlayerService;
 import app.minimize.com.spotifystreamer.Parcelables.TrackParcelable;
 import app.minimize.com.spotifystreamer.R;
 import app.minimize.com.spotifystreamer.Rx.RxBus;
+import app.minimize.com.spotifystreamer.SettingsActivity;
 import butterknife.Bind;
 import butterknife.ButterKnife;
 import rx.Subscriber;
@@ -74,7 +75,9 @@ public class ContainerActivity extends AppCompatActivity {
         //start service to retrieve the status of player
         startServiceForStatusRetrieval();
 
-        RxBus.getInstance().toObserverable().observeOn(Schedulers.newThread())
+        RxBus.getInstance()
+                .toObserverable()
+                .observeOn(Schedulers.newThread())
                 .observeOn(AndroidSchedulers.mainThread())
                 .subscribe(new Subscriber<Object>() {
                     @Override
@@ -89,7 +92,7 @@ public class ContainerActivity extends AppCompatActivity {
 
                     @Override
                     public void onNext(final Object o) {
-                        if(o instanceof TrackParcelable){
+                        if (o instanceof TrackParcelable) {
                             onEventMainThread(((TrackParcelable) o));
                         }
                     }
@@ -102,6 +105,52 @@ public class ContainerActivity extends AppCompatActivity {
                 MediaPlayerService.class);
         intent.putExtra(Keys.KEY_GET_STATUS, true);
         startService(intent);
+    }
+
+    @Override
+    public void onStop() {
+//        EventBus.getDefault()
+//                .unregister(this);
+        super.onStop();
+    }
+
+    @Override
+    protected void onDestroy() {
+        super.onDestroy();
+        ButterKnife.unbind(this);
+    }
+
+    public void onEventMainThread(TrackParcelable trackParcelable) {
+        if (MediaPlayerHandler.getPlayerState() == MediaPlayerHandler.MediaPlayerState.Idle) {
+            //Hide the NowPlaying
+            hideNowPlayingLayout();
+        } else {
+            layoutNowPlaying.setVisibility(View.VISIBLE);
+            layoutNowPlaying.setOnClickListener(v -> {
+                Toast.makeText(this,
+                        ((TextView) layoutNowPlaying.findViewById(R.id.textViewTrackName)).getText()
+                                .toString(),
+                        Toast.LENGTH_SHORT)
+                        .show();
+                //TODO : launch the PlayerFragment here
+//                Utility.launchFragmentWithSharedElements(isTwoPane(),);
+
+            });
+            textViewTrackName.setText(trackParcelable.songName);
+            textViewArtistName.setText(trackParcelable.artistName);
+            int size = trackParcelable.albumImageUrls.size();
+            if (size > 0)
+                Picasso.with(ContainerActivity.this)
+                        .load(trackParcelable.albumImageUrls.get(size - 1))
+                        .into(imageViewAlbum);
+            else
+                imageViewAlbum.setImageDrawable(ContextCompat.getDrawable(ContainerActivity.this, R.drawable.ic_not_available));
+        }
+
+    }
+
+    public void hideNowPlayingLayout() {
+        layoutNowPlaying.setVisibility(View.GONE);
     }
 
     public boolean isTwoPane() {
@@ -136,63 +185,19 @@ public class ContainerActivity extends AppCompatActivity {
             return true;
         } else if (id == android.R.id.home) {
             getSupportFragmentManager().popBackStack();
+        } else if (id == R.id.action_settings) {
+            startActivity(new Intent(this, SettingsActivity.class));
         }
-        return super.onOptionsItemSelected(item);
-    }
 
-    public void hideNowPlayingLayout() {
-        layoutNowPlaying.setVisibility(View.GONE);
+        return super.onOptionsItemSelected(item);
     }
 
     @Override
     public void onStart() {
         super.onStart();
-//        EventBus.getDefault()
-//                .register(this);
-    }
-
-    @Override
-    public void onStop() {
-//        EventBus.getDefault()
-//                .unregister(this);
-        super.onStop();
-    }
-
-    public void onEventMainThread(TrackParcelable trackParcelable) {
-        if (MediaPlayerHandler.getPlayerState() == MediaPlayerHandler.MediaPlayerState.Idle) {
-            //Hide the NowPlaying
-            hideNowPlayingLayout();
-        } else {
-            layoutNowPlaying.setVisibility(View.VISIBLE);
-            layoutNowPlaying.setOnClickListener(v -> {
-                Toast.makeText(this,
-                        ((TextView) layoutNowPlaying.findViewById(R.id.textViewTrackName)).getText()
-                                .toString(),
-                        Toast.LENGTH_SHORT)
-                        .show();
-                //TODO : launch the PlayerFragment here
-
-
-            });
-            textViewTrackName.setText(trackParcelable.songName);
-            textViewArtistName.setText(trackParcelable.artistName);
-            int size = trackParcelable.albumImageUrls.size();
-            if (size > 0)
-                Picasso.with(ContainerActivity.this)
-                        .load(trackParcelable.albumImageUrls.get(size - 1))
-                        .into(imageViewAlbum);
-            else
-                imageViewAlbum.setImageDrawable(ContextCompat.getDrawable(ContainerActivity.this, R.drawable.ic_not_available));
-        }
     }
 
     private void logHelper(final String message) {
         Log.e("Container Activity", message);
-    }
-
-    @Override
-    protected void onDestroy() {
-        super.onDestroy();
-        ButterKnife.unbind(this);
     }
 }

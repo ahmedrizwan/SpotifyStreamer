@@ -37,4 +37,9 @@ public class Keys {
     public static final int SMOOTHNESS_FACTOR = 500;
     public static final String KEY_TRACK_PARCELABLE_LIST = "TracksParcelableList";
     public static final String COLOR_ACTION_BAR = "ActionBarColor";
+    public static final String SHARED_PREFS = "SpotifyStreamerPrefs";
+    public static final String KEY_LOCATION = "SpotifyLocation";
+
+
+
 }
