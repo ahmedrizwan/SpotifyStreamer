@@ -125,9 +125,10 @@ public class ArtistsFragment extends Fragment implements ArtistsAdapter.ArtistsE
 
         } else {
             //change actionBar and statusBar color
-            Utility.setActionBarAndStatusBarColor(((AppCompatActivity) getActivity()),
-                    Utility.getPrimaryColorFromSelectedTheme(getActivity()));
+//            Utility.setActionBarAndStatusBarColor(((AppCompatActivity) getActivity()),
+//                    Utility.getPrimaryColorFromSelectedTheme(getActivity()));
         }
+
         //retore state
         restoreState(savedInstanceState);
 
@@ -362,4 +363,5 @@ public class ArtistsFragment extends Fragment implements ArtistsAdapter.ArtistsE
         }
         return false;
     }
+
 }

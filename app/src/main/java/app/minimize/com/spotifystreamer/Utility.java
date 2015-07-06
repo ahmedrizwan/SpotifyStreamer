@@ -4,7 +4,6 @@ import android.annotation.TargetApi;
 import android.content.Context;
 import android.content.res.TypedArray;
 import android.graphics.Color;
-import android.graphics.drawable.ColorDrawable;
 import android.os.Build;
 import android.support.v4.app.Fragment;
 import android.support.v4.app.FragmentTransaction;
@@ -157,9 +156,6 @@ public class Utility {
 
     @TargetApi(Build.VERSION_CODES.LOLLIPOP)
     public static void setActionBarAndStatusBarColor(final AppCompatActivity activity, final int vibrantColor) {
-        activity.getSupportActionBar()
-                .setBackgroundDrawable(new ColorDrawable(vibrantColor));
-
         if (isVersionLollipopAndAbove()) {
             float[] hsv = new float[3];
             Color.colorToHSV(vibrantColor, hsv);
@@ -167,7 +163,6 @@ public class Utility {
             int darkColor = Color.HSVToColor(hsv);
             activity.getWindow()
                     .setStatusBarColor(darkColor);
-
         }
     }
 }

@@ -1,32 +1,42 @@
-<LinearLayout
-
-    xmlns:android="http://schemas.android.com/apk/res/android"
-    xmlns:tools="http://schemas.android.com/tools"
-    android:layout_width="match_parent"
-    android:layout_height="match_parent"
-    android:background="@android:color/white"
-    android:orientation="vertical"
-    tools:context="app.minimize.com.spotifystreamer.Activities.ContainerActivity">
-
-    <android.support.v7.widget.Toolbar
-        android:id="@+id/mainToolbar"
-        android:layout_width="match_parent"
-        android:layout_height="?attr/actionBarSize"
-        android:background="?attr/colorPrimary"
-        />
-
+<?xml version="1.0" encoding="utf-8"?>
+<layout xmlns:android="http://schemas.android.com/apk/res/android" xmlns:bind="http://schemas.android.com/apk/res-auto">
+    <data>
+        <variable name="toolBarTitle" type="String"/>
+        <variable name="trackTitle" type="String"/>
+        <variable name="albumTitle" type="String"/>
+        <variable name="artistTitle" type="String"/>
+        <variable name="toolBarBackgroundColor" type="int"/>
+    </data>
     <LinearLayout
-        android:id="@+id/container"
+        xmlns:tools="http://schemas.android.com/tools"
         android:layout_width="match_parent"
-        android:layout_height="0dp"
-        android:layout_marginBottom="2sp"
-        android:layout_weight="1"
-        android:orientation="vertical"/>
+        android:layout_height="match_parent"
+        android:background="@android:color/white"
+        android:orientation="vertical"
+        tools:context="app.minimize.com.spotifystreamer.Activities.ContainerActivity">
 
-    <include layout="@layout/include_now_playing"
-        />
+        <android.support.v7.widget.Toolbar
+            android:id="@+id/mainToolbar"
+            android:layout_width="match_parent"
+            android:layout_height="?attr/actionBarSize"
+            android:background="@{toolBarBackgroundColor!=0?toolBarBackgroundColor:@color/green}"
+            android:title="@{toolBarTitle}"
+            />
 
+        <LinearLayout
+            android:id="@+id/container"
+            android:layout_width="match_parent"
+            android:layout_height="0dp"
+            android:layout_marginBottom="2sp"
+            android:layout_weight="1"
+            android:orientation="vertical"/>
 
-</LinearLayout>
+        <include layout="@layout/include_now_playing"
+                 bind:trackTitle="@{trackTitle}"
+                 bind:albumTitle="@{albumTitle}"
+                 bind:artistTitle="@{artistTitle}"
+            />
 
+    </LinearLayout>
+</layout>
 
