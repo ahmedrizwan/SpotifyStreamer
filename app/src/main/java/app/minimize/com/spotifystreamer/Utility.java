@@ -120,7 +120,7 @@ public class Utility {
     }
 
     public static void loadImage(Context context, String smallImageUrl,
-                                 String largeImageUrl, ImageView imageView, Callable<Void> onSuccess) {
+                                    String largeImageUrl, ImageView imageView, Callable<Void> onSuccess) {
 
         Picasso.with(context)
                 .load(smallImageUrl) // thumbnail url goes here
@@ -153,6 +153,7 @@ public class Utility {
                     }
                 });
     }
+
 
     @TargetApi(Build.VERSION_CODES.LOLLIPOP)
     public static void setActionBarAndStatusBarColor(final AppCompatActivity activity, final int vibrantColor) {
