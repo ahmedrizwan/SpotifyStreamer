@@ -115,6 +115,7 @@ public class PlayerDialogFragment extends DialogFragment {
         imageViewPlay.setButtonBackgroundColor(getActivity(), vibrantColor);
         seekBarPlayer.setProgressColor(vibrantColor);
         seekBarPlayer.setThumbColor(vibrantColor);
+        seekBarPlayer.setProgressBackgroundColor(Color.BLUE);
 
         if (Utility.isVersionLollipopAndAbove())
             imageViewAlbum.setTransitionName(imageViewAlbumTransitionName);
@@ -142,7 +143,6 @@ public class PlayerDialogFragment extends DialogFragment {
                     public void onCompleted() {
 
                     }
-
                     @Override
                     public void onError(final Throwable e) {
 

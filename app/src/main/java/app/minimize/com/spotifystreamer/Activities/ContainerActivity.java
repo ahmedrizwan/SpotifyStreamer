@@ -1,12 +1,12 @@
 package app.minimize.com.spotifystreamer.Activities;
 
 import android.content.Intent;
+import android.databinding.DataBindingUtil;
 import android.os.Bundle;
 import android.support.annotation.Nullable;
 import android.support.v4.content.ContextCompat;
 import android.support.v7.app.AlertDialog;
 import android.support.v7.app.AppCompatActivity;
-import android.support.v7.widget.Toolbar;
 import android.util.Log;
 import android.view.Menu;
 import android.view.MenuItem;
@@ -25,7 +25,7 @@ import app.minimize.com.spotifystreamer.MediaPlayerService;
 import app.minimize.com.spotifystreamer.Parcelables.TrackParcelable;
 import app.minimize.com.spotifystreamer.R;
 import app.minimize.com.spotifystreamer.Rx.RxBus;
-import app.minimize.com.spotifystreamer.SettingsActivity;
+import app.minimize.com.spotifystreamer.databinding.ActivityContainerBinding;
 import butterknife.Bind;
 import butterknife.ButterKnife;
 import rx.Subscriber;
@@ -34,11 +34,10 @@ import rx.schedulers.Schedulers;
 
 public class ContainerActivity extends AppCompatActivity {
 
+    private static final String TAG = "ContainerActivity";
     boolean mTwoPane;
     @Bind(R.id.textViewArtistName)
     TextView textViewArtistName;
-    @Bind(R.id.mainToolbar)
-    Toolbar mainToolbar;
     @Nullable
     @Bind(R.id.container)
     LinearLayout container;
@@ -48,6 +47,7 @@ public class ContainerActivity extends AppCompatActivity {
     TextView textViewTrackName;
     @Bind(R.id.layoutNowPlaying)
     ViewGroup layoutNowPlaying;
+    private ActivityContainerBinding mActivityContainerBinding;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -56,8 +56,8 @@ public class ContainerActivity extends AppCompatActivity {
         setContentView(R.layout.activity_container);
         ButterKnife.bind(this);
 
-        //ActionBar
-        setSupportActionBar(mainToolbar);
+        mActivityContainerBinding = DataBindingUtil.setContentView(this, R.layout.activity_container);
+        mActivityContainerBinding.setToolBarTitle(getString(R.string.app_name));
 
         //Check for twoPanes
         if (findViewById(R.id.tracksContainer) != null) {
@@ -136,8 +136,9 @@ public class ContainerActivity extends AppCompatActivity {
 //                Utility.launchFragmentWithSharedElements(isTwoPane(),);
 
             });
-            textViewTrackName.setText(trackParcelable.songName);
-            textViewArtistName.setText(trackParcelable.artistName);
+            mActivityContainerBinding.setTrackTitle(trackParcelable.songName);
+            mActivityContainerBinding.setAlbumTitle(trackParcelable.albumName);
+
             int size = trackParcelable.albumImageUrls.size();
             if (size > 0)
                 Picasso.with(ContainerActivity.this)
@@ -146,7 +147,6 @@ public class ContainerActivity extends AppCompatActivity {
             else
                 imageViewAlbum.setImageDrawable(ContextCompat.getDrawable(ContainerActivity.this, R.drawable.ic_not_available));
         }
-
     }
 
     public void hideNowPlayingLayout() {
