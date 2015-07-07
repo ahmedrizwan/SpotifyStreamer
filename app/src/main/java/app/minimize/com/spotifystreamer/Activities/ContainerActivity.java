@@ -46,6 +46,8 @@ public class ContainerActivity extends AppCompatActivity {
         mActivityContainerBinding.setToolBarBackgroundColor(Utility.getPrimaryColorFromSelectedTheme(this));
         mActivityContainerBinding.setNowPlayingVisible(false);
 
+        setSupportActionBar(mActivityContainerBinding.mainToolbar);
+
         //Check for twoPanes
         if (findViewById(R.id.tracksContainer) != null) {
             mTwoPane = true;
