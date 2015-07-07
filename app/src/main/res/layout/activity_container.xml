@@ -6,6 +6,8 @@
         <variable name="albumTitle" type="String"/>
         <variable name="artistTitle" type="String"/>
         <variable name="toolBarBackgroundColor" type="int"/>
+        <variable name="nowPlayingVisible" type="Boolean"/>
+        <variable name="albumImage" type="android.graphics.drawable.Drawable"/>
     </data>
     <LinearLayout
         xmlns:tools="http://schemas.android.com/tools"
@@ -35,6 +37,8 @@
                  bind:trackTitle="@{trackTitle}"
                  bind:albumTitle="@{albumTitle}"
                  bind:artistTitle="@{artistTitle}"
+                 bind:nowPlayingVisible="@{nowPlayingVisible}"
+                 bind:albumImage="@{albumImage}"
             />
 
     </LinearLayout>

@@ -3,6 +3,7 @@ package app.minimize.com.spotifystreamer.Fragments;
 import android.annotation.TargetApi;
 import android.app.Activity;
 import android.content.Context;
+import android.databinding.DataBindingUtil;
 import android.graphics.Color;
 import android.graphics.drawable.BitmapDrawable;
 import android.os.Build;
@@ -14,8 +15,6 @@ import android.support.v7.app.ActionBar;
 import android.support.v7.app.AppCompatActivity;
 import android.support.v7.graphics.Palette;
 import android.support.v7.widget.LinearLayoutManager;
-import android.support.v7.widget.RecyclerView;
-import android.support.v7.widget.Toolbar;
 import android.view.KeyEvent;
 import android.view.LayoutInflater;
 import android.view.View;
@@ -24,11 +23,6 @@ import android.view.animation.Animation;
 import android.view.animation.BounceInterpolator;
 import android.view.animation.ScaleAnimation;
 import android.view.inputmethod.InputMethodManager;
-import android.widget.EditText;
-import android.widget.ImageButton;
-import android.widget.ImageView;
-import android.widget.ProgressBar;
-import android.widget.TextView;
 
 import java.util.ArrayList;
 import java.util.Collections;
@@ -42,9 +36,9 @@ import app.minimize.com.spotifystreamer.Parcelables.ArtistParcelable;
 import app.minimize.com.spotifystreamer.R;
 import app.minimize.com.spotifystreamer.Rx.RxObservables;
 import app.minimize.com.spotifystreamer.Utility;
-import butterknife.Bind;
+import app.minimize.com.spotifystreamer.databinding.FragmentArtistsBinding;
+import app.minimize.com.spotifystreamer.databinding.IncludeProgressBinding;
 import butterknife.ButterKnife;
-import butterknife.OnClick;
 import kaaes.spotify.webapi.android.SpotifyApi;
 import kaaes.spotify.webapi.android.SpotifyService;
 import kaaes.spotify.webapi.android.models.Artist;
@@ -62,38 +56,20 @@ public class ArtistsFragment extends Fragment implements ArtistsAdapter.ArtistsE
     private static final String ARTIST = "Artists";
     public static final String SELECTED_ARTIST = "SelectedArtist";
 
-    @Bind(R.id.imageViewSearch)
-    ImageView imageViewSearch;
-    @Bind(R.id.imageButtonClear)
-    ImageButton imageButtonClear;
-    @Bind(R.id.editTextSearch)
-    EditText editTextSearch;
-    @Bind(R.id.secondaryToolbar)
-    Toolbar secondaryToolbar;
-    @Bind(R.id.recyclerViewArtists)
-    RecyclerView recyclerViewArtists;
-    @Bind(R.id.progressBar)
-    ProgressBar progressBar;
-    @Bind(R.id.textViewError)
-    TextView textViewError;
-
+    private FragmentArtistsBinding mFragmentArtistsBinding;
+    private IncludeProgressBinding mIncludeProgressBinding;
+    
     List<ArtistParcelable> mArtists = Collections.emptyList();
     ArtistsAdapter mArtistsAdapter;
 
-
-    @OnClick(R.id.imageButtonClear)
-    public void imageButtonClearOnClick() {
-        clearState();
-    }
-
     private void clearState() {
-        editTextSearch.setText("");
-        imageButtonClear.setVisibility(View.GONE);
-        mArtists = new ArrayList<ArtistParcelable>();
+        mFragmentArtistsBinding.editTextSearch.setText("");
+        mFragmentArtistsBinding.imageButtonClear.setVisibility(View.GONE);
+        mArtists = new ArrayList<>();
         mArtistsAdapter.updateList(mArtists);
-        textViewError.setText(getString(R.string.search_artists_begin));
-        textViewError.setVisibility(View.VISIBLE);
-        progressBar.setVisibility(View.GONE);
+        mIncludeProgressBinding.textViewError.setText(getString(R.string.search_artists_begin));
+        mIncludeProgressBinding.textViewError.setVisibility(View.VISIBLE);
+        mIncludeProgressBinding.progressBar.setVisibility(View.GONE);
         setActionBarTitle();
     }
 
@@ -111,9 +87,11 @@ public class ArtistsFragment extends Fragment implements ArtistsAdapter.ArtistsE
     @Nullable
     @Override
     public View onCreateView(final LayoutInflater inflater, final ViewGroup container, final Bundle savedInstanceState) {
-        View rootView = inflater.inflate(R.layout.fragment_artists, container, false);
-        ButterKnife.bind(this, rootView);
+        mFragmentArtistsBinding = DataBindingUtil.inflate(inflater, R.layout.fragment_artists,
+                container, false);
 
+        mIncludeProgressBinding = DataBindingUtil.bind(mFragmentArtistsBinding.getRoot().findViewById(R.id.progressLayout));
+        mIncludeProgressBinding.textViewError.setText("Hello");
         //ActionBar
         setActionBarTitle();
 
@@ -125,16 +103,16 @@ public class ArtistsFragment extends Fragment implements ArtistsAdapter.ArtistsE
 
         } else {
             //change actionBar and statusBar color
-//            Utility.setActionBarAndStatusBarColor(((AppCompatActivity) getActivity()),
-//                    Utility.getPrimaryColorFromSelectedTheme(getActivity()));
+            Utility.setActionBarAndStatusBarColor(((AppCompatActivity) getActivity()),
+                    Utility.getPrimaryColorFromSelectedTheme(getActivity()));
         }
 
         //retore state
         restoreState(savedInstanceState);
 
-        editTextSearch.setOnKeyListener(this);
+        mFragmentArtistsBinding.editTextSearch.setOnKeyListener(this);
 
-        Observable.create(RxObservables.getSearchObservable(editTextSearch))
+        Observable.create(RxObservables.getSearchObservable(mFragmentArtistsBinding.editTextSearch))
                 .debounce(600, TimeUnit.MILLISECONDS)
                 .subscribeOn(AndroidSchedulers.mainThread())
                 .observeOn(AndroidSchedulers.mainThread())
@@ -157,31 +135,34 @@ public class ArtistsFragment extends Fragment implements ArtistsAdapter.ArtistsE
                 });
 
 
-        recyclerViewArtists.setLayoutManager(new LinearLayoutManager(getActivity()));
+        mFragmentArtistsBinding.recyclerViewArtists.setLayoutManager(new LinearLayoutManager(getActivity()));
 
-        recyclerViewArtists.setAdapter(mArtistsAdapter);
+        mFragmentArtistsBinding.recyclerViewArtists.setAdapter(mArtistsAdapter);
 
         showTextViewSearchArtists();
 
-        return rootView;
+        mFragmentArtistsBinding.imageButtonClear.setOnClickListener(v -> clearState());
+
+        return mFragmentArtistsBinding.getRoot();
     }
+
 
     private void showOrHideCancel(final String textArtistName) {
         //show clear button if there is text in EditText
-        if (textArtistName.length() > 0 && imageButtonClear.getVisibility() == View.GONE) {
+        if (textArtistName.length() > 0 && mFragmentArtistsBinding.imageButtonClear.getVisibility() == View.GONE) {
             ScaleAnimation animation = new ScaleAnimation(0, 1, 0, 1, Animation.RELATIVE_TO_SELF,
                     (float) 0.5, Animation.RELATIVE_TO_SELF, (float) 0.5);
             animation.setInterpolator(new BounceInterpolator());
             animation.setDuration(500);
-            imageButtonClear.setVisibility(View.VISIBLE);
-            imageButtonClear.startAnimation(animation);
+            mFragmentArtistsBinding.imageButtonClear.setVisibility(View.VISIBLE);
+            mFragmentArtistsBinding.imageButtonClear.startAnimation(animation);
         } else if (textArtistName.length() == 0) {
             ScaleAnimation animation = new ScaleAnimation(1, 0, 1, 0, Animation.RELATIVE_TO_SELF,
                     (float) 0.5, Animation.RELATIVE_TO_SELF, (float) 0.5);
             animation.setInterpolator(new BounceInterpolator());
             animation.setDuration(500);
-            imageButtonClear.setVisibility(View.VISIBLE);
-            imageButtonClear.startAnimation(animation);
+            mFragmentArtistsBinding.imageButtonClear.setVisibility(View.VISIBLE);
+            mFragmentArtistsBinding.imageButtonClear.startAnimation(animation);
 
             animation.setAnimationListener(new Animation.AnimationListener() {
                 @Override
@@ -191,7 +172,7 @@ public class ArtistsFragment extends Fragment implements ArtistsAdapter.ArtistsE
 
                 @Override
                 public void onAnimationEnd(final Animation animation) {
-                    imageButtonClear.setVisibility(View.GONE);
+                    mFragmentArtistsBinding.imageButtonClear.setVisibility(View.GONE);
                 }
 
                 @Override
@@ -231,22 +212,22 @@ public class ArtistsFragment extends Fragment implements ArtistsAdapter.ArtistsE
 
     private void showTextViewSearchArtists() {
         if (mArtists.size() == 0) {
-            textViewError.setText(getString(R.string.search_artists_begin));
-            textViewError.setVisibility(View.VISIBLE);
+            mIncludeProgressBinding.textViewError.setText(getString(R.string.search_artists_begin));
+            mIncludeProgressBinding.textViewError.setVisibility(View.VISIBLE);
         }
     }
 
     private void searchForArtists(final String artistName) {
-        textViewError.setVisibility(View.GONE);
+        mIncludeProgressBinding.textViewError.setVisibility(View.GONE);
         if (artistName.length() == 0) {
-            imageButtonClear.setVisibility(View.GONE);
+            mFragmentArtistsBinding.imageButtonClear.setVisibility(View.GONE);
             mArtists = new ArrayList<>();
             mArtistsAdapter.updateList(mArtists);
-            progressBar.setVisibility(View.GONE);
+            mIncludeProgressBinding.progressBar.setVisibility(View.GONE);
             showTextViewSearchArtists();
         } else {
-            imageButtonClear.setVisibility(View.VISIBLE);
-            progressBar.setVisibility(View.VISIBLE);
+            mFragmentArtistsBinding.imageButtonClear.setVisibility(View.VISIBLE);
+            mIncludeProgressBinding.progressBar.setVisibility(View.VISIBLE);
             //method that gets me the artists and their artistImageUrls
             Utility.runOnWorkerThread(() -> {
                 SpotifyApi spotifyApi = new SpotifyApi();
@@ -270,9 +251,9 @@ public class ArtistsFragment extends Fragment implements ArtistsAdapter.ArtistsE
 
     private void artistsNotFound(final RetrofitError error) {
         if (error.getKind() == RetrofitError.Kind.NETWORK) {
-            textViewError.setText(getString(R.string.network_error));
-            textViewError.setVisibility(View.VISIBLE);
-            progressBar.setVisibility(View.GONE);
+            mIncludeProgressBinding.textViewError.setText(getString(R.string.network_error));
+            mIncludeProgressBinding.textViewError.setVisibility(View.VISIBLE);
+            mIncludeProgressBinding.progressBar.setVisibility(View.GONE);
         }
     }
 
@@ -284,12 +265,12 @@ public class ArtistsFragment extends Fragment implements ArtistsAdapter.ArtistsE
         }
         //update the adapter
         if (mArtists.size() == 0) {
-            textViewError.setText(getString(R.string.tv_no_artists));
-            textViewError.setVisibility(View.VISIBLE);
+            mIncludeProgressBinding.textViewError.setText(getString(R.string.tv_no_artists));
+            mIncludeProgressBinding.textViewError.setVisibility(View.VISIBLE);
         }
 
         mArtistsAdapter.updateList(mArtists);
-        progressBar.setVisibility(View.GONE);
+        mIncludeProgressBinding.progressBar.setVisibility(View.GONE);
     }
 
 
@@ -353,12 +334,12 @@ public class ArtistsFragment extends Fragment implements ArtistsAdapter.ArtistsE
         if ((event.getAction() == KeyEvent.ACTION_DOWN) &&
                 (keyCode == KeyEvent.KEYCODE_ENTER)) {
             // Perform action on key press
-            searchForArtists(editTextSearch.getText()
+            searchForArtists(mFragmentArtistsBinding.editTextSearch.getText()
                     .toString());
             // code to hide the soft keyboard
             InputMethodManager inputMethodManager = (InputMethodManager) getActivity().getSystemService(
                     Context.INPUT_METHOD_SERVICE);
-            inputMethodManager.hideSoftInputFromWindow(editTextSearch.getApplicationWindowToken(), 0);
+            inputMethodManager.hideSoftInputFromWindow(mFragmentArtistsBinding.editTextSearch.getApplicationWindowToken(), 0);
             return true;
         }
         return false;
