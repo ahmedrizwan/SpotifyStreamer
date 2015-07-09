@@ -40,7 +40,7 @@
             android:id="@+id/textViewTrackAlbum"/>
 
 
-        <app.minimize.com.spotifystreamer.Views.MaterialSeekBar
+        <app.minimize.com.seek_bar_compat.SeekBarCompat
             android:id="@+id/seekBarPlayer"
             android:layout_width="fill_parent"
             android:layout_height="wrap_content"
