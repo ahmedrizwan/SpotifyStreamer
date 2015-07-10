@@ -3,14 +3,17 @@ package app.minimize.com.seek_bar_compat;
 import android.graphics.Canvas;
 import android.graphics.ColorFilter;
 import android.graphics.Paint;
-import android.graphics.drawable.ShapeDrawable;
+import android.graphics.drawable.BitmapDrawable;
+import android.util.Log;
 
 /**
  * Created by ahmedrizwan on 7/8/15.
  */
-public class SeekBarThumbDrawable extends ShapeDrawable {
+public class SeekBarThumbDrawable extends BitmapDrawable {
     private static final String TAG = "SeekBarThumb";
     private int mHeight;
+    private int mSeekBarHeight;
+    private int mMargin;
     private SeekBarCompat mSeekBarCompat;
     private Paint mPaint = new Paint();
     private float xMultiple;
@@ -28,9 +31,8 @@ public class SeekBarThumbDrawable extends ShapeDrawable {
     @Override
     public void draw(final Canvas canvas) {
         try {
-            canvas.drawCircle(mSeekBarCompat.getProgress() * xMultiple, mHeight / 2, mHeight / shrinkScale, mPaint);
-        } catch (Exception e){
-//            Log.e(TAG, "draw "+e.toString());
+            canvas.drawCircle(mSeekBarCompat.getProgress() * xMultiple, mSeekBarHeight / 2, mHeight / shrinkScale, mPaint);
+        } catch (Exception e) {
         }
     }
 
@@ -61,12 +63,22 @@ public class SeekBarThumbDrawable extends ShapeDrawable {
 
     public void setMax(final int max) {
         mMax = max;
-        xMultiple = (mWidth-mHeight)/mMax ;
+        Log.e(TAG, "setMax " + (mWidth - mHeight / 2) + " " + (mWidth - mMargin - mHeight / 2));
+        xMultiple = (mWidth + mMargin - mHeight) / mMax;
     }
 
-    public void setHeight(int height) {
-        mHeight = height;
+    public void setHeight(int thumbHeight, int seekBarHeight, int margin) {
+        mHeight = thumbHeight;
+        mSeekBarHeight = seekBarHeight;
+        mMargin = margin;
         mWidth = mSeekBarCompat.getWidth();
-        xMultiple = (mSeekBarCompat.getWidth()-height)/mMax;
+        xMultiple = (mSeekBarCompat.getWidth() - thumbHeight) / mMax;
     }
+
+    public void setColor(int thumbColor) {
+        mPaint.setColor(thumbColor);
+        invalidateSelf();
+    }
+
+
 }

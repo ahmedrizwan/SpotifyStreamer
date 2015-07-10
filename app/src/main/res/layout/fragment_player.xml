@@ -19,7 +19,8 @@
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
             android:background="@android:color/white"
-            android:padding="@dimen/default_margin">
+            android:paddingTop="@dimen/default_margin"
+            android:paddingBottom="@dimen/default_margin">
 
             <TextView
                 android:id="@+id/textViewTrackName"
@@ -44,10 +45,10 @@
             <app.minimize.com.seek_bar_compat.SeekBarCompat
                 android:id="@+id/seekBarPlayer"
                 android:layout_width="fill_parent"
-                android:layout_height="wrap_content"
+                android:layout_height="100dp"
+                android:background="@android:color/holo_orange_light"
                 android:layout_below="@id/textViewTrackAlbum"
                 android:layout_centerVertical="true"
-                android:maxHeight="300sp"
                 />
 
             <Chronometer
