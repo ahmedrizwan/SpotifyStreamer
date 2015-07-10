@@ -45,13 +45,12 @@ public class ContainerActivity extends AppCompatActivity {
         mActivityContainerBinding.setToolBarTitle(getString(R.string.app_name));
         mActivityContainerBinding.setToolBarBackgroundColor(Utility.getPrimaryColorFromSelectedTheme(this));
         mActivityContainerBinding.setNowPlayingVisible(false);
-
         setSupportActionBar(mActivityContainerBinding.mainToolbar);
 
         //Check for twoPanes
-        if (findViewById(R.id.tracksContainer) != null) {
-            mTwoPane = true;
-        } else {
+//        if (findViewById(R.id.tracksContainer) != null) {
+//            mTwoPane = true;
+//        } else {
             mTwoPane = false;
             //make transaction for the artists fragment
             if (savedInstanceState == null) {
@@ -59,7 +58,8 @@ public class ContainerActivity extends AppCompatActivity {
                         .add(R.id.container, new ArtistsFragment())
                         .commit();
             }
-        }
+
+//        }
 
         //start service to retrieve the status of player
         startServiceForStatusRetrieval();
