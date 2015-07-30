@@ -3,6 +3,7 @@ package app.minimize.com.spotifystreamer.Fragments;
 import android.annotation.TargetApi;
 import android.content.DialogInterface;
 import android.content.Intent;
+import android.databinding.DataBindingUtil;
 import android.graphics.Color;
 import android.os.Build;
 import android.os.Bundle;
@@ -16,15 +17,11 @@ import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
 import android.view.Window;
-import android.widget.Chronometer;
-import android.widget.ImageView;
-import android.widget.TextView;
 
 import java.util.List;
 import java.util.Timer;
 import java.util.TimerTask;
 
-import app.minimize.com.seek_bar_compat.SeekBarCompat;
 import app.minimize.com.spotifystreamer.Activities.ContainerActivity;
 import app.minimize.com.spotifystreamer.Activities.Keys;
 import app.minimize.com.spotifystreamer.HelperClasses.MediaPlayerHandler;
@@ -34,11 +31,7 @@ import app.minimize.com.spotifystreamer.Parcelables.TrackParcelable;
 import app.minimize.com.spotifystreamer.R;
 import app.minimize.com.spotifystreamer.Rx.RxBus;
 import app.minimize.com.spotifystreamer.Utility;
-import app.minimize.com.spotifystreamer.Views.NextButton;
-import app.minimize.com.spotifystreamer.Views.PlayButton;
-import app.minimize.com.spotifystreamer.Views.PreviousButton;
-import butterknife.Bind;
-import butterknife.ButterKnife;
+import app.minimize.com.spotifystreamer.databinding.FragmentPlayerBinding;
 import rx.Subscriber;
 import rx.android.schedulers.AndroidSchedulers;
 import rx.schedulers.Schedulers;
@@ -48,33 +41,15 @@ import rx.schedulers.Schedulers;
  */
 public class PlayerDialogFragment extends DialogFragment {
 
-
-    @Bind(R.id.textViewTrackName)
-    TextView textViewTrackName;
-    @Bind(R.id.seekBarPlayer)
-    SeekBarCompat seekBarPlayer;
-    @Bind(R.id.chronometerStart)
-    Chronometer chronometerStart;
-    @Bind(R.id.chronometerEnd)
-    Chronometer chronometerEnd;
-    @Bind(R.id.imageViewPrevious)
-    PreviousButton imageViewPrevious;
-    @Bind(R.id.imageViewPlay)
-    PlayButton imageViewPlay;
-    @Bind(R.id.imageViewNext)
-    NextButton imageViewNext;
-    @Bind(R.id.textViewTrackAlbum)
-    TextView textViewTrackAlbum;
-    @Bind(R.id.imageViewAlbum)
-    ImageView imageViewAlbum;
-
     private TracksFragment tracksFragment;
     private TrackParcelable mTrackParcelable;
     private int mAmountToUpdate = 0, currentProgress = 0;
     private Timer timer;
-    private String imageViewAlbumTransitionName;
+    private String mImageViewAlbumTransitionName;
     private int vibrantColor = Color.BLACK;
     private boolean isTwoPane = false;
+
+    private FragmentPlayerBinding mFragmentPlayerBinding;
 
     public static PlayerDialogFragment getInstance(TracksFragment tracksFragment) {
         PlayerDialogFragment playerDialogFragment = new PlayerDialogFragment();
@@ -86,8 +61,7 @@ public class PlayerDialogFragment extends DialogFragment {
     @Nullable
     @Override
     public View onCreateView(final LayoutInflater inflater, final ViewGroup container, final Bundle savedInstanceState) {
-        View rootView = inflater.inflate(R.layout.fragment_player, container, false);
-        ButterKnife.bind(this, rootView);
+        mFragmentPlayerBinding = DataBindingUtil.inflate(inflater, R.layout.fragment_player, container, false);
 
         isTwoPane = ((ContainerActivity) getActivity()).isTwoPane();
         mTrackParcelable = getArguments().getParcelable(getString(R.string.key_tracks_parcelable));
@@ -108,26 +82,26 @@ public class PlayerDialogFragment extends DialogFragment {
 
         ((ContainerActivity) getActivity()).hideNowPlayingLayout();
 
-        imageViewPlay.setOnClickListener(v -> {
+        mFragmentPlayerBinding.imageViewPlay.setOnClickListener(v -> {
             toggleTrack();
         });
 
-        imageViewPlay.setButtonBackgroundColor(getActivity(), vibrantColor);
-        seekBarPlayer.setProgressColor(vibrantColor);
-        seekBarPlayer.setThumbColor(vibrantColor);
+        mFragmentPlayerBinding.imageViewPlay.setButtonBackgroundColor(getActivity(), vibrantColor);
+        mFragmentPlayerBinding.seekBarPlayer.setProgressColor(vibrantColor);
+        mFragmentPlayerBinding.seekBarPlayer.setThumbColor(vibrantColor);
 
         if (Utility.isVersionLollipopAndAbove())
-            imageViewAlbum.setTransitionName(imageViewAlbumTransitionName);
+            mFragmentPlayerBinding.imageViewAlbum.setTransitionName(mImageViewAlbumTransitionName);
 
         if (mTrackParcelable != null) {
-            textViewTrackName.setText(mTrackParcelable.songName);
-            textViewTrackAlbum.setText(mTrackParcelable.albumName);
+            mFragmentPlayerBinding.textViewTrackName.setText(mTrackParcelable.songName);
+            mFragmentPlayerBinding.textViewTrackAlbum.setText(mTrackParcelable.albumName);
             int size = mTrackParcelable.albumImageUrls.size();
             if (size > 0) {
                 Utility.loadImage(getActivity(),
                         mTrackParcelable.albumImageUrls.get(size - 1),
                         mTrackParcelable.albumImageUrls.get(0),
-                        imageViewAlbum,
+                        mFragmentPlayerBinding.imageViewAlbum,
                         null);
             }
             playTrack();
@@ -139,13 +113,10 @@ public class PlayerDialogFragment extends DialogFragment {
                 .observeOn(AndroidSchedulers.mainThread())
                 .subscribe(new Subscriber<Object>() {
                     @Override
-                    public void onCompleted() {
+                    public void onCompleted() {}
 
-                    }
                     @Override
-                    public void onError(final Throwable e) {
-
-                    }
+                    public void onError(final Throwable e) {}
 
                     @Override
                     public void onNext(final Object o) {
@@ -158,7 +129,8 @@ public class PlayerDialogFragment extends DialogFragment {
                         }
                     }
                 });
-        return rootView;
+        
+        return mFragmentPlayerBinding.getRoot();
     }
 
     private void toggleTrack() {
@@ -178,7 +150,7 @@ public class PlayerDialogFragment extends DialogFragment {
             getActivity().startService(intent);
         }).start();
 
-        imageViewPlay.setPauseMode(true);
+        mFragmentPlayerBinding.imageViewPlay.setPauseMode(true);
     }
 
     @Override
@@ -192,39 +164,39 @@ public class PlayerDialogFragment extends DialogFragment {
     }
 
     public void onEventMainThread(MediaPlayerHandler.StoppedEvent stoppedEvent) {
-        imageViewPlay.setPauseMode(false);
-        if (chronometerStart != null) {
-            chronometerStart.setBase(SystemClock.elapsedRealtime());
-            chronometerEnd.setBase(SystemClock.elapsedRealtime() -
+        mFragmentPlayerBinding.imageViewPlay.setPauseMode(false);
+        if (mFragmentPlayerBinding.chronometerStart != null) {
+            mFragmentPlayerBinding.chronometerStart.setBase(SystemClock.elapsedRealtime());
+            mFragmentPlayerBinding.chronometerEnd.setBase(SystemClock.elapsedRealtime() -
                     stoppedEvent.duration);
-            chronometerStart.stop();
+            mFragmentPlayerBinding.chronometerStart.stop();
         }
-
-        seekBarPlayer.setProgress(0);
+        mFragmentPlayerBinding.seekBarPlayer.setProgress(0);
     }
 
     public void onEventMainThread(MediaPlayerHandler.PausedEvent pausedEvent) {
-        imageViewPlay.setPauseMode(false);
-        if (chronometerStart != null) {
-            chronometerStart.setBase(SystemClock.elapsedRealtime() - pausedEvent.progress);
-            chronometerStart.stop();
+        mFragmentPlayerBinding.imageViewPlay.setPauseMode(false);
+        if (mFragmentPlayerBinding.chronometerStart != null) {
+            mFragmentPlayerBinding.chronometerStart.setBase(SystemClock.elapsedRealtime() - pausedEvent.progress);
+            mFragmentPlayerBinding.chronometerStart.stop();
         }
     }
 
     public void onEventMainThread(MediaPlayerHandler.PlayingEvent playingEvent) {
         try {
-            imageViewPlay.setPauseMode(true);
-            if (chronometerStart != null) {
-                chronometerStart.setBase(SystemClock.elapsedRealtime() - playingEvent.progress);
-                chronometerEnd.setBase(SystemClock.elapsedRealtime() -
+            mFragmentPlayerBinding.imageViewPlay.setPauseMode(true);
+            if (mFragmentPlayerBinding.chronometerStart != null) {
+                mFragmentPlayerBinding.chronometerStart.setBase(SystemClock.elapsedRealtime() - playingEvent.progress);
+                mFragmentPlayerBinding.chronometerEnd.setBase(SystemClock.elapsedRealtime() -
                         playingEvent.duration);
-                chronometerStart.start();
+                mFragmentPlayerBinding.chronometerStart.start();
             }
             mAmountToUpdate = (playingEvent.duration) / Keys.SMOOTHNESS_FACTOR;
-            seekBarPlayer.setOnSeekBarChangeListener(SeekbarChangeListener
-                    .getInstance(playingEvent.duration, Keys.SMOOTHNESS_FACTOR, chronometerStart));
-            seekBarPlayer.setMax(Keys.SMOOTHNESS_FACTOR);
-            seekBarPlayer.setProgress(playingEvent.progress / mAmountToUpdate);
+            mFragmentPlayerBinding.seekBarPlayer.setOnSeekBarChangeListener(SeekbarChangeListener
+                    .getInstance(playingEvent.duration, Keys.SMOOTHNESS_FACTOR, mFragmentPlayerBinding.chronometerStart));
+            mFragmentPlayerBinding.seekBarPlayer.setMax(Keys.SMOOTHNESS_FACTOR);
+            mFragmentPlayerBinding.seekBarPlayer.setThumbAlpha(255);
+            mFragmentPlayerBinding.seekBarPlayer.setProgress(playingEvent.progress / mAmountToUpdate);
 
             if (timer != null) {
                 timer.cancel();
@@ -239,10 +211,10 @@ public class PlayerDialogFragment extends DialogFragment {
                         (getActivity()).runOnUiThread(() -> {
                             try {
                                 if (MediaPlayerHandler.getPlayerState() == MediaPlayerHandler.MediaPlayerState.Playing) {
-                                    if ((mAmountToUpdate * seekBarPlayer.getProgress() < playingEvent.duration + playingEvent.progress)) {
-                                        currentProgress = seekBarPlayer.getProgress();
+                                    if ((mAmountToUpdate * mFragmentPlayerBinding.seekBarPlayer.getProgress() < playingEvent.duration + playingEvent.progress)) {
+                                        currentProgress = mFragmentPlayerBinding.seekBarPlayer.getProgress();
                                         currentProgress += 1;
-                                        seekBarPlayer.setProgress(currentProgress);
+                                        mFragmentPlayerBinding.seekBarPlayer.setProgress(currentProgress);
                                     }
                                 } else {
                                     if (timer != null)
@@ -272,16 +244,17 @@ public class PlayerDialogFragment extends DialogFragment {
     @Override
     public void onDestroyView() {
         super.onDestroyView();
-        ButterKnife.unbind(this);
     }
 
-    public void setImageViewAlbumTransitionName(String imageViewAlbumTransitionName) {
-        this.imageViewAlbumTransitionName = imageViewAlbumTransitionName;
-    }
+
 
     @Override
     public void onDismiss(final DialogInterface dialog) {
         super.onDismiss(dialog);
         tracksFragment.refreshActionBar();
+    }
+
+    public void setImageViewAlbumTransitionName(final String imageViewAlbumTransitionName) {
+        mImageViewAlbumTransitionName = imageViewAlbumTransitionName;
     }
 }

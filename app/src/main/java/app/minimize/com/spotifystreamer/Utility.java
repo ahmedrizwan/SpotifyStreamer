@@ -4,9 +4,11 @@ import android.annotation.TargetApi;
 import android.content.Context;
 import android.content.res.TypedArray;
 import android.graphics.Color;
+import android.graphics.drawable.ColorDrawable;
 import android.os.Build;
 import android.support.v4.app.Fragment;
 import android.support.v4.app.FragmentTransaction;
+import android.support.v7.app.ActionBar;
 import android.support.v7.app.AppCompatActivity;
 import android.transition.ChangeBounds;
 import android.transition.ChangeImageTransform;
@@ -72,7 +74,7 @@ public class Utility {
                 transitionSet.addTransition(new ChangeImageTransform());
                 transitionSet.addTransition(new ChangeBounds());
                 transitionSet.addTransition(new ChangeTransform());
-                transitionSet.setDuration(300);
+                transitionSet.setDuration(500);
                 fromFragment.setSharedElementReturnTransition(transitionSet);
                 fromFragment.setSharedElementEnterTransition(transitionSet);
                 toFragment.setSharedElementEnterTransition(transitionSet);
@@ -120,7 +122,7 @@ public class Utility {
     }
 
     public static void loadImage(Context context, String smallImageUrl,
-                                    String largeImageUrl, ImageView imageView, Callable<Void> onSuccess) {
+                                 String largeImageUrl, ImageView imageView, Callable<Void> onSuccess) {
 
         Picasso.with(context)
                 .load(smallImageUrl) // thumbnail url goes here
@@ -164,6 +166,10 @@ public class Utility {
             int darkColor = Color.HSVToColor(hsv);
             activity.getWindow()
                     .setStatusBarColor(darkColor);
+
+            ActionBar supportActionBar = activity.getSupportActionBar();
+            if (supportActionBar != null)
+                supportActionBar.setBackgroundDrawable(new ColorDrawable(vibrantColor));
         }
     }
 }

@@ -10,7 +10,6 @@
         android:layout_height="@dimen/iv_list_large"
         android:src="@drawable/ic_not_available"
         android:layout_margin="@dimen/default_margin"
-        android:transitionName="@string/artists_image_transition"
         android:scaleType="centerCrop"
         android:id="@+id/imageViewArtist"
         android:contentDescription="@string/description_artist_image"/>

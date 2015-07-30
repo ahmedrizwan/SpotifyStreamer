@@ -1,10 +1,12 @@
 apply plugin: 'com.android.application'
+// This does not break the build when Android Studio is missing the JRebel for Android plugin.
+apply plugin: 'com.zeroturnaround.jrebel.android'
 apply plugin: 'me.tatarka.retrolambda'
 apply plugin: 'com.android.databinding'
 
 android {
     compileSdkVersion 22
-    buildToolsVersion "23.0.0 rc1"
+    buildToolsVersion '23.0.0 rc3'
 
     defaultConfig {
         applicationId "app.minimize.com.spotifystreamer"
@@ -29,18 +31,17 @@ android {
 dependencies {
     compile fileTree(dir: 'libs', include: ['*.jar'])
     compile fileTree(dir: 'libs', include: ['jsoup-1.8.2.jar'])
-    compile 'com.android.support:appcompat-v7:22.2.0'
-    compile 'com.android.support:design:22.2.0'
-    compile 'com.android.support:support-v4:22.2.0'
-    compile 'com.android.support:cardview-v7:22.2.0'
-    compile 'com.android.support:recyclerview-v7:22.2.0'
+    compile 'com.android.support:appcompat-v7:22.2.1'
+    compile 'com.android.support:design:22.2.1'
+    compile 'com.android.support:support-v4:22.2.1'
+    compile 'com.android.support:cardview-v7:22.2.1'
+    compile 'com.android.support:recyclerview-v7:22.2.1'
     compile 'com.squareup.retrofit:retrofit:1.9.0'
     compile 'com.squareup.okhttp:okhttp:2.2.0'
     compile 'com.squareup.picasso:picasso:2.5.2'
-    compile 'com.jakewharton:butterknife:7.0.0'
-    compile 'com.android.support:palette-v7:22.2.0'
-    compile 'io.reactivex:rxandroid:0.24.0'
+    compile 'com.android.support:palette-v7:22.2.1'
+    compile 'io.reactivex:rxandroid:0.25.0'
     compile 'com.afollestad:material-dialogs:0.7.6.0'
-
-    compile project(':seek-bar-compat')
+    compile 'com.minimize.library:seekbar-compat:0.2.3'
+    compile 'com.annimon:stream:1.0.2'
 }

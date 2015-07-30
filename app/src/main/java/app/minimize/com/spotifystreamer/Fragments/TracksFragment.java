@@ -13,14 +13,10 @@ import android.support.v7.app.ActionBar;
 import android.support.v7.app.AppCompatActivity;
 import android.support.v7.graphics.Palette;
 import android.support.v7.widget.LinearLayoutManager;
-import android.support.v7.widget.RecyclerView;
 import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
-import android.widget.ImageView;
-import android.widget.ProgressBar;
-import android.widget.TextView;
 
 import java.util.ArrayList;
 import java.util.Collections;
@@ -50,13 +46,6 @@ public class TracksFragment extends Fragment implements TracksAdapter.TracksEven
     private static final String TRACKS = "Tracks";
     private static final String TAG = "TracksFragment";
 
-    RecyclerView recyclerViewTracks;
-
-    ImageView imageViewArtist;
-
-    ProgressBar progressBar;
-    TextView textViewError;
-
     private TracksAdapter mTracksAdapter;
     private List<TrackParcelable> mData = Collections.emptyList();
     private String imageTransitionName;
@@ -72,13 +61,10 @@ public class TracksFragment extends Fragment implements TracksAdapter.TracksEven
     public View onCreateView(LayoutInflater inflater, ViewGroup container,
                              Bundle savedInstanceState) {
 
-        mFragmentTracksBinding = DataBindingUtil.inflate(inflater,R.layout.fragment_tracks,container, false);
-        recyclerViewTracks = mFragmentTracksBinding.recyclerViewTracks;
-        imageViewArtist = mFragmentTracksBinding.imageViewArtist;
+        mFragmentTracksBinding = DataBindingUtil.inflate(inflater, R.layout.fragment_tracks, container, false);
         //bind the progressLayout
-        mIncludeProgressBinding = DataBindingUtil.bind(mFragmentTracksBinding.getRoot().findViewById(R.id.progressLayout));
-        progressBar = mIncludeProgressBinding.progressBar;
-        textViewError = mIncludeProgressBinding.textViewError;
+        mIncludeProgressBinding = DataBindingUtil.bind(mFragmentTracksBinding.getRoot()
+                .findViewById(R.id.progressLayout));
 
         //Restore state
         if (savedInstanceState != null) {
@@ -93,32 +79,33 @@ public class TracksFragment extends Fragment implements TracksAdapter.TracksEven
             //load up color for actionBar and status bar
             vibrantColor = activityIntent.getInt(Keys.COLOR_ACTION_BAR);
             //First launch so load tracks
-//            progressBar.setVisibility(View.VISIBLE);
             loadTracks();
         }
 
         isTwoPane = ((ContainerActivity) getActivity()).isTwoPane();
         Log.e(TAG, "onCreateView " + vibrantColor);
+
         //ActionBar
         refreshActionBar();
 
         //Message TextView
-        if ((mData != null ? mData.size() : 0) == 0)
-//            textViewError.setVisibility(View.VISIBLE);
-
+//        if ((mData != null ? mData.size() : 0) == 0)
+        mIncludeProgressBinding.textViewError.setVisibility(View.GONE);
+        if (mData != null && mData.size() > 0)
+            mIncludeProgressBinding.progressBar.setVisibility(View.GONE);
         //Transition
-        if (Utility.isVersionLollipopAndAbove()) {
-            imageViewArtist.setTransitionName(imageTransitionName);
-        }
+
+        mFragmentTracksBinding.imageViewArtist.setTransitionName(imageTransitionName);
+        Log.e(TAG, "onCreateView "+imageTransitionName);
 
         //Artist Image
         loadArtistImage();
 
         //RecyclerView
-        recyclerViewTracks.hasFixedSize();
-        recyclerViewTracks.setLayoutManager(new LinearLayoutManager(getActivity()));
+        mFragmentTracksBinding.recyclerViewTracks.hasFixedSize();
+        mFragmentTracksBinding.recyclerViewTracks.setLayoutManager(new LinearLayoutManager(getActivity()));
         mTracksAdapter = new TracksAdapter(this, mData);
-        recyclerViewTracks.setAdapter(mTracksAdapter);
+        mFragmentTracksBinding.recyclerViewTracks.setAdapter(mTracksAdapter);
 
         //NowPlaying view check if should be visible or not
         ((ContainerActivity) getActivity()).
@@ -134,7 +121,7 @@ public class TracksFragment extends Fragment implements TracksAdapter.TracksEven
             Utility.loadImage(getActivity(),
                     mArtistParcelable.artistImageUrls.get(size - 1),
                     mArtistParcelable.artistImageUrls.get(0),
-                    imageViewArtist,
+                    mFragmentTracksBinding.imageViewArtist,
                     null);
         }
     }
@@ -160,18 +147,18 @@ public class TracksFragment extends Fragment implements TracksAdapter.TracksEven
             spotifyService.getArtistTopTrack(mArtistParcelable.id, options, new Callback<Tracks>() {
                 @Override
                 public void success(final Tracks tracks, final Response response) {
-                    mData = new ArrayList<TrackParcelable>();
+                    mData = new ArrayList<>();
                     for (Track track : tracks.tracks) {
                         mData.add(new TrackParcelable(track));
                     }
                     Utility.runOnUiThread(((AppCompatActivity) getActivity()), () -> {
                         if (mData.size() == 0) {
-//                            textViewError.setText(getString(R.string.tv_no_tracks));
-//                            textViewError.setVisibility(View.VISIBLE);
+                            mIncludeProgressBinding.textViewError.setText(getString(R.string.tv_no_tracks));
+                            mIncludeProgressBinding.textViewError.setVisibility(View.VISIBLE);
                         }
 
-//                        progressBar.setVisibility(View.GONE);
-                        ((TracksAdapter) recyclerViewTracks.getAdapter()).updateList(mData);
+                        mIncludeProgressBinding.progressBar.setVisibility(View.GONE);
+                        ((TracksAdapter) mFragmentTracksBinding.recyclerViewTracks.getAdapter()).updateList(mData);
                         return null;
                     });
                 }
@@ -181,9 +168,9 @@ public class TracksFragment extends Fragment implements TracksAdapter.TracksEven
 
                     //Handle network error
                     if (error.getKind() == RetrofitError.Kind.NETWORK) {
-//                        textViewError.setText(getString(R.string.network_error));
-//                        textViewError.setVisibility(View.VISIBLE);
-//                        progressBar.setVisibility(View.GONE);
+                        mIncludeProgressBinding.textViewError.setText(getString(R.string.network_error));
+                        mIncludeProgressBinding.textViewError.setVisibility(View.VISIBLE);
+                        mIncludeProgressBinding.progressBar.setVisibility(View.GONE);
                     }
 
                 }
@@ -201,27 +188,28 @@ public class TracksFragment extends Fragment implements TracksAdapter.TracksEven
             Bundle bundle = new Bundle();
             bundle.putParcelable(getString(R.string.key_tracks_parcelable), track);
             bundle.putParcelableArrayList(Keys.KEY_TRACK_PARCELABLE_LIST, mTracksAdapter.getDataSet());
-                int vibrantColor1 = Palette.from(((BitmapDrawable) holder.imageViewAlbum.getDrawable()).getBitmap())
-                        .generate()
-                        .getVibrantColor(Color.BLACK);
-                bundle.putInt(Keys.COLOR_ACTION_BAR, vibrantColor1);
-                playerDialogFragment.setArguments(bundle);
-                playerDialogFragment.show(((AppCompatActivity) getActivity()).getSupportFragmentManager(), "Player");
+            int vibrantColor1 = Palette.from(((BitmapDrawable) holder.imageViewAlbum.getDrawable()).getBitmap())
+                    .generate()
+                    .getVibrantColor(Color.BLACK);
+            bundle.putInt(Keys.COLOR_ACTION_BAR, vibrantColor1);
+            playerDialogFragment.setArguments(bundle);
+            playerDialogFragment.show(((AppCompatActivity) getActivity()).getSupportFragmentManager(), "Player");
         } else {
             //Launch the dialogFragment from here
             PlayerDialogFragment playerDialogFragment = PlayerDialogFragment.getInstance(this);
             Bundle bundle = new Bundle();
             bundle.putParcelable(getString(R.string.key_tracks_parcelable), track);
             bundle.putParcelableArrayList(Keys.KEY_TRACK_PARCELABLE_LIST, mTracksAdapter.getDataSet());
-                int vibrantColor1 = Palette.from(((BitmapDrawable) holder.imageViewAlbum.getDrawable()).getBitmap())
-                        .generate()
-                        .getVibrantColor(Color.BLACK);
-                bundle.putInt(Keys.COLOR_ACTION_BAR, vibrantColor1);
-                playerDialogFragment.setArguments(bundle);
-                if (Utility.isVersionLollipopAndAbove())
-                    playerDialogFragment.setImageViewAlbumTransitionName(holder.imageViewAlbum.getTransitionName());
-                Utility.launchFragmentWithSharedElements(isTwoPane, this,
-                        playerDialogFragment, R.id.container, holder.imageViewAlbum);
+            int vibrantColor1 = Palette.from(((BitmapDrawable) holder.imageViewAlbum.getDrawable()).getBitmap())
+                    .generate()
+                    .getVibrantColor(Color.BLACK);
+            bundle.putInt(Keys.COLOR_ACTION_BAR, vibrantColor1);
+            playerDialogFragment.setArguments(bundle);
+
+            if (Utility.isVersionLollipopAndAbove())
+                playerDialogFragment.setImageViewAlbumTransitionName(holder.imageViewAlbum.getTransitionName());
+            Utility.launchFragmentWithSharedElements(isTwoPane, this,
+                    playerDialogFragment, R.id.container, holder.imageViewAlbum);
         }
     }
 

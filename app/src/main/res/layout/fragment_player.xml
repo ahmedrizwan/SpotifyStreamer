@@ -45,10 +45,9 @@
             <app.minimize.com.seek_bar_compat.SeekBarCompat
                 android:id="@+id/seekBarPlayer"
                 android:layout_width="fill_parent"
-                android:layout_height="100dp"
-                android:background="@android:color/holo_orange_light"
+                android:layout_height="wrap_content"
+                android:maxHeight="300sp"
                 android:layout_below="@id/textViewTrackAlbum"
-                android:layout_centerVertical="true"
                 />
 
             <Chronometer
