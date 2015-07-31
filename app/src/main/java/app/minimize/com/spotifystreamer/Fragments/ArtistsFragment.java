@@ -283,6 +283,9 @@ public class ArtistsFragment extends Fragment implements ArtistsAdapter.ArtistsE
     @TargetApi(Build.VERSION_CODES.LOLLIPOP)
     @Override
     public void artistClicked(final ArtistParcelable artistParcelable, final ArtistsAdapter.RecyclerViewHolderArtists holder) {
+        //hide the keyboard
+        Utility.hideKeyboard(getActivity(), mFragmentArtistsBinding.editTextSearch);
+        
         int container = ((ContainerActivity) getActivity()).isTwoPane() ? R.id.container : R.id.container;
         //Shared Element transition using fragments if lollipop and above
         TracksFragment tracksFragment = new TracksFragment();

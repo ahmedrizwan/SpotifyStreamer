@@ -80,7 +80,7 @@ public class PlayerDialogFragment extends DialogFragment {
             actionBar.setTitle(R.string.title_player);
         }
 
-        ((ContainerActivity) getActivity()).hideNowPlayingLayout();
+        ((ContainerActivity) getActivity()).setNowPlayingVisibile(false);
 
         mFragmentPlayerBinding.imageViewPlay.setOnClickListener(v -> {
             toggleTrack();
@@ -150,7 +150,7 @@ public class PlayerDialogFragment extends DialogFragment {
             getActivity().startService(intent);
         }).start();
 
-        mFragmentPlayerBinding.imageViewPlay.setPauseMode(true);
+        mFragmentPlayerBinding.imageViewPlay.setMode(true);
     }
 
     @Override
@@ -164,7 +164,7 @@ public class PlayerDialogFragment extends DialogFragment {
     }
 
     public void onEventMainThread(MediaPlayerHandler.StoppedEvent stoppedEvent) {
-        mFragmentPlayerBinding.imageViewPlay.setPauseMode(false);
+        mFragmentPlayerBinding.imageViewPlay.setMode(false);
         if (mFragmentPlayerBinding.chronometerStart != null) {
             mFragmentPlayerBinding.chronometerStart.setBase(SystemClock.elapsedRealtime());
             mFragmentPlayerBinding.chronometerEnd.setBase(SystemClock.elapsedRealtime() -
@@ -175,7 +175,7 @@ public class PlayerDialogFragment extends DialogFragment {
     }
 
     public void onEventMainThread(MediaPlayerHandler.PausedEvent pausedEvent) {
-        mFragmentPlayerBinding.imageViewPlay.setPauseMode(false);
+        mFragmentPlayerBinding.imageViewPlay.setMode(false);
         if (mFragmentPlayerBinding.chronometerStart != null) {
             mFragmentPlayerBinding.chronometerStart.setBase(SystemClock.elapsedRealtime() - pausedEvent.progress);
             mFragmentPlayerBinding.chronometerStart.stop();
@@ -184,7 +184,7 @@ public class PlayerDialogFragment extends DialogFragment {
 
     public void onEventMainThread(MediaPlayerHandler.PlayingEvent playingEvent) {
         try {
-            mFragmentPlayerBinding.imageViewPlay.setPauseMode(true);
+            mFragmentPlayerBinding.imageViewPlay.setMode(true);
             if (mFragmentPlayerBinding.chronometerStart != null) {
                 mFragmentPlayerBinding.chronometerStart.setBase(SystemClock.elapsedRealtime() - playingEvent.progress);
                 mFragmentPlayerBinding.chronometerEnd.setBase(SystemClock.elapsedRealtime() -

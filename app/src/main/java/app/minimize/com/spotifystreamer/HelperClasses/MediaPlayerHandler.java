@@ -173,21 +173,16 @@ public class MediaPlayerHandler implements AudioManager.OnAudioFocusChangeListen
         }
     }
 
-    private void togglePlayPause() {
+    public void togglePlayPause() {
         if (mMediaPlayerState == MediaPlayerState.Playing) {
             mMediaPlayer.pause();
             setPlayerState(MediaPlayerState.Paused);
 //            Old Implementation using EventBus
-//            EventBus.getDefault()
-//                    .post(mPausedEvent.setProgress(mMediaPlayer.getCurrentPosition()));
             RxBus.getInstance().send(mPausedEvent.setProgress(mMediaPlayer.getCurrentPosition()));
         } else {
             mMediaPlayer.start();
             setPlayerState(MediaPlayerState.Playing);
             //Post the playingEvent
-//            EventBus.getDefault()
-//                    .post(mPlayingEvent.setDuration(mMediaPlayer.getDuration())
-//                            .setProgress(mMediaPlayer.getCurrentPosition()));
             RxBus.getInstance().send(mPlayingEvent.setDuration(mMediaPlayer.getDuration())
                             .setProgress(mMediaPlayer.getCurrentPosition()));
         }
@@ -201,9 +196,6 @@ public class MediaPlayerHandler implements AudioManager.OnAudioFocusChangeListen
     public void onPrepared(final MediaPlayer mediaPlayer) {
         mediaPlayer.start();
         setPlayerState(MediaPlayerState.Playing);
-//        EventBus.getDefault()
-//                .post(mPlayingEvent.setDuration(mediaPlayer.getDuration())
-//                        .setProgress(0));
         RxBus.getInstance().send(mPlayingEvent.setDuration(mediaPlayer.getDuration())
                         .setProgress(0));
     }
@@ -211,8 +203,6 @@ public class MediaPlayerHandler implements AudioManager.OnAudioFocusChangeListen
     @Override
     public void onCompletion(final MediaPlayer mediaPlayer) {
         setPlayerState(MediaPlayerState.Stopped);
-//        EventBus.getDefault()
-//                .post(mStoppedEvent.setDuration(mediaPlayer.getDuration()));
         RxBus.getInstance().send(mStoppedEvent.setDuration(mediaPlayer.getDuration()));
         mMediaPlayer.release();
     }

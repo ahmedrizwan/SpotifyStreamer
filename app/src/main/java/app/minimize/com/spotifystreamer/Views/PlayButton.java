@@ -19,7 +19,7 @@ public class PlayButton extends CircularEmptyButton {
     Path mPath;
     float point1x, point1y, point2x, point2y, point3x, point3y;
     int widthHeight;
-    boolean pauseMode = false;
+    boolean mPaused = false;
 
     public PlayButton(final Context context) {
         super(context);
@@ -60,7 +60,7 @@ public class PlayButton extends CircularEmptyButton {
     @Override
     protected void onDraw(Canvas canvas) {
         super.onDraw(canvas);
-        if (!pauseMode) {
+        if (mPaused) {
             canvas.drawPath(mPath, mPaint);
         } else {
             canvas.drawRect(widthHeight / 3, widthHeight / 3,
@@ -72,12 +72,12 @@ public class PlayButton extends CircularEmptyButton {
         }
     }
 
-    public void setPauseMode(boolean pauseMode) {
-        this.pauseMode = pauseMode;
+    public void setMode(boolean paused) {
+        this.mPaused = paused;
         invalidate();
     }
 
-    public boolean getPauseMode() {
-        return pauseMode;
+    public boolean getPaused() {
+        return mPaused;
     }
 }

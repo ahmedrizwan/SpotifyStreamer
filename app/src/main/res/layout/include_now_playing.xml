@@ -3,12 +3,6 @@
 <layout
     xmlns:android="http://schemas.android.com/apk/res/android">
     <data>
-        <variable name="trackTitle" type="String"/>
-        <variable name="albumTitle" type="String"/>
-        <variable name="artistTitle" type="String"/>
-        <variable name="nowPlayingVisible" type="Boolean"/>
-        <variable name="albumImage" type="android.graphics.drawable.Drawable"/>
-        <import type="android.view.View"/>
 
     </data>
 
@@ -21,8 +15,7 @@
         android:layout_gravity="bottom"
         android:clickable="true"
         android:focusable="true"
-        android:visibility="@{nowPlayingVisible? View.VISIBLE : View.GONE}"
-        android:onClick="nowPlayingOnClick"
+        android:visibility="gone"
         app:cardCornerRadius="3dp"
         app:cardElevation="6dp"
         tools:showIn="@layout/activity_container">
@@ -37,7 +30,7 @@
                 android:layout_height="@dimen/iv_previous_next"
                 android:layout_centerVertical="true"
                 android:scaleType="fitCenter"
-                android:src="@{albumImage!=null?albumImage:@drawable/ic_not_available}"
+                android:src="@drawable/ic_not_available"
                 />
 
             <app.minimize.com.spotifystreamer.Views.PlayButton
@@ -48,6 +41,7 @@
                 android:layout_centerVertical="true"
                 android:background="?attr/colorPrimary"
                 android:padding="@dimen/default_margin"
+                android:clickable="true"
                 />
 
             <LinearLayout
@@ -64,7 +58,7 @@
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
                     android:fontFamily="sans-serif-light"
-                    android:text="@{trackTitle}"
+
                     android:textColor="@android:color/black"
                     android:textSize="@dimen/tv_large"
                     />
@@ -74,7 +68,7 @@
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
                     android:fontFamily="sans-serif-light"
-                    android:text="@{albumTitle}"
+
                     android:textColor="@android:color/black"
                     android:textSize="@dimen/tv_small"
                     />

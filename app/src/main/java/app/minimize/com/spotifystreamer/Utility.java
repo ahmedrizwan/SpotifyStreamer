@@ -16,6 +16,7 @@ import android.transition.ChangeTransform;
 import android.transition.TransitionSet;
 import android.util.Log;
 import android.view.View;
+import android.view.inputmethod.InputMethodManager;
 import android.widget.ImageView;
 
 import com.squareup.picasso.Callback;
@@ -53,11 +54,11 @@ public class Utility {
     }
 
     public static void launchFragment(final AppCompatActivity activity, int containerId, final Fragment fragment) {
-        FragmentTransaction trans = activity.getSupportFragmentManager()
-                .beginTransaction();
-        trans.replace(containerId, fragment);
-        trans.addToBackStack(null);
-        trans.commit();
+        activity.getSupportFragmentManager()
+                .beginTransaction()
+                .replace(containerId, fragment)
+                .addToBackStack(null)
+                .commit();
     }
 
     @TargetApi(Build.VERSION_CODES.LOLLIPOP)
@@ -79,7 +80,6 @@ public class Utility {
                 fromFragment.setSharedElementEnterTransition(transitionSet);
                 toFragment.setSharedElementEnterTransition(transitionSet);
                 toFragment.setSharedElementReturnTransition(transitionSet);
-
                 for (View view : views) {
                     fragmentTransaction.addSharedElement(view, view.getTransitionName());
                 }
@@ -170,6 +170,14 @@ public class Utility {
             ActionBar supportActionBar = activity.getSupportActionBar();
             if (supportActionBar != null)
                 supportActionBar.setBackgroundDrawable(new ColorDrawable(vibrantColor));
+        }
+    }
+
+    public static void hideKeyboard(Context context, View view) {
+        //check if view has focus
+        if (view != null) {
+            InputMethodManager imm = (InputMethodManager) context.getSystemService(Context.INPUT_METHOD_SERVICE);
+            imm.hideSoftInputFromWindow(view.getWindowToken(), 0);
         }
     }
 }
