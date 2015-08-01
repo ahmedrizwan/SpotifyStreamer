@@ -4,9 +4,11 @@ import android.annotation.TargetApi;
 import android.content.Context;
 import android.content.res.TypedArray;
 import android.graphics.Color;
+import android.graphics.drawable.ColorDrawable;
 import android.os.Build;
 import android.support.v4.app.Fragment;
 import android.support.v4.app.FragmentTransaction;
+import android.support.v7.app.ActionBar;
 import android.support.v7.app.AppCompatActivity;
 import android.transition.ChangeBounds;
 import android.transition.ChangeImageTransform;
@@ -14,6 +16,7 @@ import android.transition.ChangeTransform;
 import android.transition.TransitionSet;
 import android.util.Log;
 import android.view.View;
+import android.view.inputmethod.InputMethodManager;
 import android.widget.ImageView;
 
 import com.squareup.picasso.Callback;
@@ -51,11 +54,11 @@ public class Utility {
     }
 
     public static void launchFragment(final AppCompatActivity activity, int containerId, final Fragment fragment) {
-        FragmentTransaction trans = activity.getSupportFragmentManager()
-                .beginTransaction();
-        trans.replace(containerId, fragment);
-        trans.addToBackStack(null);
-        trans.commit();
+        activity.getSupportFragmentManager()
+                .beginTransaction()
+                .replace(containerId, fragment)
+                .addToBackStack(null)
+                .commit();
     }
 
     @TargetApi(Build.VERSION_CODES.LOLLIPOP)
@@ -72,12 +75,11 @@ public class Utility {
                 transitionSet.addTransition(new ChangeImageTransform());
                 transitionSet.addTransition(new ChangeBounds());
                 transitionSet.addTransition(new ChangeTransform());
-                transitionSet.setDuration(300);
+                transitionSet.setDuration(500);
                 fromFragment.setSharedElementReturnTransition(transitionSet);
                 fromFragment.setSharedElementEnterTransition(transitionSet);
                 toFragment.setSharedElementEnterTransition(transitionSet);
                 toFragment.setSharedElementReturnTransition(transitionSet);
-
                 for (View view : views) {
                     fragmentTransaction.addSharedElement(view, view.getTransitionName());
                 }
@@ -120,7 +122,7 @@ public class Utility {
     }
 
     public static void loadImage(Context context, String smallImageUrl,
-                                    String largeImageUrl, ImageView imageView, Callable<Void> onSuccess) {
+                                 String largeImageUrl, ImageView imageView, Callable<Void> onSuccess) {
 
         Picasso.with(context)
                 .load(smallImageUrl) // thumbnail url goes here
@@ -164,6 +166,18 @@ public class Utility {
             int darkColor = Color.HSVToColor(hsv);
             activity.getWindow()
                     .setStatusBarColor(darkColor);
+
+            ActionBar supportActionBar = activity.getSupportActionBar();
+            if (supportActionBar != null)
+                supportActionBar.setBackgroundDrawable(new ColorDrawable(vibrantColor));
+        }
+    }
+
+    public static void hideKeyboard(Context context, View view) {
+        //check if view has focus
+        if (view != null) {
+            InputMethodManager imm = (InputMethodManager) context.getSystemService(Context.INPUT_METHOD_SERVICE);
+            imm.hideSoftInputFromWindow(view.getWindowToken(), 0);
         }
     }
 }

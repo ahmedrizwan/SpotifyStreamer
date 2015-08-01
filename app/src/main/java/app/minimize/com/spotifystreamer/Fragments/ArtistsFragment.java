@@ -1,7 +1,6 @@
 package app.minimize.com.spotifystreamer.Fragments;
 
 import android.annotation.TargetApi;
-import android.app.Activity;
 import android.content.Context;
 import android.databinding.DataBindingUtil;
 import android.graphics.Color;
@@ -38,7 +37,6 @@ import app.minimize.com.spotifystreamer.Rx.RxObservables;
 import app.minimize.com.spotifystreamer.Utility;
 import app.minimize.com.spotifystreamer.databinding.FragmentArtistsBinding;
 import app.minimize.com.spotifystreamer.databinding.IncludeProgressBinding;
-import butterknife.ButterKnife;
 import kaaes.spotify.webapi.android.SpotifyApi;
 import kaaes.spotify.webapi.android.SpotifyService;
 import kaaes.spotify.webapi.android.models.Artist;
@@ -58,7 +56,7 @@ public class ArtistsFragment extends Fragment implements ArtistsAdapter.ArtistsE
 
     private FragmentArtistsBinding mFragmentArtistsBinding;
     private IncludeProgressBinding mIncludeProgressBinding;
-    
+
     List<ArtistParcelable> mArtists = Collections.emptyList();
     ArtistsAdapter mArtistsAdapter;
 
@@ -89,9 +87,11 @@ public class ArtistsFragment extends Fragment implements ArtistsAdapter.ArtistsE
     public View onCreateView(final LayoutInflater inflater, final ViewGroup container, final Bundle savedInstanceState) {
         mFragmentArtistsBinding = DataBindingUtil.inflate(inflater, R.layout.fragment_artists,
                 container, false);
+        mIncludeProgressBinding = DataBindingUtil.bind(mFragmentArtistsBinding.getRoot()
+                .findViewById(R.id.progressLayout));
 
-        mIncludeProgressBinding = DataBindingUtil.bind(mFragmentArtistsBinding.getRoot().findViewById(R.id.progressLayout));
         mIncludeProgressBinding.textViewError.setText("Hello");
+        mIncludeProgressBinding.progressBar.setVisibility(View.GONE);
         //ActionBar
         setActionBarTitle();
 
@@ -138,6 +138,7 @@ public class ArtistsFragment extends Fragment implements ArtistsAdapter.ArtistsE
         mFragmentArtistsBinding.recyclerViewArtists.setLayoutManager(new LinearLayoutManager(getActivity()));
 
         mFragmentArtistsBinding.recyclerViewArtists.setAdapter(mArtistsAdapter);
+
 
         showTextViewSearchArtists();
 
@@ -275,46 +276,20 @@ public class ArtistsFragment extends Fragment implements ArtistsAdapter.ArtistsE
 
 
     @Override
-    public void onCreate(Bundle savedInstanceState) {
-        super.onCreate(savedInstanceState);
-    }
-
-    @Override
-    public void onViewCreated(View view, Bundle savedInstanceState) {
-        super.onViewCreated(view, savedInstanceState);
-    }
-
-    @Override
-    public void onAttach(Activity activity) {
-        super.onAttach(activity);
-    }
-
-    @Override
-    public void onDetach() {
-        super.onDetach();
-    }
-
-
-    @Override
     public Context getContext() {
         return getActivity();
-    }
-
-
-    @Override
-    public void onDestroyView() {
-        super.onDestroyView();
-        ButterKnife.unbind(this);
     }
 
     @TargetApi(Build.VERSION_CODES.LOLLIPOP)
     @Override
     public void artistClicked(final ArtistParcelable artistParcelable, final ArtistsAdapter.RecyclerViewHolderArtists holder) {
-        int container = ((ContainerActivity) getActivity()).isTwoPane() ? R.id.container : R.id.container;
+        //hide the keyboard
+        Utility.hideKeyboard(getActivity(), mFragmentArtistsBinding.editTextSearch);
+        
+        int container = ((ContainerActivity) getActivity()).isTwoPane() ? R.id.tracksContainer : R.id.container;
         //Shared Element transition using fragments if lollipop and above
         TracksFragment tracksFragment = new TracksFragment();
-        if (Utility.isVersionLollipopAndAbove())
-            tracksFragment.setImageTransitionName(holder.imageViewArtist.getTransitionName());
+        tracksFragment.setImageTransitionName(holder.imageViewArtist.getTransitionName());
         Bundle bundle = new Bundle();
         bundle.putParcelable(Keys.KEY_ARTIST_PARCELABLE, artistParcelable);
         Utility.runOnWorkerThread(() -> {
@@ -326,6 +301,7 @@ public class ArtistsFragment extends Fragment implements ArtistsAdapter.ArtistsE
             Utility.launchFragmentWithSharedElements(isTwoPane, this, tracksFragment, container, holder.imageViewArtist);
             return null;
         });
+
     }
 
     @Override

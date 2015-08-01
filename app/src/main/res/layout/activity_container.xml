@@ -1,13 +1,7 @@
 <?xml version="1.0" encoding="utf-8"?>
-<layout xmlns:android="http://schemas.android.com/apk/res/android" xmlns:bind="http://schemas.android.com/apk/res-auto">
+<layout xmlns:android="http://schemas.android.com/apk/res/android">
     <data>
-        <variable name="toolBarTitle" type="String"/>
-        <variable name="trackTitle" type="String"/>
-        <variable name="albumTitle" type="String"/>
-        <variable name="artistTitle" type="String"/>
-        <variable name="toolBarBackgroundColor" type="int"/>
-        <variable name="nowPlayingVisible" type="Boolean"/>
-        <variable name="albumImage" type="android.graphics.drawable.Drawable"/>
+        <import type="android.view.View"/>
     </data>
     <LinearLayout
         xmlns:tools="http://schemas.android.com/tools"
@@ -21,8 +15,7 @@
             android:id="@+id/mainToolbar"
             android:layout_width="match_parent"
             android:layout_height="?attr/actionBarSize"
-            android:background="@{toolBarBackgroundColor!=0?toolBarBackgroundColor:@color/green}"
-            android:title="@{toolBarTitle}"
+            android:background="?attr/colorPrimary"
             />
 
         <LinearLayout
@@ -31,14 +24,12 @@
             android:layout_height="0dp"
             android:layout_marginBottom="2sp"
             android:layout_weight="1"
-            android:orientation="vertical"/>
+            android:orientation="vertical"
+            android:visibility="@{View.VISIBLE}"/>
 
-        <include layout="@layout/include_now_playing"
-                 bind:trackTitle="@{trackTitle}"
-                 bind:albumTitle="@{albumTitle}"
-                 bind:artistTitle="@{artistTitle}"
-                 bind:nowPlayingVisible="@{nowPlayingVisible}"
-                 bind:albumImage="@{albumImage}"
+        <include android:id="@+id/layoutNowPlaying"
+
+                 layout="@layout/include_now_playing"
             />
 
     </LinearLayout>

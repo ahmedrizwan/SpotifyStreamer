@@ -3,7 +3,6 @@ package app.minimize.com.spotifystreamer.Activities;
 import android.content.Intent;
 import android.databinding.DataBindingUtil;
 import android.graphics.Bitmap;
-import android.graphics.drawable.BitmapDrawable;
 import android.graphics.drawable.Drawable;
 import android.os.Bundle;
 import android.support.v4.content.ContextCompat;
@@ -13,7 +12,6 @@ import android.util.Log;
 import android.view.Menu;
 import android.view.MenuItem;
 import android.view.View;
-import android.widget.Toast;
 
 import com.squareup.picasso.Picasso;
 import com.squareup.picasso.Target;
@@ -24,8 +22,8 @@ import app.minimize.com.spotifystreamer.MediaPlayerService;
 import app.minimize.com.spotifystreamer.Parcelables.TrackParcelable;
 import app.minimize.com.spotifystreamer.R;
 import app.minimize.com.spotifystreamer.Rx.RxBus;
-import app.minimize.com.spotifystreamer.Utility;
 import app.minimize.com.spotifystreamer.databinding.ActivityContainerBinding;
+import app.minimize.com.spotifystreamer.databinding.IncludeNowPlayingBinding;
 import rx.Subscriber;
 import rx.android.schedulers.AndroidSchedulers;
 import rx.schedulers.Schedulers;
@@ -35,6 +33,7 @@ public class ContainerActivity extends AppCompatActivity {
     private static final String TAG = "ContainerActivity";
     boolean mTwoPane;
     private ActivityContainerBinding mActivityContainerBinding;
+    private IncludeNowPlayingBinding mIncludeNowPlayingBinding;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -42,15 +41,20 @@ public class ContainerActivity extends AppCompatActivity {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_container);
         mActivityContainerBinding = DataBindingUtil.setContentView(this, R.layout.activity_container);
-        mActivityContainerBinding.setToolBarTitle(getString(R.string.app_name));
-        mActivityContainerBinding.setToolBarBackgroundColor(Utility.getPrimaryColorFromSelectedTheme(this));
-        mActivityContainerBinding.setNowPlayingVisible(false);
+        mIncludeNowPlayingBinding = DataBindingUtil.bind(mActivityContainerBinding.getRoot()
+                .findViewById(R.id.layoutNowPlaying));
+
         setSupportActionBar(mActivityContainerBinding.mainToolbar);
+        mActivityContainerBinding.mainToolbar.setTitle(getString(R.string.app_name));
 
         //Check for twoPanes
-//        if (findViewById(R.id.tracksContainer) != null) {
-//            mTwoPane = true;
-//        } else {
+        if (mActivityContainerBinding.tracksContainer != null) {
+            mTwoPane = true;
+            //load the artist fragment in the tracksContainer
+            getSupportFragmentManager().beginTransaction()
+                    .add(R.id.fragmentArtists, new ArtistsFragment())
+                    .commit();
+        } else {
             mTwoPane = false;
             //make transaction for the artists fragment
             if (savedInstanceState == null) {
@@ -58,8 +62,7 @@ public class ContainerActivity extends AppCompatActivity {
                         .add(R.id.container, new ArtistsFragment())
                         .commit();
             }
-
-//        }
+        }
 
         //start service to retrieve the status of player
         startServiceForStatusRetrieval();
@@ -71,21 +74,50 @@ public class ContainerActivity extends AppCompatActivity {
                 .subscribe(new Subscriber<Object>() {
                     @Override
                     public void onCompleted() {
-
                     }
 
                     @Override
                     public void onError(final Throwable e) {
-
                     }
 
                     @Override
                     public void onNext(final Object o) {
-                        if (o instanceof TrackParcelable) {
-                            onEventMainThread(((TrackParcelable) o));
+                        Log.e(TAG, "onNext " + o.getClass());
+                        if (o instanceof MediaPlayerHandler.StoppedEvent) {
+                            //hide the nowPlayingCard
+                            setNowPlayingVisibile(false);
+                        } else if (o instanceof MediaPlayerHandler.PlayingEvent) {
+                            //show the nowPlayingCard
+                            setNowPlayingVisibile(true);
+                            cardPlaying();
+                        } else if (o instanceof MediaPlayerHandler.PausedEvent) {
+                            cardPaused();
                         }
                     }
                 });
+
+        mIncludeNowPlayingBinding.buttonPlayPause.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(final View v) {
+                MediaPlayerHandler.getInstance(ContainerActivity.this)
+                        .togglePlayPause();
+            }
+        });
+
+    }
+
+    public void refreshNowPlayingCardState() {
+        //get the state of the player
+        MediaPlayerHandler.MediaPlayerState playerState = MediaPlayerHandler
+                .getPlayerState();
+
+        if (playerState == MediaPlayerHandler.MediaPlayerState.Playing) {
+            cardPlaying();
+        } else if (playerState == MediaPlayerHandler.MediaPlayerState.Paused) {
+            cardPaused();
+        } else {
+            setNowPlayingVisibile(false);
+        }
     }
 
     public void startServiceForStatusRetrieval() {
@@ -98,46 +130,38 @@ public class ContainerActivity extends AppCompatActivity {
     public void onEventMainThread(TrackParcelable trackParcelable) {
         if (MediaPlayerHandler.getPlayerState() == MediaPlayerHandler.MediaPlayerState.Idle) {
             //Hide the NowPlaying
-            hideNowPlayingLayout();
+            setNowPlayingVisibile(false);
         } else {
-            mActivityContainerBinding.setNowPlayingVisible(true);
-            mActivityContainerBinding.setTrackTitle(trackParcelable.songName);
-            mActivityContainerBinding.setAlbumTitle(trackParcelable.albumName);
-
+            setNowPlayingVisibile(true);
+            setCardTrackAndAlbumNames(trackParcelable.songName, trackParcelable.albumName);
             int size = trackParcelable.albumImageUrls.size();
             if (size > 0)
                 Picasso.with(ContainerActivity.this)
                         .load(trackParcelable.albumImageUrls.get(size - 1))
                         .into(new Target() {
                             @Override
-                            public void onBitmapLoaded(final Bitmap bitmap, final Picasso.LoadedFrom from) {
-                                mActivityContainerBinding.setAlbumImage(new BitmapDrawable(getResources(), bitmap));
+                            public void onBitmapLoaded(final Bitmap bitmap,
+                                                       final Picasso.LoadedFrom from) {
+                                mIncludeNowPlayingBinding.imageViewAlbum.setImageBitmap(bitmap);
                             }
 
                             @Override
                             public void onBitmapFailed(final Drawable errorDrawable) {
-
                             }
 
                             @Override
                             public void onPrepareLoad(final Drawable placeHolderDrawable) {
-
                             }
                         });
             else
-                mActivityContainerBinding.setAlbumImage(ContextCompat.getDrawable(ContainerActivity.this, R.drawable.ic_not_available));
+                mIncludeNowPlayingBinding.imageViewAlbum.
+                        setImageDrawable((ContextCompat.getDrawable(ContainerActivity.this, R.drawable.ic_not_available)));
         }
     }
 
-    public void hideNowPlayingLayout() {
-        mActivityContainerBinding.setNowPlayingVisible(false);
-    }
-
-    public void nowPlayingOnClick(View view) {
-        Toast.makeText(this,
-                mActivityContainerBinding.getTrackTitle(),
-                Toast.LENGTH_SHORT)
-                .show();
+    private void setCardTrackAndAlbumNames(final String songName, final String albumName) {
+        mIncludeNowPlayingBinding.textViewArtistName.setText(albumName);
+        mIncludeNowPlayingBinding.textViewTrackName.setText(songName);
     }
 
     public boolean isTwoPane() {
@@ -186,5 +210,25 @@ public class ContainerActivity extends AppCompatActivity {
 
     private void logHelper(final String message) {
         Log.e("Container Activity", message);
+    }
+
+    public void setNowPlayingVisibile(boolean visible) {
+        Log.e(TAG, "setNowPlayingVisibile " + visible);
+        if (visible) {
+            mIncludeNowPlayingBinding.getRoot()
+                    .setVisibility(View.VISIBLE);
+        } else {
+            mIncludeNowPlayingBinding.getRoot()
+                    .setVisibility(View.GONE);
+        }
+    }
+
+    public void cardPlaying() {
+        //set the button to play mode
+        mIncludeNowPlayingBinding.buttonPlayPause.setMode(false);
+    }
+
+    public void cardPaused() {
+        mIncludeNowPlayingBinding.buttonPlayPause.setMode(true);
     }
 }
