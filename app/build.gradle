@@ -44,4 +44,5 @@ dependencies {
     compile 'com.afollestad:material-dialogs:0.7.6.0'
     compile 'com.minimize.library:seekbar-compat:0.2.3'
     compile 'com.annimon:stream:1.0.2'
+    compile 'de.greenrobot:eventbus:2.4.0'
 }

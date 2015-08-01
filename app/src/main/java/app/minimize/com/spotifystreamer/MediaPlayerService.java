@@ -9,10 +9,11 @@ import android.util.Log;
 import app.minimize.com.spotifystreamer.Activities.Keys;
 import app.minimize.com.spotifystreamer.HelperClasses.MediaPlayerHandler;
 import app.minimize.com.spotifystreamer.Parcelables.TrackParcelable;
-import app.minimize.com.spotifystreamer.Rx.RxBus;
+import de.greenrobot.event.EventBus;
 
 /**
  * Created by ahmedrizwan on 6/18/15.
+ *
  */
 public class MediaPlayerService extends Service {
 
@@ -43,7 +44,8 @@ public class MediaPlayerService extends Service {
     private boolean statusReceiver(final Intent intent) {
         try {
             if (intent.getBooleanExtra(Keys.KEY_GET_STATUS, false)) {
-                RxBus.getInstance().send(new MediaPlayerHandler.PlayingEvent(0,0));
+//                RxBus.getInstance().send(new MediaPlayerHandler.PlayingEvent(0,0));
+                EventBus.getDefault().post(mTrackParcelable);
                 Log.e(TAG, "statusReceiver ");
                 return true;
             }

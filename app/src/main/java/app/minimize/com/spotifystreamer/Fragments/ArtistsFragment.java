@@ -286,7 +286,7 @@ public class ArtistsFragment extends Fragment implements ArtistsAdapter.ArtistsE
         //hide the keyboard
         Utility.hideKeyboard(getActivity(), mFragmentArtistsBinding.editTextSearch);
         
-        int container = ((ContainerActivity) getActivity()).isTwoPane() ? R.id.container : R.id.container;
+        int container = ((ContainerActivity) getActivity()).isTwoPane() ? R.id.tracksContainer : R.id.container;
         //Shared Element transition using fragments if lollipop and above
         TracksFragment tracksFragment = new TracksFragment();
         tracksFragment.setImageTransitionName(holder.imageViewArtist.getTransitionName());
