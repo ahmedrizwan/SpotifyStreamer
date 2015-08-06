@@ -62,7 +62,8 @@ public class Utility {
     }
 
     @TargetApi(Build.VERSION_CODES.LOLLIPOP)
-    public static void launchFragmentWithSharedElements(final boolean isTwoPane, final Fragment fromFragment,
+    public static void launchFragmentWithSharedElements(final boolean isTwoPane,
+                                                        final Fragment fromFragment,
                                                         final Fragment toFragment,
                                                         final int container,
                                                         final View... views) {
