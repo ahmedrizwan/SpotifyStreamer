@@ -44,7 +44,6 @@ public class MediaPlayerService extends Service {
     private boolean statusReceiver(final Intent intent) {
         try {
             if (intent.getBooleanExtra(Keys.KEY_GET_STATUS, false)) {
-//                RxBus.getInstance().send(new MediaPlayerHandler.PlayingEvent(0,0));
                 EventBus.getDefault().post(mTrackParcelable);
                 Log.e(TAG, "statusReceiver ");
                 return true;

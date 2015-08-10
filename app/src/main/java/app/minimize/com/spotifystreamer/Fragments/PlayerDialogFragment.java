@@ -31,12 +31,9 @@ import app.minimize.com.spotifystreamer.HelperClasses.SeekbarChangeListener;
 import app.minimize.com.spotifystreamer.MediaPlayerService;
 import app.minimize.com.spotifystreamer.Parcelables.TrackParcelable;
 import app.minimize.com.spotifystreamer.R;
-import app.minimize.com.spotifystreamer.Rx.RxBus;
 import app.minimize.com.spotifystreamer.Utility;
 import app.minimize.com.spotifystreamer.databinding.FragmentPlayerBinding;
-import rx.Subscriber;
-import rx.android.schedulers.AndroidSchedulers;
-import rx.schedulers.Schedulers;
+import de.greenrobot.event.EventBus;
 
 /**
  * Created by ahmedrizwan on 6/15/15.
@@ -44,7 +41,6 @@ import rx.schedulers.Schedulers;
 public class PlayerDialogFragment extends DialogFragment {
 
     private static final String TAG = "PlayerDialogFragment";
-    private TracksFragment tracksFragment;
     private int mAmountToUpdate = 0, currentProgress = 0;
     private Timer timer;
     private String mImageViewAlbumTransitionName;
@@ -54,9 +50,8 @@ public class PlayerDialogFragment extends DialogFragment {
     private TrackParcelable mTrackParcelable;
     private ArrayList<TrackParcelable> mTrackParcelableList;
 
-    public static PlayerDialogFragment getInstance(TracksFragment tracksFragment) {
+    public static PlayerDialogFragment getInstance() {
         PlayerDialogFragment playerDialogFragment = new PlayerDialogFragment();
-        playerDialogFragment.tracksFragment = tracksFragment;
         return playerDialogFragment;
     }
 
@@ -80,45 +75,27 @@ public class PlayerDialogFragment extends DialogFragment {
             Utility.setActionBarAndStatusBarColor(((AppCompatActivity) getActivity()), mVibrantColor);
         }
 
+        mFragmentPlayerBinding.imageViewPlay.setButtonBackgroundColor(getActivity(), mVibrantColor);
+        mFragmentPlayerBinding.seekBarPlayer.setProgressColor(mVibrantColor);
+        mFragmentPlayerBinding.seekBarPlayer.setThumbColor(mVibrantColor);
+
         ActionBar actionBar = ((AppCompatActivity) getActivity()).getSupportActionBar();
         if (actionBar != null) {
             actionBar.setTitle(R.string.title_player);
         }
 
-        ((ContainerActivity) getActivity()).setNowPlayingVisibile(false);
+        ((ContainerActivity) getActivity()).hideCard();
 
         mFragmentPlayerBinding.imageViewPlay.setOnClickListener(v -> {
-            toggleTrack();
+                MediaPlayerHandler.getInstance(getActivity())
+                        .togglePlayPause();
         });
 
         if (Utility.isVersionLollipopAndAbove())
             mFragmentPlayerBinding.imageViewAlbum.setTransitionName(mImageViewAlbumTransitionName);
 
-        RxBus.getInstance()
-                .toObserverable()
-                .subscribeOn(Schedulers.newThread())
-                .observeOn(AndroidSchedulers.mainThread())
-                .subscribe(new Subscriber<Object>() {
-                    @Override
-                    public void onCompleted() {
-                    }
-
-                    @Override
-                    public void onError(final Throwable e) {
-                    }
-
-                    @Override
-                    public void onNext(final Object o) {
-                        Log.e(TAG, "onNext "+o.getClass());
-                        if (o instanceof MediaPlayerHandler.PlayingEvent) {
-                            onEventMainThread(((MediaPlayerHandler.PlayingEvent) o));
-                        } else if (o instanceof MediaPlayerHandler.PausedEvent) {
-                            onEventMainThread(((MediaPlayerHandler.PausedEvent) o));
-                        } else if (o instanceof MediaPlayerHandler.StoppedEvent) {
-                            onEventMainThread(((MediaPlayerHandler.StoppedEvent) o));
-                        }
-                    }
-                });
+        EventBus.getDefault()
+                .register(this);
 
         //next track listener
         mFragmentPlayerBinding.imageViewNext.setOnClickListener(v -> {
@@ -150,10 +127,6 @@ public class PlayerDialogFragment extends DialogFragment {
         //pause the seekbar
         pauseTheSeekbar();
 
-        mFragmentPlayerBinding.imageViewPlay.setButtonBackgroundColor(getActivity(), mVibrantColor);
-        mFragmentPlayerBinding.seekBarPlayer.setProgressColor(mVibrantColor);
-        mFragmentPlayerBinding.seekBarPlayer.setThumbColor(mVibrantColor);
-
         mFragmentPlayerBinding.textViewTrackName.setText(mTrackParcelable.songName);
         mFragmentPlayerBinding.textViewTrackAlbum.setText(mTrackParcelable.albumName);
         int size = mTrackParcelable.albumImageUrls.size();
@@ -168,13 +141,19 @@ public class PlayerDialogFragment extends DialogFragment {
                                 .getBitmap())
                                 .generate()
                                 .getVibrantColor(Color.BLACK);
-                        mFragmentPlayerBinding.imageViewPlay.setButtonBackgroundColor(getActivity(), vibrantColor);
-                        mFragmentPlayerBinding.seekBarPlayer.setProgressColor(vibrantColor);
-                        mFragmentPlayerBinding.seekBarPlayer.setThumbColor(vibrantColor);
+
                         return null;
                     });
         }
-        playTrack();
+        //check if the song is the same, then don't play it
+        if (!MediaPlayerHandler.getInstance(getActivity())
+                .getUrl()
+                .equals(mTrackParcelable.previewUrl))
+            playTrack();
+        else {
+            mFragmentPlayerBinding.imageViewPlay.setMode(true);
+            MediaPlayerHandler.getInstance(getActivity()).resendPlayerEvents();
+        }
     }
 
     private void pauseTheSeekbar() {
@@ -188,14 +167,6 @@ public class PlayerDialogFragment extends DialogFragment {
         mFragmentPlayerBinding.chronometerEnd.setBase(SystemClock.elapsedRealtime());
     }
 
-    private void toggleTrack() {
-        Intent intent = new Intent(getActivity(),
-                MediaPlayerService.class);
-        //send trackParcelable
-        intent.putExtra(Keys.KEY_TRACK_PARCELABLE, mTrackParcelable);
-        getActivity().startService(intent);
-    }
-
     private void playTrack() {
         Intent intent = new Intent(getActivity(),
                 MediaPlayerService.class);
@@ -203,7 +174,7 @@ public class PlayerDialogFragment extends DialogFragment {
         intent.putExtra(Keys.KEY_TRACK_PARCELABLE, mTrackParcelable);
         getActivity().startService(intent);
 
-        mFragmentPlayerBinding.imageViewPlay.setMode(true);
+        mFragmentPlayerBinding.imageViewPlay.setMode(false);
     }
 
     @Override
@@ -239,6 +210,7 @@ public class PlayerDialogFragment extends DialogFragment {
         try {
             mFragmentPlayerBinding.imageViewPlay.setMode(false);
             mFragmentPlayerBinding.seekBarPlayer.setEnabled(true);
+
             if (mFragmentPlayerBinding.chronometerStart != null) {
                 mFragmentPlayerBinding.chronometerStart.setBase(SystemClock.elapsedRealtime() - playingEvent.progress);
                 mFragmentPlayerBinding.chronometerEnd.setBase(SystemClock.elapsedRealtime() -
@@ -249,7 +221,6 @@ public class PlayerDialogFragment extends DialogFragment {
             mFragmentPlayerBinding.seekBarPlayer.setOnSeekBarChangeListener(SeekbarChangeListener
                     .getInstance(playingEvent.duration, Keys.SMOOTHNESS_FACTOR, mFragmentPlayerBinding.chronometerStart));
             mFragmentPlayerBinding.seekBarPlayer.setMax(Keys.SMOOTHNESS_FACTOR);
-            mFragmentPlayerBinding.seekBarPlayer.setThumbAlpha(255);
             mFragmentPlayerBinding.seekBarPlayer.setProgress(playingEvent.progress / mAmountToUpdate);
 
             if (timer != null) {
@@ -290,6 +261,7 @@ public class PlayerDialogFragment extends DialogFragment {
         } catch (NullPointerException e) {
             Log.e("MediaPlayerHandler Null", e.getMessage());
         }
+
     }
 
     private void logHelper(final String message) {
@@ -304,7 +276,6 @@ public class PlayerDialogFragment extends DialogFragment {
     @Override
     public void onDismiss(final DialogInterface dialog) {
         super.onDismiss(dialog);
-//        tracksFragment.refreshActionBar();
     }
 
     public void setImageViewAlbumTransitionName(final String imageViewAlbumTransitionName) {

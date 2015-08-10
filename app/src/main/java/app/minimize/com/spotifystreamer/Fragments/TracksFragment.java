@@ -96,7 +96,7 @@ public class TracksFragment extends Fragment implements TracksAdapter.TracksEven
         //Transition
 
         mFragmentTracksBinding.imageViewArtist.setTransitionName(imageTransitionName);
-        Log.e(TAG, "onCreateView "+imageTransitionName);
+        Log.e(TAG, "onCreateView " + imageTransitionName);
 
         //Artist Image
         loadArtistImage();
@@ -151,16 +151,18 @@ public class TracksFragment extends Fragment implements TracksAdapter.TracksEven
                     for (Track track : tracks.tracks) {
                         mData.add(new TrackParcelable(track));
                     }
-                    Utility.runOnUiThread(((AppCompatActivity) getActivity()), () -> {
-                        if (mData.size() == 0) {
-                            mIncludeProgressBinding.textViewError.setText(getString(R.string.tv_no_tracks));
-                            mIncludeProgressBinding.textViewError.setVisibility(View.VISIBLE);
-                        }
+                    AppCompatActivity activity = (AppCompatActivity) getActivity();
+                    if (activity != null)
+                        Utility.runOnUiThread(activity, () -> {
+                            if (mData.size() == 0) {
+                                mIncludeProgressBinding.textViewError.setText(getString(R.string.tv_no_tracks));
+                                mIncludeProgressBinding.textViewError.setVisibility(View.VISIBLE);
+                            }
 
-                        mIncludeProgressBinding.progressBar.setVisibility(View.GONE);
-                        ((TracksAdapter) mFragmentTracksBinding.recyclerViewTracks.getAdapter()).updateList(mData);
-                        return null;
-                    });
+                            mIncludeProgressBinding.progressBar.setVisibility(View.GONE);
+                            ((TracksAdapter) mFragmentTracksBinding.recyclerViewTracks.getAdapter()).updateList(mData);
+                            return null;
+                        });
                 }
 
                 @Override
@@ -184,7 +186,7 @@ public class TracksFragment extends Fragment implements TracksAdapter.TracksEven
     public void trackClicked(final TrackParcelable track, final TracksAdapter.RecyclerViewHolderTracks holder) {
         if (isTwoPane) {
             //launch playerDialogFragment
-            PlayerDialogFragment playerDialogFragment = PlayerDialogFragment.getInstance(this);
+            PlayerDialogFragment playerDialogFragment = PlayerDialogFragment.getInstance();
             Bundle bundle = new Bundle();
             bundle.putParcelable(getString(R.string.key_tracks_parcelable), track);
             bundle.putParcelableArrayList(Keys.KEY_TRACK_PARCELABLE_LIST, mTracksAdapter.getDataSet());
@@ -196,7 +198,7 @@ public class TracksFragment extends Fragment implements TracksAdapter.TracksEven
             playerDialogFragment.show(((AppCompatActivity) getActivity()).getSupportFragmentManager(), "Player");
         } else {
             //Launch the dialogFragment from here
-            PlayerDialogFragment playerDialogFragment = PlayerDialogFragment.getInstance(this);
+            PlayerDialogFragment playerDialogFragment = PlayerDialogFragment.getInstance();
             Bundle bundle = new Bundle();
             bundle.putParcelable(getString(R.string.key_tracks_parcelable), track);
             bundle.putParcelableArrayList(Keys.KEY_TRACK_PARCELABLE_LIST, mTracksAdapter.getDataSet());

@@ -139,10 +139,11 @@ public class ArtistsFragment extends Fragment implements ArtistsAdapter.ArtistsE
 
         mFragmentArtistsBinding.recyclerViewArtists.setAdapter(mArtistsAdapter);
 
-
         showTextViewSearchArtists();
 
         mFragmentArtistsBinding.imageButtonClear.setOnClickListener(v -> clearState());
+
+        ((ContainerActivity) getActivity()).refreshNowPlayingCardState();
 
         return mFragmentArtistsBinding.getRoot();
     }

@@ -10,13 +10,29 @@ import android.widget.Toast;
 
 import java.io.IOException;
 
-import app.minimize.com.spotifystreamer.Rx.RxBus;
+import de.greenrobot.event.EventBus;
 
 
 /**
  * Created by ahmedrizwan on 2/9/15.
  */
 public class MediaPlayerHandler implements AudioManager.OnAudioFocusChangeListener, MediaPlayer.OnPreparedListener, MediaPlayer.OnCompletionListener {
+
+
+    public void resendPlayerEvents() {
+        if(mMediaPlayerState == MediaPlayerState.Playing){
+            EventBus.getDefault()
+                    .post(mPlayingEvent.setDuration(mMediaPlayer.getDuration())
+                            .setProgress(mMediaPlayer.getCurrentPosition()));
+        }else if(mMediaPlayerState == MediaPlayerState.Stopped){
+            EventBus.getDefault()
+                    .post(mStoppedEvent);
+        } else if(mMediaPlayerState == MediaPlayerState.Paused){
+            EventBus.getDefault()
+                    .post(mPausedEvent.setProgress(mMediaPlayer.getCurrentPosition()));
+        }
+    }
+
     public enum MediaPlayerState {Playing, Stopped, Paused, Idle}
 
     //State
@@ -117,7 +133,9 @@ public class MediaPlayerHandler implements AudioManager.OnAudioFocusChangeListen
         Log.e("Player", "Granted!");
         if (mMediaPlayerState != MediaPlayerState.Stopped && !newFile) {
             Log.e("Player", "Toggle!");
-            togglePlayPause();
+            EventBus.getDefault()
+                    .post(mPlayingEvent.setDuration(mMediaPlayer.getDuration())
+                            .setProgress(mMediaPlayer.getCurrentPosition()));
         } else {
             try {
                 Log.e("Player", "Load!");
@@ -158,10 +176,8 @@ public class MediaPlayerHandler implements AudioManager.OnAudioFocusChangeListen
     }
 
 
-
     @Override
     public void onAudioFocusChange(final int focusChange) {
-        Log.e("onAudioFocusChange", "togglePlayPause");
         try {
             if (focusChange == AudioManager.AUDIOFOCUS_LOSS) {
                 // Stop playback
@@ -173,18 +189,25 @@ public class MediaPlayerHandler implements AudioManager.OnAudioFocusChangeListen
         }
     }
 
+    public MediaPlayerState getMediaPlayerState() {
+        return mMediaPlayerState;
+    }
+
     public void togglePlayPause() {
         if (mMediaPlayerState == MediaPlayerState.Playing) {
             mMediaPlayer.pause();
             setPlayerState(MediaPlayerState.Paused);
-//            Old Implementation using EventBus
-            RxBus.getInstance().send(mPausedEvent.setProgress(mMediaPlayer.getCurrentPosition()));
-        } else {
+            EventBus.getDefault()
+                    .post(mPausedEvent.setProgress(mMediaPlayer.getCurrentPosition()));
+        } else if (mMediaPlayerState == MediaPlayerState.Paused) {
             mMediaPlayer.start();
             setPlayerState(MediaPlayerState.Playing);
             //Post the playingEvent
-            RxBus.getInstance().send(mPlayingEvent.setDuration(mMediaPlayer.getDuration())
+            EventBus.getDefault()
+                    .post(mPlayingEvent.setDuration(mMediaPlayer.getDuration())
                             .setProgress(mMediaPlayer.getCurrentPosition()));
+        } else {
+            handlePlayback(mTrackUrl, mTrackName);
         }
     }
 
@@ -196,14 +219,16 @@ public class MediaPlayerHandler implements AudioManager.OnAudioFocusChangeListen
     public void onPrepared(final MediaPlayer mediaPlayer) {
         mediaPlayer.start();
         setPlayerState(MediaPlayerState.Playing);
-        RxBus.getInstance().send(mPlayingEvent.setDuration(mediaPlayer.getDuration())
+        EventBus.getDefault()
+                .post(mPlayingEvent.setDuration(mediaPlayer.getDuration())
                         .setProgress(0));
     }
 
     @Override
     public void onCompletion(final MediaPlayer mediaPlayer) {
         setPlayerState(MediaPlayerState.Stopped);
-        RxBus.getInstance().send(mStoppedEvent.setDuration(mediaPlayer.getDuration()));
+        EventBus.getDefault()
+                .post(mStoppedEvent.setDuration(mediaPlayer.getDuration()));
         mMediaPlayer.release();
     }
 
@@ -261,5 +286,9 @@ public class MediaPlayerHandler implements AudioManager.OnAudioFocusChangeListen
             this.duration = duration;
             this.progress = progress;
         }
+    }
+
+    public String getUrl() {
+        return mTrackUrl;
     }
 }
