@@ -20,7 +20,6 @@ import android.view.View;
 import android.view.ViewGroup;
 import android.view.Window;
 
-import java.util.ArrayList;
 import java.util.Timer;
 import java.util.TimerTask;
 
@@ -44,11 +43,9 @@ public class PlayerDialogFragment extends DialogFragment {
     private int mAmountToUpdate = 0, currentProgress = 0;
     private Timer timer;
     private String mImageViewAlbumTransitionName;
-    private int mVibrantColor = Color.BLACK;
 
     private FragmentPlayerBinding mFragmentPlayerBinding;
-    private TrackParcelable mTrackParcelable;
-    private ArrayList<TrackParcelable> mTrackParcelableList;
+    private boolean mTwoPane = false;
 
     public static PlayerDialogFragment getInstance() {
         PlayerDialogFragment playerDialogFragment = new PlayerDialogFragment();
@@ -61,23 +58,10 @@ public class PlayerDialogFragment extends DialogFragment {
     public View onCreateView(final LayoutInflater inflater, final ViewGroup container, final Bundle savedInstanceState) {
         mFragmentPlayerBinding = DataBindingUtil.inflate(inflater, R.layout.fragment_player, container, false);
 
-        boolean isTwoPane = ((ContainerActivity) getActivity()).isTwoPane();
+        EventBus.getDefault()
+                .register(this);
 
-        mTrackParcelable = getArguments().getParcelable(getString(R.string.key_tracks_parcelable));
-        mTrackParcelableList = getArguments().getParcelableArrayList(Keys.KEY_TRACK_PARCELABLE_LIST);
-
-        mVibrantColor = getArguments().getInt(Keys.COLOR_ACTION_BAR);
-
-        if (isTwoPane) {
-            getDialog().getWindow()
-                    .requestFeature(Window.FEATURE_NO_TITLE);
-        } else {
-            Utility.setActionBarAndStatusBarColor(((AppCompatActivity) getActivity()), mVibrantColor);
-        }
-
-        mFragmentPlayerBinding.imageViewPlay.setButtonBackgroundColor(getActivity(), mVibrantColor);
-        mFragmentPlayerBinding.seekBarPlayer.setProgressColor(mVibrantColor);
-        mFragmentPlayerBinding.seekBarPlayer.setThumbColor(mVibrantColor);
+        mTwoPane = ((ContainerActivity) getActivity()).isTwoPane();
 
         ActionBar actionBar = ((AppCompatActivity) getActivity()).getSupportActionBar();
         if (actionBar != null) {
@@ -87,34 +71,36 @@ public class PlayerDialogFragment extends DialogFragment {
         ((ContainerActivity) getActivity()).hideCard();
 
         mFragmentPlayerBinding.imageViewPlay.setOnClickListener(v -> {
-                MediaPlayerHandler.getInstance(getActivity())
-                        .togglePlayPause();
+            MediaPlayerHandler.getInstance(getActivity())
+                    .togglePlayPause();
         });
 
         if (Utility.isVersionLollipopAndAbove())
             mFragmentPlayerBinding.imageViewAlbum.setTransitionName(mImageViewAlbumTransitionName);
 
-        EventBus.getDefault()
-                .register(this);
 
         //next track listener
         mFragmentPlayerBinding.imageViewNext.setOnClickListener(v -> {
             //play the next track
-            int indexOfTrack = mTrackParcelableList.indexOf(mTrackParcelable);
-            if (indexOfTrack != mTrackParcelableList.size() - 1) {
-                mTrackParcelable = mTrackParcelableList.get(indexOfTrack + 1);
-                playThisTrack();
-            }
+//            int indexOfTrack = mTrackParcelableList.indexOf(mTrackParcelable);
+//            if (indexOfTrack != mTrackParcelableList.size() - 1) {
+//                mTrackParcelable = mTrackParcelableList.get(indexOfTrack + 1);
+//                playThisTrack();
+//            }
+            //Service
+            startServiceWithEvent(MediaPlayerHandler.NEXT);
         });
 
         //previous track
         mFragmentPlayerBinding.imageViewPrevious.setOnClickListener(v -> {
             //play the next track
-            int indexOfTrack = mTrackParcelableList.indexOf(mTrackParcelable);
-            if (indexOfTrack != 0) {
-                mTrackParcelable = mTrackParcelableList.get(indexOfTrack - 1);
-                playThisTrack();
-            }
+//            int indexOfTrack = mTrackParcelableList.indexOf(mTrackParcelable);
+//            if (indexOfTrack != 0) {
+//                mTrackParcelable = mTrackParcelableList.get(indexOfTrack - 1);
+//                playThisTrack();
+//            }
+            //Service
+            startServiceWithEvent(MediaPlayerHandler.PREVIOUS);
         });
 
         playThisTrack();
@@ -122,9 +108,22 @@ public class PlayerDialogFragment extends DialogFragment {
         return mFragmentPlayerBinding.getRoot();
     }
 
-
     public void playThisTrack() {
         //pause the seekbar
+        pauseTheSeekbar();
+
+        //Service
+        startServiceWithEvent(MediaPlayerHandler.PLAY);
+    }
+
+    private void startServiceWithEvent(final String event) {
+        Intent intent = new Intent(getActivity(), MediaPlayerService.class);
+        intent.putExtra(getString(R.string.key_event), event);
+        getActivity().startService(intent);
+    }
+
+    public void onEventMainThread(TrackParcelable mTrackParcelable) {
+
         pauseTheSeekbar();
 
         mFragmentPlayerBinding.textViewTrackName.setText(mTrackParcelable.songName);
@@ -141,19 +140,25 @@ public class PlayerDialogFragment extends DialogFragment {
                                 .getBitmap())
                                 .generate()
                                 .getVibrantColor(Color.BLACK);
-
+                        updateColors(vibrantColor);
                         return null;
                     });
         }
-        //check if the song is the same, then don't play it
-        if (!MediaPlayerHandler.getInstance(getActivity())
-                .getUrl()
-                .equals(mTrackParcelable.previewUrl))
-            playTrack();
-        else {
-            mFragmentPlayerBinding.imageViewPlay.setMode(true);
-            MediaPlayerHandler.getInstance(getActivity()).resendPlayerEvents();
+
+    }
+
+    public void updateColors(int mVibrantColor){
+//        int mVibrantColor = vibrantColorEvent.mVibrantColor;
+        if (mTwoPane) {
+            getDialog().getWindow()
+                    .requestFeature(Window.FEATURE_NO_TITLE);
+        } else {
+            Utility.setActionBarAndStatusBarColor(((AppCompatActivity) getActivity()), mVibrantColor);
         }
+
+        mFragmentPlayerBinding.imageViewPlay.setButtonBackgroundColor(getActivity(), mVibrantColor);
+        mFragmentPlayerBinding.seekBarPlayer.setProgressColor(mVibrantColor);
+        mFragmentPlayerBinding.seekBarPlayer.setThumbColor(mVibrantColor);
     }
 
     private void pauseTheSeekbar() {
@@ -167,15 +172,6 @@ public class PlayerDialogFragment extends DialogFragment {
         mFragmentPlayerBinding.chronometerEnd.setBase(SystemClock.elapsedRealtime());
     }
 
-    private void playTrack() {
-        Intent intent = new Intent(getActivity(),
-                MediaPlayerService.class);
-        //send trackParcelable
-        intent.putExtra(Keys.KEY_TRACK_PARCELABLE, mTrackParcelable);
-        getActivity().startService(intent);
-
-        mFragmentPlayerBinding.imageViewPlay.setMode(false);
-    }
 
     @Override
     public void onStart() {

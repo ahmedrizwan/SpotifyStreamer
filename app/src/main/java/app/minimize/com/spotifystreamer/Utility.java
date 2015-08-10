@@ -2,6 +2,7 @@ package app.minimize.com.spotifystreamer;
 
 import android.annotation.TargetApi;
 import android.content.Context;
+import android.content.Intent;
 import android.content.res.TypedArray;
 import android.graphics.Color;
 import android.graphics.drawable.ColorDrawable;
@@ -22,7 +23,11 @@ import android.widget.ImageView;
 import com.squareup.picasso.Callback;
 import com.squareup.picasso.Picasso;
 
+import java.util.ArrayList;
 import java.util.concurrent.Callable;
+
+import app.minimize.com.spotifystreamer.Activities.Keys;
+import app.minimize.com.spotifystreamer.Parcelables.TrackParcelable;
 
 /**
  * Created by ahmedrizwan on 6/9/15.
@@ -131,24 +136,15 @@ public class Utility {
                 .into(imageView, new Callback() {
                     @Override
                     public void onSuccess() {
+                        try {
+                            onSuccess.call();
+                        } catch (Exception e) {
+                            e.printStackTrace();
+                        }
                         Picasso.with(context)
                                 .load(largeImageUrl) // image url goes here
                                 .placeholder(imageView.getDrawable())
-                                .into(imageView, new Callback() {
-                                    @Override
-                                    public void onSuccess() {
-                                        try {
-                                            onSuccess.call();
-                                        } catch (Exception e) {
-                                            e.printStackTrace();
-                                        }
-                                    }
-
-                                    @Override
-                                    public void onError() {
-
-                                    }
-                                });
+                                .into(imageView);
                     }
 
                     @Override
@@ -181,4 +177,16 @@ public class Utility {
             imm.hideSoftInputFromWindow(view.getWindowToken(), 0);
         }
     }
+
+    public static void saveTrackAndTrackListInService(Context context,
+                                                      TrackParcelable trackParcelable,
+                                                      ArrayList<TrackParcelable> topTracks) {
+        Intent intent = new Intent(context,
+                MediaPlayerService.class);
+        intent.putExtra(Keys.KEY_SAVE_TRACKS, true);
+        intent.putExtra(Keys.KEY_TRACK_PARCELABLE, trackParcelable);
+        intent.putExtra(Keys.KEY_TOP_TRACK_PARCELABLES, topTracks);
+        context.startService(intent);
+    }
+
 }

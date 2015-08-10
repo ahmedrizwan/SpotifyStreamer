@@ -21,6 +21,8 @@
     <string name="album_image_transition">albumImageTransition</string>
     <string name="preference_location_key">preferenceLocationKey</string>
     <string name="preference_location_title">Location</string>
+    <string name="key_event">Event</string>
+    <string name="value_play">PlayTrack</string>
 
 
     <string-array name="country_names">

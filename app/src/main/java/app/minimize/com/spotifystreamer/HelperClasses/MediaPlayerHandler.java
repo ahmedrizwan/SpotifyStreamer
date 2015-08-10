@@ -19,6 +19,13 @@ import de.greenrobot.event.EventBus;
 public class MediaPlayerHandler implements AudioManager.OnAudioFocusChangeListener, MediaPlayer.OnPreparedListener, MediaPlayer.OnCompletionListener {
 
 
+    public static final String PLAY = "PlayTrack";
+    public static final String PAUSE = "PauseTrack";
+    public static final String STOP = "StopTrack";
+    public static final String NEXT = "NextTrack";
+    public static final String PREVIOUS = "PreviousTrack";
+
+
     public void resendPlayerEvents() {
         if(mMediaPlayerState == MediaPlayerState.Playing){
             EventBus.getDefault()
@@ -184,8 +191,8 @@ public class MediaPlayerHandler implements AudioManager.OnAudioFocusChangeListen
                 if (!mMediaPlayer.isPlaying())
                     togglePlayPause();
             }
-        } catch (NullPointerException e) {
-            logHelper(e.getMessage());
+        } catch (Exception e) {
+            logHelper(e.toString());
         }
     }
 
@@ -287,6 +294,7 @@ public class MediaPlayerHandler implements AudioManager.OnAudioFocusChangeListen
             this.progress = progress;
         }
     }
+
 
     public String getUrl() {
         return mTrackUrl;

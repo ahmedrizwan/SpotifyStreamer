@@ -41,5 +41,6 @@ public class Keys {
     public static final String KEY_LOCATION = "SpotifyLocation";
 
 
-
+    public static final String KEY_TOP_TRACK_PARCELABLES = "TopTenTrackParcelables";
+    public static final String KEY_SAVE_TRACKS = "SaveTracks";
 }

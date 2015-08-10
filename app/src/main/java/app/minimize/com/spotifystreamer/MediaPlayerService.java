@@ -2,23 +2,27 @@ package app.minimize.com.spotifystreamer;
 
 import android.app.Service;
 import android.content.Intent;
+import android.graphics.Color;
 import android.os.IBinder;
 import android.support.annotation.Nullable;
 import android.util.Log;
 
-import app.minimize.com.spotifystreamer.Activities.Keys;
+import java.util.ArrayList;
+
 import app.minimize.com.spotifystreamer.HelperClasses.MediaPlayerHandler;
 import app.minimize.com.spotifystreamer.Parcelables.TrackParcelable;
 import de.greenrobot.event.EventBus;
 
 /**
  * Created by ahmedrizwan on 6/18/15.
- *
  */
 public class MediaPlayerService extends Service {
 
     private static final String TAG = "MediaPlayerService";
     private TrackParcelable mTrackParcelable;
+    private ArrayList<TrackParcelable> mTrackParcelables;
+    private int mVibrantColor = Color.BLACK;
+    private EventBus mEventBus;
 
     //MediaPlayer
     private MediaPlayerHandler mMediaPlayerHandler;
@@ -32,45 +36,65 @@ public class MediaPlayerService extends Service {
     @Override
     public void onCreate() {
         mMediaPlayerHandler = MediaPlayerHandler.getInstance(this);
+        mEventBus = EventBus.getDefault();
+        mEventBus.register(this);
     }
 
     @Override
     public int onStartCommand(final Intent intent, final int flags, final int startId) {
-        if (statusReceiver(intent)) return START_STICKY;
-        if (playerReceiver(intent)) return START_STICKY;
+        try {
+            int indexOfTrack = -2;
+            String stringExtra = intent.getStringExtra(getString(R.string.key_event));
+            switch (stringExtra) {
+                case MediaPlayerHandler.PLAY:
+                    if (mTrackParcelable != null) {
+                        mMediaPlayerHandler.handlePlayback(mTrackParcelable.previewUrl, mTrackParcelable.songName);
+                        mEventBus.post(mTrackParcelable);
+                        mEventBus.post(mVibrantColor);
+                    }
+                    break;
+                case MediaPlayerHandler.PAUSE:
+
+                    break;
+                case MediaPlayerHandler.STOP:
+
+                    break;
+                case MediaPlayerHandler.NEXT:
+                    indexOfTrack = mTrackParcelables.indexOf(mTrackParcelable);
+                    if (indexOfTrack < mTrackParcelables.size()) {
+                        mTrackParcelable = mTrackParcelables.get(indexOfTrack + 1);
+                        mMediaPlayerHandler.handlePlayback(mTrackParcelable.previewUrl, mTrackParcelable.songName);
+                        mEventBus.post(mTrackParcelable);
+                    }
+                    break;
+                case MediaPlayerHandler.PREVIOUS:
+                    indexOfTrack = mTrackParcelables.indexOf(mTrackParcelable);
+                    if (indexOfTrack > 0) {
+                        mTrackParcelable = mTrackParcelables.get(indexOfTrack - 1);
+                        mMediaPlayerHandler.handlePlayback(mTrackParcelable.previewUrl, mTrackParcelable.songName);
+                        mEventBus.post(mTrackParcelable);
+                    }
+                    break;
+            }
+        } catch (Exception e) {
+
+        }
+
         return START_STICKY;
     }
 
-    private boolean statusReceiver(final Intent intent) {
-        try {
-            if (intent.getBooleanExtra(Keys.KEY_GET_STATUS, false)) {
-                EventBus.getDefault().post(mTrackParcelable);
-                Log.e(TAG, "statusReceiver ");
-                return true;
-            }
-        } catch (NullPointerException e) {
-            return false;
-        }
-        return false;
+    public void onEventMainThread(TrackParcelable trackParcelable) {
+        Log.e(TAG, "onEvent TrackParcelable");
+        mTrackParcelable = trackParcelable;
     }
 
-    private boolean playerReceiver(Intent intent) {
-        try {
-            //retrieve the parcelables
-            mTrackParcelable = intent.getParcelableExtra(Keys.KEY_TRACK_PARCELABLE);
-            if (mTrackParcelable != null)
-                mMediaPlayerHandler.handlePlayback(mTrackParcelable.previewUrl, mTrackParcelable.songName);
-            return true;
-        } catch (NullPointerException e) {
-            logHelper("PlayTrack Exception");
-            return false;
-        }
+    public void onEventMainThread(ArrayList<TrackParcelable> trackParcelables) {
+        mTrackParcelables = trackParcelables;
     }
 
-    private void logHelper(final String message) {
-        Log.e("Service", message);
+    public void onEventMainThread(int vibrantColor) {
+        mVibrantColor = vibrantColor;
     }
-
 
 
 }

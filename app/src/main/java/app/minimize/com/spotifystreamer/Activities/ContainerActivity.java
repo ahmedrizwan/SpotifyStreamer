@@ -111,6 +111,7 @@ public class ContainerActivity extends AppCompatActivity {
     public void onEventMainThread(TrackParcelable trackParcelable) {
         showCard();
         refreshNowPlayingCardState();
+        Log.e(TAG, "onEventMainThread "+trackParcelable.songName);
         setCardTrackAndAlbumNames(trackParcelable.songName, trackParcelable.albumName);
         int size = trackParcelable.albumImageUrls.size();
         if (size > 0)
@@ -178,6 +179,7 @@ public class ContainerActivity extends AppCompatActivity {
         showCard();
         //show the nowPlayingCard
         cardPlaying();
+        startServiceForStatusRetrieval();
     }
 
     public void onEventMainThread(MediaPlayerHandler.PausedEvent pausedEvent) {
@@ -245,9 +247,11 @@ public class ContainerActivity extends AppCompatActivity {
 
     public void showCard() {
         Fragment activeFragment = getSupportFragmentManager().findFragmentById(R.id.container);
-        if (!(activeFragment instanceof PlayerDialogFragment) && MediaPlayerHandler.getPlayerState() != MediaPlayerHandler.MediaPlayerState.Idle)
+        if (!(activeFragment instanceof PlayerDialogFragment) &&
+                MediaPlayerHandler.getPlayerState() != MediaPlayerHandler.MediaPlayerState.Idle)
             mIncludeNowPlayingBinding.getRoot()
                     .setVisibility(View.VISIBLE);
+
     }
 
     public void cardPlaying() {
