@@ -189,4 +189,7 @@ public class Utility {
         context.startService(intent);
     }
 
+    public static void startService(final Context activity) {
+        activity.startService(new Intent(activity, MediaPlayerService.class));
+    }
 }

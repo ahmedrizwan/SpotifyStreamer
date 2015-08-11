@@ -3,7 +3,6 @@ package app.minimize.com.spotifystreamer.Adapters;
 import android.annotation.TargetApi;
 import android.content.Context;
 import android.os.Build;
-import android.os.Parcelable;
 import android.support.v7.widget.RecyclerView;
 import android.view.LayoutInflater;
 import android.view.View;
@@ -14,7 +13,6 @@ import android.widget.TextView;
 import com.squareup.picasso.Picasso;
 
 import java.util.ArrayList;
-import java.util.Collections;
 import java.util.List;
 
 import app.minimize.com.spotifystreamer.Parcelables.TrackParcelable;
@@ -27,19 +25,19 @@ import app.minimize.com.spotifystreamer.Utility;
 public class TracksAdapter extends RecyclerView.Adapter<TracksAdapter.RecyclerViewHolderTracks> {
 
     private Context context;
-    private List<TrackParcelable> mData = Collections.emptyList();
+    private ArrayList<TrackParcelable> mData = new ArrayList<>();
 
     private TracksEventListener tracksEventListener;
     private final boolean lollipopAndAbove = Utility.isVersionLollipopAndAbove();
 
-    public TracksAdapter(TracksEventListener tracksEventListener, List<TrackParcelable> data) {
+    public TracksAdapter(TracksEventListener tracksEventListener, ArrayList<TrackParcelable> data) {
         this.tracksEventListener = tracksEventListener;
         this.context = tracksEventListener.getContext();
         mData = data;
     }
 
     public void updateList(List<TrackParcelable> data) {
-        mData = data;
+        mData = (ArrayList<TrackParcelable>) data;
         notifyDataSetChanged();
     }
 
@@ -87,8 +85,8 @@ public class TracksAdapter extends RecyclerView.Adapter<TracksAdapter.RecyclerVi
         return mData.size();
     }
 
-    public ArrayList<? extends Parcelable> getDataSet() {
-        return (ArrayList<? extends Parcelable>) mData;
+    public ArrayList<TrackParcelable> getDataSet() {
+        return mData;
     }
 
 

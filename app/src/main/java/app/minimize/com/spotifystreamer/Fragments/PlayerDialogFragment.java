@@ -46,6 +46,8 @@ public class PlayerDialogFragment extends DialogFragment {
 
     private FragmentPlayerBinding mFragmentPlayerBinding;
     private boolean mTwoPane = false;
+    private MediaPlayerHandler mMediaPlayerHandler;
+    private TrackParcelable mTrackParcelable;
 
     public static PlayerDialogFragment getInstance() {
         PlayerDialogFragment playerDialogFragment = new PlayerDialogFragment();
@@ -68,12 +70,16 @@ public class PlayerDialogFragment extends DialogFragment {
             actionBar.setTitle(R.string.title_player);
         }
 
+        mMediaPlayerHandler = MediaPlayerHandler.getInstance();
+
+        try {
+            mTrackParcelable = getArguments().getParcelable(Keys.KEY_TRACK_PARCELABLE);
+        } catch (NullPointerException e) {
+            mTrackParcelable = null;
+        }
+
         ((ContainerActivity) getActivity()).hideCard();
 
-        mFragmentPlayerBinding.imageViewPlay.setOnClickListener(v -> {
-            MediaPlayerHandler.getInstance(getActivity())
-                    .togglePlayPause();
-        });
 
         if (Utility.isVersionLollipopAndAbove())
             mFragmentPlayerBinding.imageViewAlbum.setTransitionName(mImageViewAlbumTransitionName);
@@ -81,26 +87,17 @@ public class PlayerDialogFragment extends DialogFragment {
 
         //next track listener
         mFragmentPlayerBinding.imageViewNext.setOnClickListener(v -> {
-            //play the next track
-//            int indexOfTrack = mTrackParcelableList.indexOf(mTrackParcelable);
-//            if (indexOfTrack != mTrackParcelableList.size() - 1) {
-//                mTrackParcelable = mTrackParcelableList.get(indexOfTrack + 1);
-//                playThisTrack();
-//            }
-            //Service
-            startServiceWithEvent(MediaPlayerHandler.NEXT);
+            mMediaPlayerHandler.nextTrack();
         });
 
         //previous track
         mFragmentPlayerBinding.imageViewPrevious.setOnClickListener(v -> {
-            //play the next track
-//            int indexOfTrack = mTrackParcelableList.indexOf(mTrackParcelable);
-//            if (indexOfTrack != 0) {
-//                mTrackParcelable = mTrackParcelableList.get(indexOfTrack - 1);
-//                playThisTrack();
-//            }
-            //Service
-            startServiceWithEvent(MediaPlayerHandler.PREVIOUS);
+            mMediaPlayerHandler.previousTrack();
+        });
+
+        //play/pause track
+        mFragmentPlayerBinding.imageViewPlay.setOnClickListener(v -> {
+            mMediaPlayerHandler.togglePlayPause();
         });
 
         playThisTrack();
@@ -111,10 +108,13 @@ public class PlayerDialogFragment extends DialogFragment {
     public void playThisTrack() {
         //pause the seekbar
         pauseTheSeekbar();
+        if (mTrackParcelable != null)
+            mMediaPlayerHandler.handlePlayback(mTrackParcelable);
+        else
+            mMediaPlayerHandler.resendPlayerEvents();
 
-        //Service
-        startServiceWithEvent(MediaPlayerHandler.PLAY);
     }
+
 
     private void startServiceWithEvent(final String event) {
         Intent intent = new Intent(getActivity(), MediaPlayerService.class);
@@ -123,9 +123,7 @@ public class PlayerDialogFragment extends DialogFragment {
     }
 
     public void onEventMainThread(TrackParcelable mTrackParcelable) {
-
         pauseTheSeekbar();
-
         mFragmentPlayerBinding.textViewTrackName.setText(mTrackParcelable.songName);
         mFragmentPlayerBinding.textViewTrackAlbum.setText(mTrackParcelable.albumName);
         int size = mTrackParcelable.albumImageUrls.size();
@@ -147,8 +145,7 @@ public class PlayerDialogFragment extends DialogFragment {
 
     }
 
-    public void updateColors(int mVibrantColor){
-//        int mVibrantColor = vibrantColorEvent.mVibrantColor;
+    public void updateColors(int mVibrantColor) {
         if (mTwoPane) {
             getDialog().getWindow()
                     .requestFeature(Window.FEATURE_NO_TITLE);
@@ -231,7 +228,7 @@ public class PlayerDialogFragment extends DialogFragment {
                     try {
                         (getActivity()).runOnUiThread(() -> {
                             try {
-                                if (MediaPlayerHandler.getPlayerState() == MediaPlayerHandler.MediaPlayerState.Playing) {
+                                if (MediaPlayerHandler.getMediaPlayerState() == MediaPlayerHandler.MediaPlayerState.Playing) {
                                     if ((mAmountToUpdate * mFragmentPlayerBinding.seekBarPlayer.getProgress() <
                                             playingEvent.duration + playingEvent.progress)) {
                                         currentProgress = mFragmentPlayerBinding.seekBarPlayer.getProgress();

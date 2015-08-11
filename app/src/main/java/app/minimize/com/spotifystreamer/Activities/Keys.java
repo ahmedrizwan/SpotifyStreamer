@@ -10,7 +10,6 @@ public class Keys {
 
     public static final String PAUSE = "Pause";
     public static final String STOP = "Stop";
-    public static final String RESUME = "Resume";
     public static final String STATUS = "Status";
 
     public static final String KEY_TRACK_NAME = "TrackName";
@@ -43,4 +42,7 @@ public class Keys {
 
     public static final String KEY_TOP_TRACK_PARCELABLES = "TopTenTrackParcelables";
     public static final String KEY_SAVE_TRACKS = "SaveTracks";
+    public static final String NEXT = "Next";
+    public static final String PREVIOUS = "Previous";
+    public static final String PLAY = "Play";
 }

@@ -2,7 +2,6 @@ package app.minimize.com.spotifystreamer.Fragments;
 
 import android.annotation.TargetApi;
 import android.content.Context;
-import android.content.Intent;
 import android.databinding.DataBindingUtil;
 import android.graphics.Color;
 import android.graphics.drawable.BitmapDrawable;
@@ -20,22 +19,19 @@ import android.view.View;
 import android.view.ViewGroup;
 
 import java.util.ArrayList;
-import java.util.Collections;
 import java.util.HashMap;
-import java.util.List;
 import java.util.Map;
 
 import app.minimize.com.spotifystreamer.Activities.ContainerActivity;
 import app.minimize.com.spotifystreamer.Activities.Keys;
 import app.minimize.com.spotifystreamer.Adapters.TracksAdapter;
-import app.minimize.com.spotifystreamer.MediaPlayerService;
+import app.minimize.com.spotifystreamer.HelperClasses.MediaPlayerHandler;
 import app.minimize.com.spotifystreamer.Parcelables.ArtistParcelable;
 import app.minimize.com.spotifystreamer.Parcelables.TrackParcelable;
 import app.minimize.com.spotifystreamer.R;
 import app.minimize.com.spotifystreamer.Utility;
 import app.minimize.com.spotifystreamer.databinding.FragmentTracksBinding;
 import app.minimize.com.spotifystreamer.databinding.IncludeProgressBinding;
-import de.greenrobot.event.EventBus;
 import kaaes.spotify.webapi.android.SpotifyApi;
 import kaaes.spotify.webapi.android.SpotifyService;
 import kaaes.spotify.webapi.android.models.Track;
@@ -50,7 +46,7 @@ public class TracksFragment extends Fragment implements TracksAdapter.TracksEven
     private static final String TAG = "TracksFragment";
 
     private TracksAdapter mTracksAdapter;
-    private List<TrackParcelable> mData = Collections.emptyList();
+    private ArrayList<TrackParcelable> mData = new ArrayList<>();
     private String imageTransitionName;
     private ArtistParcelable mArtistParcelable;
     private boolean isTwoPane = false;
@@ -58,6 +54,7 @@ public class TracksFragment extends Fragment implements TracksAdapter.TracksEven
 
     private FragmentTracksBinding mFragmentTracksBinding;
     private IncludeProgressBinding mIncludeProgressBinding;
+    private MediaPlayerHandler mMediaPlayerHandler;
 
     @TargetApi(Build.VERSION_CODES.LOLLIPOP)
     @Override
@@ -68,6 +65,10 @@ public class TracksFragment extends Fragment implements TracksAdapter.TracksEven
         //bind the progressLayout
         mIncludeProgressBinding = DataBindingUtil.bind(mFragmentTracksBinding.getRoot()
                 .findViewById(R.id.progressLayout));
+
+        mMediaPlayerHandler = MediaPlayerHandler.getInstance();
+        if(mMediaPlayerHandler==null)
+            Utility.startService(getActivity());
 
         //Restore state
         if (savedInstanceState != null) {
@@ -187,13 +188,9 @@ public class TracksFragment extends Fragment implements TracksAdapter.TracksEven
     @TargetApi(Build.VERSION_CODES.LOLLIPOP)
     @Override
     public void trackClicked(final TrackParcelable track, final TracksAdapter.RecyclerViewHolderTracks holder) {
-        //Save track and trackList to service
-        getActivity().startService(new Intent(getActivity(), MediaPlayerService.class));
-        EventBus.getDefault()
-                .post(track);
-        EventBus.getDefault()
-                .post(mTracksAdapter.getDataSet());
-
+        Bundle bundleTracks = new Bundle();
+        bundleTracks.putParcelable(Keys.KEY_TRACK_PARCELABLE,track);
+        mMediaPlayerHandler.setTrackParcelables(mTracksAdapter.getDataSet());
         if (isTwoPane) {
             //launch playerDialogFragment
             PlayerDialogFragment playerDialogFragment = PlayerDialogFragment.getInstance();
@@ -209,6 +206,8 @@ public class TracksFragment extends Fragment implements TracksAdapter.TracksEven
         } else {
             //Launch the dialogFragment from here
             PlayerDialogFragment playerDialogFragment = PlayerDialogFragment.getInstance();
+            playerDialogFragment.setArguments(bundleTracks);
+
             if (Utility.isVersionLollipopAndAbove())
                 playerDialogFragment.setImageViewAlbumTransitionName(holder.imageViewAlbum.getTransitionName());
 
@@ -234,7 +233,9 @@ public class TracksFragment extends Fragment implements TracksAdapter.TracksEven
     @Override
     public void onResume() {
         super.onResume();
-        Log.e(TAG, "onResume TracksFragment");
+        Utility.startService(getActivity());
+        //Card show or hide
+        ((ContainerActivity) getActivity()).shorOrHideCard();
     }
 
     public void refreshActionBar() {

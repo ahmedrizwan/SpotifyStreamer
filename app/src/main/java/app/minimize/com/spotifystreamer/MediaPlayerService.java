@@ -2,15 +2,11 @@ package app.minimize.com.spotifystreamer;
 
 import android.app.Service;
 import android.content.Intent;
-import android.graphics.Color;
 import android.os.IBinder;
 import android.support.annotation.Nullable;
-import android.util.Log;
-
-import java.util.ArrayList;
 
 import app.minimize.com.spotifystreamer.HelperClasses.MediaPlayerHandler;
-import app.minimize.com.spotifystreamer.Parcelables.TrackParcelable;
+import app.minimize.com.spotifystreamer.HelperClasses.Notifications;
 import de.greenrobot.event.EventBus;
 
 /**
@@ -19,10 +15,6 @@ import de.greenrobot.event.EventBus;
 public class MediaPlayerService extends Service {
 
     private static final String TAG = "MediaPlayerService";
-    private TrackParcelable mTrackParcelable;
-    private ArrayList<TrackParcelable> mTrackParcelables;
-    private int mVibrantColor = Color.BLACK;
-    private EventBus mEventBus;
 
     //MediaPlayer
     private MediaPlayerHandler mMediaPlayerHandler;
@@ -35,66 +27,29 @@ public class MediaPlayerService extends Service {
 
     @Override
     public void onCreate() {
+        //Just instantiate the handler for mediaPlayer
         mMediaPlayerHandler = MediaPlayerHandler.getInstance(this);
-        mEventBus = EventBus.getDefault();
-        mEventBus.register(this);
+        EventBus.getDefault().register(this);
     }
 
     @Override
     public int onStartCommand(final Intent intent, final int flags, final int startId) {
-        try {
-            int indexOfTrack = -2;
-            String stringExtra = intent.getStringExtra(getString(R.string.key_event));
-            switch (stringExtra) {
-                case MediaPlayerHandler.PLAY:
-                    if (mTrackParcelable != null) {
-                        mMediaPlayerHandler.handlePlayback(mTrackParcelable.previewUrl, mTrackParcelable.songName);
-                        mEventBus.post(mTrackParcelable);
-                        mEventBus.post(mVibrantColor);
-                    }
-                    break;
-                case MediaPlayerHandler.PAUSE:
-
-                    break;
-                case MediaPlayerHandler.STOP:
-
-                    break;
-                case MediaPlayerHandler.NEXT:
-                    indexOfTrack = mTrackParcelables.indexOf(mTrackParcelable);
-                    if (indexOfTrack < mTrackParcelables.size()) {
-                        mTrackParcelable = mTrackParcelables.get(indexOfTrack + 1);
-                        mMediaPlayerHandler.handlePlayback(mTrackParcelable.previewUrl, mTrackParcelable.songName);
-                        mEventBus.post(mTrackParcelable);
-                    }
-                    break;
-                case MediaPlayerHandler.PREVIOUS:
-                    indexOfTrack = mTrackParcelables.indexOf(mTrackParcelable);
-                    if (indexOfTrack > 0) {
-                        mTrackParcelable = mTrackParcelables.get(indexOfTrack - 1);
-                        mMediaPlayerHandler.handlePlayback(mTrackParcelable.previewUrl, mTrackParcelable.songName);
-                        mEventBus.post(mTrackParcelable);
-                    }
-                    break;
-            }
-        } catch (Exception e) {
-
-        }
-
         return START_STICKY;
     }
 
-    public void onEventMainThread(TrackParcelable trackParcelable) {
-        Log.e(TAG, "onEvent TrackParcelable");
-        mTrackParcelable = trackParcelable;
+    public void onEventMainThread(MediaPlayerHandler.StoppedEvent stoppedEvent) {
+        Notifications.cancelNotification(this);
     }
 
-    public void onEventMainThread(ArrayList<TrackParcelable> trackParcelables) {
-        mTrackParcelables = trackParcelables;
+    public void onEventMainThread(MediaPlayerHandler.PausedEvent pausedEvent) {
+        int size = mMediaPlayerHandler.getTrackParcelable().albumImageUrls.size();
+        Notifications.showPlayerNotifications(this, mMediaPlayerHandler.getTrackParcelable().albumImageUrls.get(size-2),MediaPlayerHandler.getMediaPlayerState(),mMediaPlayerHandler.getTrackParcelable().songName);
     }
 
-    public void onEventMainThread(int vibrantColor) {
-        mVibrantColor = vibrantColor;
+    public void onEventMainThread(MediaPlayerHandler.PlayingEvent playingEvent) {
+        //show notification
+        int size = mMediaPlayerHandler.getTrackParcelable().albumImageUrls.size();
+        Notifications.showPlayerNotifications(this, mMediaPlayerHandler.getTrackParcelable().albumImageUrls.get(size-2), MediaPlayerHandler.getMediaPlayerState(),mMediaPlayerHandler.getTrackParcelable().songName);
     }
-
 
 }

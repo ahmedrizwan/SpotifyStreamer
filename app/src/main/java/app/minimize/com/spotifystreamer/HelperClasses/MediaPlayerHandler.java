@@ -9,7 +9,10 @@ import android.util.Log;
 import android.widget.Toast;
 
 import java.io.IOException;
+import java.util.ArrayList;
+import java.util.List;
 
+import app.minimize.com.spotifystreamer.Parcelables.TrackParcelable;
 import de.greenrobot.event.EventBus;
 
 
@@ -18,36 +21,67 @@ import de.greenrobot.event.EventBus;
  */
 public class MediaPlayerHandler implements AudioManager.OnAudioFocusChangeListener, MediaPlayer.OnPreparedListener, MediaPlayer.OnCompletionListener {
 
+    public void stopMediaPlayer() {
 
-    public static final String PLAY = "PlayTrack";
-    public static final String PAUSE = "PauseTrack";
-    public static final String STOP = "StopTrack";
-    public static final String NEXT = "NextTrack";
-    public static final String PREVIOUS = "PreviousTrack";
-
-
-    public void resendPlayerEvents() {
-        if(mMediaPlayerState == MediaPlayerState.Playing){
-            EventBus.getDefault()
-                    .post(mPlayingEvent.setDuration(mMediaPlayer.getDuration())
-                            .setProgress(mMediaPlayer.getCurrentPosition()));
-        }else if(mMediaPlayerState == MediaPlayerState.Stopped){
-            EventBus.getDefault()
-                    .post(mStoppedEvent);
-        } else if(mMediaPlayerState == MediaPlayerState.Paused){
-            EventBus.getDefault()
-                    .post(mPausedEvent.setProgress(mMediaPlayer.getCurrentPosition()));
-        }
     }
 
     public enum MediaPlayerState {Playing, Stopped, Paused, Idle}
+
+    public void resendPlayerEvents() {
+        EventBus.getDefault().post(mTrackParcelable);
+        if (mMediaPlayerState == MediaPlayerState.Playing) {
+            EventBus.getDefault()
+                    .post(mPlayingEvent.setDuration(mMediaPlayer.getDuration())
+                            .setProgress(mMediaPlayer.getCurrentPosition()));
+        } else if (mMediaPlayerState == MediaPlayerState.Stopped) {
+            EventBus.getDefault()
+                    .post(mStoppedEvent);
+        } else if (mMediaPlayerState == MediaPlayerState.Paused) {
+            EventBus.getDefault()
+                    .post(mPausedEvent.setProgress(mMediaPlayer.getCurrentPosition()));
+        }
+
+    }
+
+    public TrackParcelable getTrackParcelable() {
+        return mTrackParcelable;
+    }
+
+    public List<TrackParcelable> getTrackParcelables() {
+        return mTrackParcelables;
+    }
+
+    public void setTrackParcelables(ArrayList<TrackParcelable> trackParcelables) {
+        mTrackParcelables = trackParcelables;
+    }
+
+    public void setTrackParcelable(TrackParcelable trackParcelable) {
+        mTrackParcelable = trackParcelable;
+    }
+
+    public void nextTrack() {
+        int indexOfTrack = mTrackParcelables.indexOf(mTrackParcelable);
+        if (indexOfTrack < mTrackParcelables.size()-1) {
+            handlePlayback(mTrackParcelables.get(indexOfTrack + 1));
+        }
+    }
+
+    public void previousTrack() {
+        int indexOfTrack = mTrackParcelables.indexOf(mTrackParcelable);
+        if (indexOfTrack > 0) {
+            handlePlayback(mTrackParcelables.get(indexOfTrack - 1));
+        }
+    }
 
     //State
     MediaPlayerState mMediaPlayerState = MediaPlayerState.Idle;
     private static MediaPlayerHandler sMediaPlayerHandler;
     private MediaPlayer mMediaPlayer;
     private Context mContext;
-    private String mTrackUrl = "", mTrackName = "";
+
+    private TrackParcelable mTrackParcelable;
+    private List<TrackParcelable> mTrackParcelables;
+
 
     //Events
     private PlayingEvent mPlayingEvent;
@@ -57,18 +91,6 @@ public class MediaPlayerHandler implements AudioManager.OnAudioFocusChangeListen
     private final String TAG = "MediaPlayerHandler";
 
     private MediaPlayerHandler() {
-    }
-
-    /***
-     * Returns the state idle if mediaPlayerHandler is uninitialized
-     *
-     * @return Player state
-     */
-    public static MediaPlayerState getPlayerState() {
-        if (sMediaPlayerHandler == null)
-            return MediaPlayerState.Idle;
-        else
-            return sMediaPlayerHandler.mMediaPlayerState;
     }
 
     /***
@@ -88,6 +110,11 @@ public class MediaPlayerHandler implements AudioManager.OnAudioFocusChangeListen
         return sMediaPlayerHandler;
     }
 
+    public static MediaPlayerHandler getInstance() {
+        return sMediaPlayerHandler;
+    }
+
+
     public static MediaPlayer getPlayer() {
         if (sMediaPlayerHandler != null)
             return sMediaPlayerHandler.mMediaPlayer;
@@ -104,11 +131,15 @@ public class MediaPlayerHandler implements AudioManager.OnAudioFocusChangeListen
         mContext = context;
     }
 
-    public void handlePlayback(String trackUrl, String trackName) {
+    public void handlePlayback(TrackParcelable trackParcelable) {
         //check if its the same old file or a new one
-        boolean newFile = !mTrackUrl.equals(trackUrl);
-        mTrackUrl = trackUrl;
-        mTrackName = trackName;
+        boolean newFile;
+        try {
+            newFile = !mTrackParcelable.previewUrl.equals(trackParcelable.previewUrl);
+        }catch (NullPointerException e){
+            newFile = false;
+        }
+        mTrackParcelable = trackParcelable;
 
         if (newFile || mMediaPlayerState == MediaPlayerState.Stopped) {
 
@@ -138,11 +169,10 @@ public class MediaPlayerHandler implements AudioManager.OnAudioFocusChangeListen
 
     private void playPauseOrStopMediaPlayer(final boolean newFile, final AudioManager audioManager) {
         Log.e("Player", "Granted!");
-        if (mMediaPlayerState != MediaPlayerState.Stopped && !newFile) {
-            Log.e("Player", "Toggle!");
-            EventBus.getDefault()
-                    .post(mPlayingEvent.setDuration(mMediaPlayer.getDuration())
-                            .setProgress(mMediaPlayer.getCurrentPosition()));
+        if (mMediaPlayerState != MediaPlayerState.Stopped && !newFile && mMediaPlayerState!=MediaPlayerState.Idle) {
+            Log.e("Player", "the Same old file!");
+            EventBus.getDefault().post(mTrackParcelable);
+            resendPlayerEvents();
         } else {
             try {
                 Log.e("Player", "Load!");
@@ -152,9 +182,10 @@ public class MediaPlayerHandler implements AudioManager.OnAudioFocusChangeListen
                     i.putExtra("command", "pause");
                     mContext.sendBroadcast(i);
                 }
+                EventBus.getDefault().post(mTrackParcelable);
                 playUrl();
             } catch (IOException e) {
-                Toast.makeText(mContext, "Unable to play " + mTrackName, Toast.LENGTH_SHORT)
+                Toast.makeText(mContext, "Unable to play " + mTrackParcelable.songName, Toast.LENGTH_SHORT)
                         .show();
             } catch (IllegalStateException e) {
                 Log.e(TAG, e.toString());
@@ -171,7 +202,7 @@ public class MediaPlayerHandler implements AudioManager.OnAudioFocusChangeListen
             }
             mMediaPlayer.setAudioStreamType(AudioManager.STREAM_MUSIC);
             try {
-                mMediaPlayer.setDataSource(mContext, Uri.parse(mTrackUrl));
+                mMediaPlayer.setDataSource(mContext, Uri.parse(mTrackParcelable.previewUrl));
                 mMediaPlayer.setOnPreparedListener(this);
                 mMediaPlayer.setOnCompletionListener(this);
                 mMediaPlayer.prepare();
@@ -196,8 +227,11 @@ public class MediaPlayerHandler implements AudioManager.OnAudioFocusChangeListen
         }
     }
 
-    public MediaPlayerState getMediaPlayerState() {
-        return mMediaPlayerState;
+    public static MediaPlayerState getMediaPlayerState() {
+        if (sMediaPlayerHandler == null)
+            return MediaPlayerState.Idle;
+        else
+            return sMediaPlayerHandler.mMediaPlayerState;
     }
 
     public void togglePlayPause() {
@@ -214,7 +248,7 @@ public class MediaPlayerHandler implements AudioManager.OnAudioFocusChangeListen
                     .post(mPlayingEvent.setDuration(mMediaPlayer.getDuration())
                             .setProgress(mMediaPlayer.getCurrentPosition()));
         } else {
-            handlePlayback(mTrackUrl, mTrackName);
+            handlePlayback(getTrackParcelable());
         }
     }
 
@@ -295,8 +329,4 @@ public class MediaPlayerHandler implements AudioManager.OnAudioFocusChangeListen
         }
     }
 
-
-    public String getUrl() {
-        return mTrackUrl;
-    }
 }

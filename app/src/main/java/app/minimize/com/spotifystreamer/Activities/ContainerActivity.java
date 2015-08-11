@@ -76,16 +76,12 @@ public class ContainerActivity extends AppCompatActivity {
 
         //start service to retrieve the status of player
         startServiceForStatusRetrieval();
-
-        mIncludeNowPlayingBinding.buttonPlayPause.setOnClickListener(v -> MediaPlayerHandler.getInstance(ContainerActivity.this)
-                .togglePlayPause());
-
     }
 
     public void refreshNowPlayingCardState() {
         //get the state of the player
         MediaPlayerHandler.MediaPlayerState playerState = MediaPlayerHandler
-                .getPlayerState();
+                .getMediaPlayerState();
         showCard();
         if (playerState == MediaPlayerHandler.MediaPlayerState.Playing) {
             cardPlaying();
@@ -105,91 +101,6 @@ public class ContainerActivity extends AppCompatActivity {
                 MediaPlayerService.class);
         intent.putExtra(Keys.KEY_GET_STATUS, true);
         startService(intent);
-    }
-
-    @TargetApi(Build.VERSION_CODES.LOLLIPOP)
-    public void onEventMainThread(TrackParcelable trackParcelable) {
-        showCard();
-        refreshNowPlayingCardState();
-        Log.e(TAG, "onEventMainThread "+trackParcelable.songName);
-        setCardTrackAndAlbumNames(trackParcelable.songName, trackParcelable.albumName);
-        int size = trackParcelable.albumImageUrls.size();
-        if (size > 0)
-            Picasso.with(ContainerActivity.this)
-                    .load(trackParcelable.albumImageUrls.get(size - 1))
-                    .into(new Target() {
-                        @Override
-                        public void onBitmapLoaded(final Bitmap bitmap,
-                                                   final Picasso.LoadedFrom from) {
-                            mIncludeNowPlayingBinding.imageViewAlbum.setImageBitmap(bitmap);
-                        }
-
-                        @Override
-                        public void onBitmapFailed(final Drawable errorDrawable) {
-                        }
-
-                        @Override
-                        public void onPrepareLoad(final Drawable placeHolderDrawable) {
-                        }
-                    });
-        else
-            mIncludeNowPlayingBinding.imageViewAlbum.
-                    setImageDrawable((ContextCompat.getDrawable(ContainerActivity.this, R.drawable.ic_not_available)));
-
-        //click listner for the Card
-        mIncludeNowPlayingBinding.layoutNowPlaying.setOnClickListener(v -> {
-            //launch player dialog fragment
-            if (mTwoPane) {
-                //launch playerDialogFragment
-                PlayerDialogFragment playerDialogFragment = PlayerDialogFragment.getInstance();
-                Bundle bundle = new Bundle();
-                bundle.putParcelable(getString(R.string.key_tracks_parcelable), trackParcelable);
-//                        bundle.putParcelableArrayList(Keys.KEY_TRACK_PARCELABLE_LIST, mTracksAdapter.getDataSet());
-                int vibrantColor1 = Palette.from(((BitmapDrawable) mIncludeNowPlayingBinding.imageViewAlbum.getDrawable()).getBitmap())
-                        .generate()
-                        .getVibrantColor(Color.BLACK);
-                bundle.putInt(Keys.COLOR_ACTION_BAR, vibrantColor1);
-                playerDialogFragment.setArguments(bundle);
-                playerDialogFragment.show(getSupportFragmentManager(), "Player");
-            } else {
-                //Launch the dialogFragment from here
-                PlayerDialogFragment playerDialogFragment = PlayerDialogFragment.getInstance();
-                Bundle bundle = new Bundle();
-                bundle.putParcelable(getString(R.string.key_tracks_parcelable), trackParcelable);
-//                        bundle.putParcelableArrayList(Keys.KEY_TRACK_PARCELABLE_LIST, mTracksAdapter.getDataSet());
-                int vibrantColor1 = Palette.from(((BitmapDrawable) mIncludeNowPlayingBinding.imageViewAlbum.getDrawable()).getBitmap())
-                        .generate()
-                        .getVibrantColor(Color.BLACK);
-                bundle.putInt(Keys.COLOR_ACTION_BAR, vibrantColor1);
-                playerDialogFragment.setArguments(bundle);
-
-                if (Utility.isVersionLollipopAndAbove()) {
-                    mIncludeNowPlayingBinding.imageViewAlbum.setTransitionName(trackParcelable.previewUrl);
-                    playerDialogFragment.setImageViewAlbumTransitionName(trackParcelable.previewUrl);
-                }
-                Fragment fromFragment = getSupportFragmentManager().findFragmentById(R.id.container);
-                Utility.launchFragmentWithSharedElements(mTwoPane, fromFragment,
-                        playerDialogFragment, R.id.container, mIncludeNowPlayingBinding.imageViewAlbum);
-            }
-        });
-
-    }
-
-    public void onEventMainThread(MediaPlayerHandler.PlayingEvent playingEvent) {
-        showCard();
-        //show the nowPlayingCard
-        cardPlaying();
-        startServiceForStatusRetrieval();
-    }
-
-    public void onEventMainThread(MediaPlayerHandler.PausedEvent pausedEvent) {
-        showCard();
-        cardPaused();
-    }
-
-    public void onEventMainThread(MediaPlayerHandler.StoppedEvent stoppedEvent) {
-        showCard();
-        cardStopped();
     }
 
     private void setCardTrackAndAlbumNames(final String songName, final String albumName) {
@@ -248,7 +159,7 @@ public class ContainerActivity extends AppCompatActivity {
     public void showCard() {
         Fragment activeFragment = getSupportFragmentManager().findFragmentById(R.id.container);
         if (!(activeFragment instanceof PlayerDialogFragment) &&
-                MediaPlayerHandler.getPlayerState() != MediaPlayerHandler.MediaPlayerState.Idle)
+                MediaPlayerHandler.getMediaPlayerState() != MediaPlayerHandler.MediaPlayerState.Idle)
             mIncludeNowPlayingBinding.getRoot()
                     .setVisibility(View.VISIBLE);
 
@@ -266,5 +177,102 @@ public class ContainerActivity extends AppCompatActivity {
     public void hideCard() {
         mIncludeNowPlayingBinding.getRoot()
                 .setVisibility(View.GONE);
+    }
+
+    public void shorOrHideCard() {
+        Log.e(TAG, "shorOrHideCard " + MediaPlayerHandler.getMediaPlayerState()
+                .toString());
+        switch (MediaPlayerHandler.getMediaPlayerState()) {
+            case Idle:
+                //hide the card
+                mIncludeNowPlayingBinding.layoutNowPlaying.setVisibility(View.GONE);
+                break;
+            default:
+                onEventMainThread(MediaPlayerHandler.getInstance()
+                        .getTrackParcelable());
+                break;
+        }
+    }
+
+    @TargetApi(Build.VERSION_CODES.LOLLIPOP)
+    public void onEventMainThread(TrackParcelable trackParcelable) {
+        showCard();
+        refreshNowPlayingCardState();
+        setCardTrackAndAlbumNames(trackParcelable.songName, trackParcelable.albumName);
+        int size = trackParcelable.albumImageUrls.size();
+        if (size > 0)
+            Picasso.with(ContainerActivity.this)
+                    .load(trackParcelable.albumImageUrls.get(size - 1))
+                    .into(new Target() {
+                        @Override
+                        public void onBitmapLoaded(final Bitmap bitmap,
+                                                   final Picasso.LoadedFrom from) {
+                            mIncludeNowPlayingBinding.imageViewAlbum.setImageBitmap(bitmap);
+                        }
+
+                        @Override
+                        public void onBitmapFailed(final Drawable errorDrawable) {
+                        }
+
+                        @Override
+                        public void onPrepareLoad(final Drawable placeHolderDrawable) {
+                        }
+                    });
+        else
+            mIncludeNowPlayingBinding.imageViewAlbum.
+                    setImageDrawable((ContextCompat.getDrawable(ContainerActivity.this, R.drawable.ic_not_available)));
+
+        //click listner for the Card
+        mIncludeNowPlayingBinding.layoutNowPlaying.setOnClickListener(v -> {
+            //launch player dialog fragment
+            if (mTwoPane) {
+                //launch playerDialogFragment
+                PlayerDialogFragment playerDialogFragment = PlayerDialogFragment.getInstance();
+                Bundle bundle = new Bundle();
+                bundle.putParcelable(getString(R.string.key_tracks_parcelable), trackParcelable);
+//                        bundle.putParcelableArrayList(Keys.KEY_TRACK_PARCELABLE_LIST, mTracksAdapter.getDataSet());
+                int vibrantColor1 = Palette.from(((BitmapDrawable) mIncludeNowPlayingBinding.imageViewAlbum.getDrawable()).getBitmap())
+                        .generate()
+                        .getVibrantColor(Color.BLACK);
+                bundle.putInt(Keys.COLOR_ACTION_BAR, vibrantColor1);
+                playerDialogFragment.setArguments(bundle);
+                playerDialogFragment.show(getSupportFragmentManager(), "Player");
+            } else {
+                //Launch the dialogFragment from here
+                PlayerDialogFragment playerDialogFragment = PlayerDialogFragment.getInstance();
+                if (Utility.isVersionLollipopAndAbove()) {
+                    mIncludeNowPlayingBinding.imageViewAlbum.setTransitionName(trackParcelable.previewUrl);
+                    playerDialogFragment.setImageViewAlbumTransitionName(trackParcelable.previewUrl);
+                }
+                Fragment fromFragment = getSupportFragmentManager().findFragmentById(R.id.container);
+                Utility.launchFragmentWithSharedElements(mTwoPane, fromFragment,
+                        playerDialogFragment, R.id.container, mIncludeNowPlayingBinding.imageViewAlbum);
+            }
+        });
+
+        mIncludeNowPlayingBinding.buttonPlayPause.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(final View v) {
+                MediaPlayerHandler.getInstance().togglePlayPause();
+            }
+        });
+
+    }
+
+    public void onEventMainThread(MediaPlayerHandler.PlayingEvent playingEvent) {
+        showCard();
+        //show the nowPlayingCard
+        cardPlaying();
+        startServiceForStatusRetrieval();
+    }
+
+    public void onEventMainThread(MediaPlayerHandler.PausedEvent pausedEvent) {
+        showCard();
+        cardPaused();
+    }
+
+    public void onEventMainThread(MediaPlayerHandler.StoppedEvent stoppedEvent) {
+        showCard();
+        cardStopped();
     }
 }

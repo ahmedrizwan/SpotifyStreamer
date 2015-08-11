@@ -25,6 +25,8 @@
             />
 
         <activity android:name=".Activities.SettingsActivity"/>
+
+        <receiver android:name=".HelperClasses.PlayerNotificationReceiver"/>
     </application>
 
 </manifest>
