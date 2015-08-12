@@ -19,7 +19,6 @@ public class Keys {
     public static final String SHARED_PREFS = "SpotifyStreamerPrefs";
     public static final String KEY_LOCATION = "SpotifyLocation";
 
-
     public static final String KEY_TOP_TRACK_PARCELABLES = "TopTenTrackParcelables";
     public static final String KEY_SAVE_TRACKS = "SaveTracks";
     public static final String NEXT = "Next";
