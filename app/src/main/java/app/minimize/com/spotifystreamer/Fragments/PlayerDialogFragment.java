@@ -4,6 +4,7 @@ import android.annotation.TargetApi;
 import android.content.DialogInterface;
 import android.content.Intent;
 import android.databinding.DataBindingUtil;
+import android.graphics.Color;
 import android.os.Build;
 import android.os.Bundle;
 import android.os.SystemClock;
@@ -60,9 +61,10 @@ public class PlayerDialogFragment extends DialogFragment {
                 .register(this);
 
         mTwoPane = ((ContainerActivity) getActivity()).isTwoPane();
-        if(mTwoPane){
+        if (mTwoPane) {
             //make it full screen
-            getDialog().getWindow().requestFeature(Window.FEATURE_NO_TITLE);
+            getDialog().getWindow()
+                    .requestFeature(Window.FEATURE_NO_TITLE);
         }
 
         ActionBar actionBar = ((AppCompatActivity) getActivity()).getSupportActionBar();
@@ -102,10 +104,15 @@ public class PlayerDialogFragment extends DialogFragment {
 
         //share click listener
         mFragmentPlayerBinding.imageButtonShare.setOnClickListener(v -> {
-            shareTextUrl(mMediaPlayerHandler.getTrackParcelable().previewUrl,mMediaPlayerHandler.getTrackParcelable().songName);
+            shareTextUrl(mMediaPlayerHandler.getTrackParcelable().previewUrl, mMediaPlayerHandler.getTrackParcelable().songName);
         });
 
-        playThisTrack();
+        if (savedInstanceState == null)
+            playThisTrack();
+        else {
+            onEventMainThread(mMediaPlayerHandler.getTrackParcelable());
+            mMediaPlayerHandler.resendPlayerEvents();
+        }
 
         return mFragmentPlayerBinding.getRoot();
     }
@@ -119,7 +126,7 @@ public class PlayerDialogFragment extends DialogFragment {
             mMediaPlayerHandler.resendPlayerEvents();
     }
 
-    private void shareTextUrl(String url,String songName) {
+    private void shareTextUrl(String url, String songName) {
         Intent share = new Intent(android.content.Intent.ACTION_SEND);
         share.setType("text/plain");
         // Add data to the intent, the receiving app will decide
@@ -139,13 +146,18 @@ public class PlayerDialogFragment extends DialogFragment {
                     mTrackParcelable.albumImageUrls.get(size - 1),
                     mTrackParcelable.albumImageUrls.get(0),
                     mFragmentPlayerBinding.imageViewAlbum,
-                    val -> updateColors(val));
+                    val -> {
+                        if (mTwoPane)
+                            updateColors(Color.BLACK);
+                        else
+                            updateColors(val);
+                    });
         }
 
     }
 
     public void updateColors(int mVibrantColor) {
-        Log.e(TAG, "updateColors "+mVibrantColor);
+        Log.e(TAG, "updateColors " + mVibrantColor);
 
         if (mTwoPane) {
             getDialog().getWindow()
@@ -157,6 +169,7 @@ public class PlayerDialogFragment extends DialogFragment {
         mFragmentPlayerBinding.imageViewPlay.setButtonBackgroundColor(getActivity(), mVibrantColor);
         mFragmentPlayerBinding.seekBarPlayer.setProgressColor(mVibrantColor);
         mFragmentPlayerBinding.seekBarPlayer.setThumbColor(mVibrantColor);
+
     }
 
     private void pauseTheSeekbar() {
@@ -255,7 +268,6 @@ public class PlayerDialogFragment extends DialogFragment {
         } catch (NullPointerException e) {
             Log.e("MediaPlayerHandler Null", e.getMessage());
         }
-
     }
 
     private void logHelper(final String message) {

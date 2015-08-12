@@ -5,7 +5,7 @@
         android:layout_width="match_parent"
         android:layout_height="match_parent"
         android:orientation="vertical"
-        android:minHeight="1000dp"
+        android:minHeight="500dp"
         >
 
         <ImageView
