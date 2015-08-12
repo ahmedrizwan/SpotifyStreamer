@@ -7,4 +7,11 @@
             android:title="@string/preference_location_title"
             />
     </PreferenceCategory>
+
+    <PreferenceCategory android:title="User Interface">
+        <SwitchPreference
+            android:key="@string/preference_notification_key"
+            android:title="@string/preference_notification"
+            />
+    </PreferenceCategory>
 </PreferenceScreen>

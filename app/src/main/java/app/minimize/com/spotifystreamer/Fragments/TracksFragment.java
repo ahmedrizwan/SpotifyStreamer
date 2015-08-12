@@ -7,7 +7,6 @@ import android.graphics.Color;
 import android.graphics.drawable.BitmapDrawable;
 import android.os.Build;
 import android.os.Bundle;
-import android.os.Parcelable;
 import android.support.v4.app.Fragment;
 import android.support.v7.app.ActionBar;
 import android.support.v7.app.AppCompatActivity;
@@ -26,6 +25,7 @@ import app.minimize.com.spotifystreamer.Activities.ContainerActivity;
 import app.minimize.com.spotifystreamer.Activities.Keys;
 import app.minimize.com.spotifystreamer.Adapters.TracksAdapter;
 import app.minimize.com.spotifystreamer.HelperClasses.MediaPlayerHandler;
+import app.minimize.com.spotifystreamer.MyPreferenceFragment;
 import app.minimize.com.spotifystreamer.Parcelables.ArtistParcelable;
 import app.minimize.com.spotifystreamer.Parcelables.TrackParcelable;
 import app.minimize.com.spotifystreamer.R;
@@ -111,10 +111,6 @@ public class TracksFragment extends Fragment implements TracksAdapter.TracksEven
         mTracksAdapter = new TracksAdapter(this, mData);
         mFragmentTracksBinding.recyclerViewTracks.setAdapter(mTracksAdapter);
 
-        //NowPlaying view check if should be visible or not
-        ((ContainerActivity) getActivity()).
-                startServiceForStatusRetrieval();
-
         return mFragmentTracksBinding.getRoot();
     }
 
@@ -135,7 +131,7 @@ public class TracksFragment extends Fragment implements TracksAdapter.TracksEven
         super.onSaveInstanceState(outState);
         try {
             outState.putParcelable(Keys.KEY_ARTIST_PARCELABLE, mArtistParcelable);
-            outState.putParcelableArrayList(TRACKS, (ArrayList<? extends Parcelable>) mData);
+            outState.putParcelableArrayList(TRACKS, mData);
         } catch (Exception e) {
             e.printStackTrace();
         }
@@ -146,7 +142,7 @@ public class TracksFragment extends Fragment implements TracksAdapter.TracksEven
             SpotifyApi spotifyApi = new SpotifyApi();
             SpotifyService spotifyService = spotifyApi.getService();
             Map<String, Object> options = new HashMap<>();
-            options.put(SpotifyService.COUNTRY, "US");
+            options.put(SpotifyService.COUNTRY, MyPreferenceFragment.getSelectedCountry(getActivity()));
 
             spotifyService.getArtistTopTrack(mArtistParcelable.id, options, new Callback<Tracks>() {
                 @Override
@@ -162,7 +158,6 @@ public class TracksFragment extends Fragment implements TracksAdapter.TracksEven
                                 mIncludeProgressBinding.textViewError.setText(getString(R.string.tv_no_tracks));
                                 mIncludeProgressBinding.textViewError.setVisibility(View.VISIBLE);
                             }
-
                             mIncludeProgressBinding.progressBar.setVisibility(View.GONE);
                             ((TracksAdapter) mFragmentTracksBinding.recyclerViewTracks.getAdapter()).updateList(mData);
                             return null;
@@ -189,7 +184,7 @@ public class TracksFragment extends Fragment implements TracksAdapter.TracksEven
     @Override
     public void trackClicked(final TrackParcelable track, final TracksAdapter.RecyclerViewHolderTracks holder) {
         Bundle bundleTracks = new Bundle();
-        bundleTracks.putParcelable(Keys.KEY_TRACK_PARCELABLE,track);
+        bundleTracks.putParcelable(Keys.KEY_TRACK_PARCELABLE, track);
         mMediaPlayerHandler.setTrackParcelables(mTracksAdapter.getDataSet());
         if (isTwoPane) {
             //launch playerDialogFragment

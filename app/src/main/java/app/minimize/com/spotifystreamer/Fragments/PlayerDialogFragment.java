@@ -27,7 +27,6 @@ import app.minimize.com.spotifystreamer.Activities.ContainerActivity;
 import app.minimize.com.spotifystreamer.Activities.Keys;
 import app.minimize.com.spotifystreamer.HelperClasses.MediaPlayerHandler;
 import app.minimize.com.spotifystreamer.HelperClasses.SeekbarChangeListener;
-import app.minimize.com.spotifystreamer.MediaPlayerService;
 import app.minimize.com.spotifystreamer.Parcelables.TrackParcelable;
 import app.minimize.com.spotifystreamer.R;
 import app.minimize.com.spotifystreamer.Utility;
@@ -100,6 +99,11 @@ public class PlayerDialogFragment extends DialogFragment {
             mMediaPlayerHandler.togglePlayPause();
         });
 
+        //share click listener
+        mFragmentPlayerBinding.imageButtonShare.setOnClickListener(v -> {
+            shareTextUrl(mTrackParcelable.previewUrl,mTrackParcelable.songName);
+        });
+
         playThisTrack();
 
         return mFragmentPlayerBinding.getRoot();
@@ -112,14 +116,16 @@ public class PlayerDialogFragment extends DialogFragment {
             mMediaPlayerHandler.handlePlayback(mTrackParcelable);
         else
             mMediaPlayerHandler.resendPlayerEvents();
-
     }
 
-
-    private void startServiceWithEvent(final String event) {
-        Intent intent = new Intent(getActivity(), MediaPlayerService.class);
-        intent.putExtra(getString(R.string.key_event), event);
-        getActivity().startService(intent);
+    private void shareTextUrl(String url,String songName) {
+        Intent share = new Intent(android.content.Intent.ACTION_SEND);
+        share.setType("text/plain");
+        // Add data to the intent, the receiving app will decide
+        // what to do with it.
+        share.putExtra(Intent.EXTRA_SUBJECT, songName);
+        share.putExtra(Intent.EXTRA_TEXT, url);
+        startActivity(Intent.createChooser(share, "Share Preview"));
     }
 
     public void onEventMainThread(TrackParcelable mTrackParcelable) {

@@ -20,9 +20,12 @@
     <string name="title_player">Player</string>
     <string name="album_image_transition">albumImageTransition</string>
     <string name="preference_location_key">preferenceLocationKey</string>
-    <string name="preference_location_title">Location</string>
+    <string name="preference_location_title">Selected Location</string>
     <string name="key_event">Event</string>
     <string name="value_play">PlayTrack</string>
+    <string name="preference_notification">Show Notification Controls</string>
+    <string name="preference_notification_key">preferenceNotificationKey</string>
+    <string name="locations">Locations</string>
 
 
     <string-array name="country_names">

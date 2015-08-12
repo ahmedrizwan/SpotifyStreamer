@@ -4,6 +4,7 @@ import android.databinding.DataBindingUtil;
 import android.os.Bundle;
 import android.support.v7.app.AppCompatActivity;
 
+import app.minimize.com.spotifystreamer.MyPreferenceFragment;
 import app.minimize.com.spotifystreamer.R;
 import app.minimize.com.spotifystreamer.databinding.ActivitySettingsBinding;
 
@@ -16,5 +17,10 @@ public class SettingsActivity extends AppCompatActivity {
         super.onCreate(savedInstanceState);
         ActivitySettingsBinding activitySettingsBinding = DataBindingUtil.setContentView(this, R.layout.activity_settings);
         activitySettingsBinding.setTitle(getString(R.string.action_settings));
+        //load the fragment
+        getFragmentManager().beginTransaction().replace(R.id.container, new MyPreferenceFragment()).commit();
+        setSupportActionBar(activitySettingsBinding.mainToolbar);
+        getSupportActionBar().setDisplayHomeAsUpEnabled(true);
     }
+
 }

@@ -42,14 +42,24 @@ public class MediaPlayerService extends Service {
     }
 
     public void onEventMainThread(MediaPlayerHandler.PausedEvent pausedEvent) {
-        int size = mMediaPlayerHandler.getTrackParcelable().albumImageUrls.size();
-        Notifications.showPlayerNotifications(this, mMediaPlayerHandler.getTrackParcelable().albumImageUrls.get(size-2),MediaPlayerHandler.getMediaPlayerState(),mMediaPlayerHandler.getTrackParcelable().songName);
+        handleNotification();
     }
 
+
     public void onEventMainThread(MediaPlayerHandler.PlayingEvent playingEvent) {
-        //show notification
-        int size = mMediaPlayerHandler.getTrackParcelable().albumImageUrls.size();
-        Notifications.showPlayerNotifications(this, mMediaPlayerHandler.getTrackParcelable().albumImageUrls.get(size-2), MediaPlayerHandler.getMediaPlayerState(),mMediaPlayerHandler.getTrackParcelable().songName);
+        handleNotification();
+
+    }
+    private void handleNotification() {
+        if(MyPreferenceFragment.isNotificationModeOn(this)) {
+            try {
+                int size = mMediaPlayerHandler.getTrackParcelable().albumImageUrls.size();
+                Notifications.showPlayerNotifications(this, mMediaPlayerHandler.getTrackParcelable().albumImageUrls.get(size - 2), MediaPlayerHandler.getMediaPlayerState(), mMediaPlayerHandler.getTrackParcelable().songName);
+            } catch (Exception e) {
+                Notifications.showPlayerNotifications(this, null, MediaPlayerHandler.getMediaPlayerState(), mMediaPlayerHandler.getTrackParcelable().songName);
+            }
+        } else
+            Notifications.cancelNotification(this);
     }
 
 }

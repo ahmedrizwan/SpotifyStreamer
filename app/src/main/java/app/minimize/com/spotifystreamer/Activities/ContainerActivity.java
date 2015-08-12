@@ -4,8 +4,6 @@ import android.annotation.TargetApi;
 import android.content.Intent;
 import android.databinding.DataBindingUtil;
 import android.graphics.Bitmap;
-import android.graphics.Color;
-import android.graphics.drawable.BitmapDrawable;
 import android.graphics.drawable.Drawable;
 import android.os.Build;
 import android.os.Bundle;
@@ -13,7 +11,6 @@ import android.support.v4.app.Fragment;
 import android.support.v4.content.ContextCompat;
 import android.support.v7.app.AlertDialog;
 import android.support.v7.app.AppCompatActivity;
-import android.support.v7.graphics.Palette;
 import android.util.Log;
 import android.view.Menu;
 import android.view.MenuItem;
@@ -25,7 +22,6 @@ import com.squareup.picasso.Target;
 import app.minimize.com.spotifystreamer.Fragments.ArtistsFragment;
 import app.minimize.com.spotifystreamer.Fragments.PlayerDialogFragment;
 import app.minimize.com.spotifystreamer.HelperClasses.MediaPlayerHandler;
-import app.minimize.com.spotifystreamer.MediaPlayerService;
 import app.minimize.com.spotifystreamer.Parcelables.TrackParcelable;
 import app.minimize.com.spotifystreamer.R;
 import app.minimize.com.spotifystreamer.Utility;
@@ -73,9 +69,6 @@ public class ContainerActivity extends AppCompatActivity {
                         .commit();
             }
         }
-
-        //start service to retrieve the status of player
-        startServiceForStatusRetrieval();
     }
 
     public void refreshNowPlayingCardState() {
@@ -94,13 +87,6 @@ public class ContainerActivity extends AppCompatActivity {
 
     private void cardStopped() {
         mIncludeNowPlayingBinding.buttonPlayPause.setMode(true);
-    }
-
-    public void startServiceForStatusRetrieval() {
-        Intent intent = new Intent(this,
-                MediaPlayerService.class);
-        intent.putExtra(Keys.KEY_GET_STATUS, true);
-        startService(intent);
     }
 
     private void setCardTrackAndAlbumNames(final String songName, final String albumName) {
@@ -136,7 +122,7 @@ public class ContainerActivity extends AppCompatActivity {
             AlertDialog dialog = builder.create();
             dialog.show();
             dialog.getButton(AlertDialog.BUTTON_POSITIVE)
-                    .setTextColor(getResources().getColor(R.color.color_primary));
+                    .setTextColor(getResources().getColor(R.color.green));
             return true;
         } else if (id == android.R.id.home) {
             getSupportFragmentManager().popBackStack();
@@ -180,8 +166,6 @@ public class ContainerActivity extends AppCompatActivity {
     }
 
     public void shorOrHideCard() {
-        Log.e(TAG, "shorOrHideCard " + MediaPlayerHandler.getMediaPlayerState()
-                .toString());
         switch (MediaPlayerHandler.getMediaPlayerState()) {
             case Idle:
                 //hide the card
@@ -228,14 +212,6 @@ public class ContainerActivity extends AppCompatActivity {
             if (mTwoPane) {
                 //launch playerDialogFragment
                 PlayerDialogFragment playerDialogFragment = PlayerDialogFragment.getInstance();
-                Bundle bundle = new Bundle();
-                bundle.putParcelable(getString(R.string.key_tracks_parcelable), trackParcelable);
-//                        bundle.putParcelableArrayList(Keys.KEY_TRACK_PARCELABLE_LIST, mTracksAdapter.getDataSet());
-                int vibrantColor1 = Palette.from(((BitmapDrawable) mIncludeNowPlayingBinding.imageViewAlbum.getDrawable()).getBitmap())
-                        .generate()
-                        .getVibrantColor(Color.BLACK);
-                bundle.putInt(Keys.COLOR_ACTION_BAR, vibrantColor1);
-                playerDialogFragment.setArguments(bundle);
                 playerDialogFragment.show(getSupportFragmentManager(), "Player");
             } else {
                 //Launch the dialogFragment from here
@@ -250,20 +226,15 @@ public class ContainerActivity extends AppCompatActivity {
             }
         });
 
-        mIncludeNowPlayingBinding.buttonPlayPause.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(final View v) {
-                MediaPlayerHandler.getInstance().togglePlayPause();
-            }
-        });
+        mIncludeNowPlayingBinding.buttonPlayPause.setOnClickListener(v -> MediaPlayerHandler.getInstance().togglePlayPause());
 
     }
 
+    //refresh the state of the Card
+    //three methods for three events
     public void onEventMainThread(MediaPlayerHandler.PlayingEvent playingEvent) {
         showCard();
-        //show the nowPlayingCard
         cardPlaying();
-        startServiceForStatusRetrieval();
     }
 
     public void onEventMainThread(MediaPlayerHandler.PausedEvent pausedEvent) {
