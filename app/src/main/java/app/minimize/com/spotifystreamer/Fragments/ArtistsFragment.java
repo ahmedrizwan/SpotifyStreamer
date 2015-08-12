@@ -94,7 +94,7 @@ public class ArtistsFragment extends Fragment implements ArtistsAdapter.ArtistsE
                 .findViewById(R.id.progressLayout));
 
         mMediaPlayerHandler = MediaPlayerHandler.getInstance();
-        if(mMediaPlayerHandler==null)
+        if (mMediaPlayerHandler == null)
             Utility.startService(getActivity());
 
         mIncludeProgressBinding.textViewError.setText("Hello");
@@ -151,8 +151,6 @@ public class ArtistsFragment extends Fragment implements ArtistsAdapter.ArtistsE
         mFragmentArtistsBinding.imageButtonClear.setOnClickListener(v -> clearState());
 
         ((ContainerActivity) getActivity()).refreshNowPlayingCardState();
-
-
 
 
         return mFragmentArtistsBinding.getRoot();
@@ -303,11 +301,12 @@ public class ArtistsFragment extends Fragment implements ArtistsAdapter.ArtistsE
     public void artistClicked(final ArtistParcelable artistParcelable, final ArtistsAdapter.RecyclerViewHolderArtists holder) {
         //hide the keyboard
         Utility.hideKeyboard(getActivity(), mFragmentArtistsBinding.editTextSearch);
-        
+
         int container = ((ContainerActivity) getActivity()).isTwoPane() ? R.id.tracksContainer : R.id.container;
         //Shared Element transition using fragments if lollipop and above
         TracksFragment tracksFragment = new TracksFragment();
-        tracksFragment.setImageTransitionName(holder.imageViewArtist.getTransitionName());
+        if (Utility.isVersionLollipopAndAbove())
+            tracksFragment.setImageTransitionName(holder.imageViewArtist.getTransitionName());
         Bundle bundle = new Bundle();
         bundle.putParcelable(Keys.KEY_ARTIST_PARCELABLE, artistParcelable);
         Utility.runOnWorkerThread(() -> {

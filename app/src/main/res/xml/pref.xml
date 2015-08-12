@@ -9,7 +9,7 @@
     </PreferenceCategory>
 
     <PreferenceCategory android:title="User Interface">
-        <SwitchPreference
+        <CheckBoxPreference
             android:key="@string/preference_notification_key"
             android:title="@string/preference_notification"
             />

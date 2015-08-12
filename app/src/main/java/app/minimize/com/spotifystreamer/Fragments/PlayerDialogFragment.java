@@ -4,8 +4,6 @@ import android.annotation.TargetApi;
 import android.content.DialogInterface;
 import android.content.Intent;
 import android.databinding.DataBindingUtil;
-import android.graphics.Color;
-import android.graphics.drawable.BitmapDrawable;
 import android.os.Build;
 import android.os.Bundle;
 import android.os.SystemClock;
@@ -13,7 +11,6 @@ import android.support.annotation.Nullable;
 import android.support.v4.app.DialogFragment;
 import android.support.v7.app.ActionBar;
 import android.support.v7.app.AppCompatActivity;
-import android.support.v7.graphics.Palette;
 import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
@@ -63,6 +60,10 @@ public class PlayerDialogFragment extends DialogFragment {
                 .register(this);
 
         mTwoPane = ((ContainerActivity) getActivity()).isTwoPane();
+        if(mTwoPane){
+            //make it full screen
+            getDialog().getWindow().requestFeature(Window.FEATURE_NO_TITLE);
+        }
 
         ActionBar actionBar = ((AppCompatActivity) getActivity()).getSupportActionBar();
         if (actionBar != null) {
@@ -101,7 +102,7 @@ public class PlayerDialogFragment extends DialogFragment {
 
         //share click listener
         mFragmentPlayerBinding.imageButtonShare.setOnClickListener(v -> {
-            shareTextUrl(mTrackParcelable.previewUrl,mTrackParcelable.songName);
+            shareTextUrl(mMediaPlayerHandler.getTrackParcelable().previewUrl,mMediaPlayerHandler.getTrackParcelable().songName);
         });
 
         playThisTrack();
@@ -138,20 +139,14 @@ public class PlayerDialogFragment extends DialogFragment {
                     mTrackParcelable.albumImageUrls.get(size - 1),
                     mTrackParcelable.albumImageUrls.get(0),
                     mFragmentPlayerBinding.imageViewAlbum,
-                    () -> {
-                        //extract the color from the image
-                        int vibrantColor = Palette.from(((BitmapDrawable) mFragmentPlayerBinding.imageViewAlbum.getDrawable())
-                                .getBitmap())
-                                .generate()
-                                .getVibrantColor(Color.BLACK);
-                        updateColors(vibrantColor);
-                        return null;
-                    });
+                    val -> updateColors(val));
         }
 
     }
 
     public void updateColors(int mVibrantColor) {
+        Log.e(TAG, "updateColors "+mVibrantColor);
+
         if (mTwoPane) {
             getDialog().getWindow()
                     .requestFeature(Window.FEATURE_NO_TITLE);

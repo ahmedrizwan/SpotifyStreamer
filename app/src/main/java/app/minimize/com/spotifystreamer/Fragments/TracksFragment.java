@@ -98,7 +98,7 @@ public class TracksFragment extends Fragment implements TracksAdapter.TracksEven
         if (mData != null && mData.size() > 0)
             mIncludeProgressBinding.progressBar.setVisibility(View.GONE);
         //Transition
-
+        if(Utility.isVersionLollipopAndAbove())
         mFragmentTracksBinding.imageViewArtist.setTransitionName(imageTransitionName);
         Log.e(TAG, "onCreateView " + imageTransitionName);
 

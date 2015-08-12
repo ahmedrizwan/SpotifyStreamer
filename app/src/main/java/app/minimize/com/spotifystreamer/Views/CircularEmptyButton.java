@@ -44,6 +44,8 @@ public class CircularEmptyButton extends EmptyButton {
             setBackgroundDrawable(getCircularButton(buttonColor,
                     darker(buttonColor, 2)));
         }
+
+        invalidate();
     }
 
 }

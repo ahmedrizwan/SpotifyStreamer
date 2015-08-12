@@ -3,9 +3,9 @@ package app.minimize.com.spotifystreamer;
 import android.content.Context;
 import android.content.SharedPreferences;
 import android.os.Bundle;
+import android.preference.CheckBoxPreference;
 import android.preference.Preference;
 import android.preference.PreferenceFragment;
-import android.preference.SwitchPreference;
 
 import com.afollestad.materialdialogs.MaterialDialog;
 
@@ -36,7 +36,6 @@ public class MyPreferenceFragment extends PreferenceFragment {
         createCountryToCodeMap();
         setupLocationPreference(sharedPreferences);
         setupNotificationPreference(sharedPreferences);
-
     }
 
     private void createCountryToCodeMap() {
@@ -50,7 +49,7 @@ public class MyPreferenceFragment extends PreferenceFragment {
     }
 
     private void setupNotificationPreference(final SharedPreferences sharedPreferences) {
-        SwitchPreference switchPreference = (SwitchPreference) findPreference(getString(R.string.preference_notification_key));
+        CheckBoxPreference switchPreference = (CheckBoxPreference) findPreference(getString(R.string.preference_notification_key));
         switchPreference.setChecked(isNotificationModeOn(getActivity()));
 
         switchPreference.setOnPreferenceChangeListener((preference, newValue) -> {
@@ -60,7 +59,8 @@ public class MyPreferenceFragment extends PreferenceFragment {
             switchPreference.setChecked(((Boolean) newValue));
             //make the mediaplayer handler re-send trackParcelables
             try {
-                MediaPlayerHandler.getInstance().resendPlayerEvents();
+                MediaPlayerHandler.getInstance()
+                        .resendPlayerEvents();
             } catch (Exception e) {
                 e.printStackTrace();
             }

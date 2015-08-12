@@ -5,18 +5,21 @@ import android.content.Context;
 import android.content.Intent;
 import android.content.res.TypedArray;
 import android.graphics.Color;
+import android.graphics.drawable.BitmapDrawable;
 import android.graphics.drawable.ColorDrawable;
 import android.os.Build;
 import android.support.v4.app.Fragment;
 import android.support.v4.app.FragmentTransaction;
 import android.support.v7.app.ActionBar;
 import android.support.v7.app.AppCompatActivity;
+import android.support.v7.graphics.Palette;
 import android.transition.ChangeBounds;
 import android.transition.ChangeImageTransform;
 import android.transition.ChangeTransform;
 import android.transition.TransitionSet;
 import android.util.Log;
 import android.view.View;
+import android.view.ViewTreeObserver;
 import android.view.inputmethod.InputMethodManager;
 import android.widget.ImageView;
 
@@ -27,6 +30,7 @@ import java.util.ArrayList;
 import java.util.concurrent.Callable;
 
 import app.minimize.com.spotifystreamer.Activities.Keys;
+import app.minimize.com.spotifystreamer.HelperClasses.CallbackAction;
 import app.minimize.com.spotifystreamer.Parcelables.TrackParcelable;
 
 /**
@@ -95,15 +99,19 @@ public class Utility {
                         .addToBackStack(null)
                         .commit();
             } else {
-
                 fragmentTransaction
                         .replace(container, toFragment)
-                        .addToBackStack(null)
                         .commit();
             }
 
         } else {
-            Utility.launchFragment(((AppCompatActivity) fromFragment.getActivity()), container, toFragment);
+            if (isTwoPane)
+                fromFragment.getActivity().getSupportFragmentManager()
+                        .beginTransaction()
+                        .replace(container, toFragment)
+                        .commit();
+            else
+                Utility.launchFragment(((AppCompatActivity) fromFragment.getActivity()), container, toFragment);
         }
 
     }
@@ -127,8 +135,28 @@ public class Utility {
         return primaryColor;
     }
 
+    public static void triggerMethodOnceViewIsDisplayed(final View view, final Callable<Void> method) {
+        final ViewTreeObserver observer = view.getViewTreeObserver();
+        observer.addOnGlobalLayoutListener(new ViewTreeObserver.OnGlobalLayoutListener() {
+            @Override
+            public void onGlobalLayout() {
+                if (Build.VERSION.SDK_INT < 16) {
+                    view.getViewTreeObserver()
+                            .removeGlobalOnLayoutListener(this);
+                } else view.getViewTreeObserver()
+                        .removeOnGlobalLayoutListener(this);
+                try {
+                    method.call();
+                } catch (Exception e) {
+                    Log.e("TriggerMethod", e.toString());
+                }
+            }
+        });
+    }
+
     public static void loadImage(Context context, String smallImageUrl,
-                                 String largeImageUrl, ImageView imageView, Callable<Void> onSuccess) {
+                                 String largeImageUrl, ImageView imageView,
+                                 CallbackAction<Integer> onSuccess) {
 
         Picasso.with(context)
                 .load(smallImageUrl) // thumbnail url goes here
@@ -137,9 +165,13 @@ public class Utility {
                     @Override
                     public void onSuccess() {
                         try {
-                            onSuccess.call();
+                            int vibrantColor = Palette.from(((BitmapDrawable) imageView.getDrawable())
+                                    .getBitmap())
+                                    .generate()
+                                    .getVibrantColor(Color.BLACK);
+                            onSuccess.call(vibrantColor);
                         } catch (Exception e) {
-                            e.printStackTrace();
+                            Log.e("LoadImage", "onSuccess "+e.toString());
                         }
                         Picasso.with(context)
                                 .load(largeImageUrl) // image url goes here
@@ -164,10 +196,10 @@ public class Utility {
             activity.getWindow()
                     .setStatusBarColor(darkColor);
 
-            ActionBar supportActionBar = activity.getSupportActionBar();
-            if (supportActionBar != null)
-                supportActionBar.setBackgroundDrawable(new ColorDrawable(vibrantColor));
         }
+        ActionBar supportActionBar = activity.getSupportActionBar();
+        if (supportActionBar != null)
+            supportActionBar.setBackgroundDrawable(new ColorDrawable(vibrantColor));
     }
 
     public static void hideKeyboard(Context context, View view) {
