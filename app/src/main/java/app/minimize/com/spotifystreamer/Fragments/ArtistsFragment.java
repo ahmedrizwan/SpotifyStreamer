@@ -31,6 +31,7 @@ import java.util.concurrent.TimeUnit;
 import app.minimize.com.spotifystreamer.Activities.ContainerActivity;
 import app.minimize.com.spotifystreamer.Activities.Keys;
 import app.minimize.com.spotifystreamer.Adapters.ArtistsAdapter;
+import app.minimize.com.spotifystreamer.HelperClasses.MediaPlayerHandler;
 import app.minimize.com.spotifystreamer.Parcelables.ArtistParcelable;
 import app.minimize.com.spotifystreamer.R;
 import app.minimize.com.spotifystreamer.Rx.RxObservables;
@@ -59,6 +60,8 @@ public class ArtistsFragment extends Fragment implements ArtistsAdapter.ArtistsE
 
     List<ArtistParcelable> mArtists = Collections.emptyList();
     ArtistsAdapter mArtistsAdapter;
+
+    MediaPlayerHandler mMediaPlayerHandler;
 
     private void clearState() {
         mFragmentArtistsBinding.editTextSearch.setText("");
@@ -89,6 +92,10 @@ public class ArtistsFragment extends Fragment implements ArtistsAdapter.ArtistsE
                 container, false);
         mIncludeProgressBinding = DataBindingUtil.bind(mFragmentArtistsBinding.getRoot()
                 .findViewById(R.id.progressLayout));
+
+        mMediaPlayerHandler = MediaPlayerHandler.getInstance();
+        if (mMediaPlayerHandler == null)
+            Utility.startService(getActivity());
 
         mIncludeProgressBinding.textViewError.setText("Hello");
         mIncludeProgressBinding.progressBar.setVisibility(View.GONE);
@@ -145,9 +152,17 @@ public class ArtistsFragment extends Fragment implements ArtistsAdapter.ArtistsE
 
         ((ContainerActivity) getActivity()).refreshNowPlayingCardState();
 
+
         return mFragmentArtistsBinding.getRoot();
     }
 
+    @Override
+    public void onResume() {
+        super.onResume();
+        Utility.startService(getActivity());
+        //Card show or hide
+        ((ContainerActivity) getActivity()).shorOrHideCard();
+    }
 
     private void showOrHideCancel(final String textArtistName) {
         //show clear button if there is text in EditText
@@ -286,11 +301,12 @@ public class ArtistsFragment extends Fragment implements ArtistsAdapter.ArtistsE
     public void artistClicked(final ArtistParcelable artistParcelable, final ArtistsAdapter.RecyclerViewHolderArtists holder) {
         //hide the keyboard
         Utility.hideKeyboard(getActivity(), mFragmentArtistsBinding.editTextSearch);
-        
+
         int container = ((ContainerActivity) getActivity()).isTwoPane() ? R.id.tracksContainer : R.id.container;
         //Shared Element transition using fragments if lollipop and above
         TracksFragment tracksFragment = new TracksFragment();
-        tracksFragment.setImageTransitionName(holder.imageViewArtist.getTransitionName());
+        if (Utility.isVersionLollipopAndAbove())
+            tracksFragment.setImageTransitionName(holder.imageViewArtist.getTransitionName());
         Bundle bundle = new Bundle();
         bundle.putParcelable(Keys.KEY_ARTIST_PARCELABLE, artistParcelable);
         Utility.runOnWorkerThread(() -> {

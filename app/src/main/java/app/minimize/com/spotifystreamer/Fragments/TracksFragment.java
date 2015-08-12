@@ -7,7 +7,6 @@ import android.graphics.Color;
 import android.graphics.drawable.BitmapDrawable;
 import android.os.Build;
 import android.os.Bundle;
-import android.os.Parcelable;
 import android.support.v4.app.Fragment;
 import android.support.v7.app.ActionBar;
 import android.support.v7.app.AppCompatActivity;
@@ -19,14 +18,14 @@ import android.view.View;
 import android.view.ViewGroup;
 
 import java.util.ArrayList;
-import java.util.Collections;
 import java.util.HashMap;
-import java.util.List;
 import java.util.Map;
 
 import app.minimize.com.spotifystreamer.Activities.ContainerActivity;
 import app.minimize.com.spotifystreamer.Activities.Keys;
 import app.minimize.com.spotifystreamer.Adapters.TracksAdapter;
+import app.minimize.com.spotifystreamer.HelperClasses.MediaPlayerHandler;
+import app.minimize.com.spotifystreamer.MyPreferenceFragment;
 import app.minimize.com.spotifystreamer.Parcelables.ArtistParcelable;
 import app.minimize.com.spotifystreamer.Parcelables.TrackParcelable;
 import app.minimize.com.spotifystreamer.R;
@@ -47,7 +46,7 @@ public class TracksFragment extends Fragment implements TracksAdapter.TracksEven
     private static final String TAG = "TracksFragment";
 
     private TracksAdapter mTracksAdapter;
-    private List<TrackParcelable> mData = Collections.emptyList();
+    private ArrayList<TrackParcelable> mData = new ArrayList<>();
     private String imageTransitionName;
     private ArtistParcelable mArtistParcelable;
     private boolean isTwoPane = false;
@@ -55,6 +54,7 @@ public class TracksFragment extends Fragment implements TracksAdapter.TracksEven
 
     private FragmentTracksBinding mFragmentTracksBinding;
     private IncludeProgressBinding mIncludeProgressBinding;
+    private MediaPlayerHandler mMediaPlayerHandler;
 
     @TargetApi(Build.VERSION_CODES.LOLLIPOP)
     @Override
@@ -65,6 +65,10 @@ public class TracksFragment extends Fragment implements TracksAdapter.TracksEven
         //bind the progressLayout
         mIncludeProgressBinding = DataBindingUtil.bind(mFragmentTracksBinding.getRoot()
                 .findViewById(R.id.progressLayout));
+
+        mMediaPlayerHandler = MediaPlayerHandler.getInstance();
+        if(mMediaPlayerHandler==null)
+            Utility.startService(getActivity());
 
         //Restore state
         if (savedInstanceState != null) {
@@ -94,7 +98,7 @@ public class TracksFragment extends Fragment implements TracksAdapter.TracksEven
         if (mData != null && mData.size() > 0)
             mIncludeProgressBinding.progressBar.setVisibility(View.GONE);
         //Transition
-
+        if(Utility.isVersionLollipopAndAbove())
         mFragmentTracksBinding.imageViewArtist.setTransitionName(imageTransitionName);
         Log.e(TAG, "onCreateView " + imageTransitionName);
 
@@ -106,10 +110,6 @@ public class TracksFragment extends Fragment implements TracksAdapter.TracksEven
         mFragmentTracksBinding.recyclerViewTracks.setLayoutManager(new LinearLayoutManager(getActivity()));
         mTracksAdapter = new TracksAdapter(this, mData);
         mFragmentTracksBinding.recyclerViewTracks.setAdapter(mTracksAdapter);
-
-        //NowPlaying view check if should be visible or not
-        ((ContainerActivity) getActivity()).
-                startServiceForStatusRetrieval();
 
         return mFragmentTracksBinding.getRoot();
     }
@@ -131,7 +131,7 @@ public class TracksFragment extends Fragment implements TracksAdapter.TracksEven
         super.onSaveInstanceState(outState);
         try {
             outState.putParcelable(Keys.KEY_ARTIST_PARCELABLE, mArtistParcelable);
-            outState.putParcelableArrayList(TRACKS, (ArrayList<? extends Parcelable>) mData);
+            outState.putParcelableArrayList(TRACKS, mData);
         } catch (Exception e) {
             e.printStackTrace();
         }
@@ -142,7 +142,7 @@ public class TracksFragment extends Fragment implements TracksAdapter.TracksEven
             SpotifyApi spotifyApi = new SpotifyApi();
             SpotifyService spotifyService = spotifyApi.getService();
             Map<String, Object> options = new HashMap<>();
-            options.put(SpotifyService.COUNTRY, "US");
+            options.put(SpotifyService.COUNTRY, MyPreferenceFragment.getSelectedCountry(getActivity()));
 
             spotifyService.getArtistTopTrack(mArtistParcelable.id, options, new Callback<Tracks>() {
                 @Override
@@ -158,7 +158,6 @@ public class TracksFragment extends Fragment implements TracksAdapter.TracksEven
                                 mIncludeProgressBinding.textViewError.setText(getString(R.string.tv_no_tracks));
                                 mIncludeProgressBinding.textViewError.setVisibility(View.VISIBLE);
                             }
-
                             mIncludeProgressBinding.progressBar.setVisibility(View.GONE);
                             ((TracksAdapter) mFragmentTracksBinding.recyclerViewTracks.getAdapter()).updateList(mData);
                             return null;
@@ -184,6 +183,9 @@ public class TracksFragment extends Fragment implements TracksAdapter.TracksEven
     @TargetApi(Build.VERSION_CODES.LOLLIPOP)
     @Override
     public void trackClicked(final TrackParcelable track, final TracksAdapter.RecyclerViewHolderTracks holder) {
+        Bundle bundleTracks = new Bundle();
+        bundleTracks.putParcelable(Keys.KEY_TRACK_PARCELABLE, track);
+        mMediaPlayerHandler.setTrackParcelables(mTracksAdapter.getDataSet());
         if (isTwoPane) {
             //launch playerDialogFragment
             PlayerDialogFragment playerDialogFragment = PlayerDialogFragment.getInstance();
@@ -199,17 +201,11 @@ public class TracksFragment extends Fragment implements TracksAdapter.TracksEven
         } else {
             //Launch the dialogFragment from here
             PlayerDialogFragment playerDialogFragment = PlayerDialogFragment.getInstance();
-            Bundle bundle = new Bundle();
-            bundle.putParcelable(getString(R.string.key_tracks_parcelable), track);
-            bundle.putParcelableArrayList(Keys.KEY_TRACK_PARCELABLE_LIST, mTracksAdapter.getDataSet());
-            int vibrantColor1 = Palette.from(((BitmapDrawable) holder.imageViewAlbum.getDrawable()).getBitmap())
-                    .generate()
-                    .getVibrantColor(Color.BLACK);
-            bundle.putInt(Keys.COLOR_ACTION_BAR, vibrantColor1);
-            playerDialogFragment.setArguments(bundle);
+            playerDialogFragment.setArguments(bundleTracks);
 
             if (Utility.isVersionLollipopAndAbove())
                 playerDialogFragment.setImageViewAlbumTransitionName(holder.imageViewAlbum.getTransitionName());
+
             Utility.launchFragmentWithSharedElements(isTwoPane, this,
                     playerDialogFragment, R.id.container, holder.imageViewAlbum);
         }
@@ -232,7 +228,9 @@ public class TracksFragment extends Fragment implements TracksAdapter.TracksEven
     @Override
     public void onResume() {
         super.onResume();
-        Log.e(TAG, "onResume TracksFragment");
+        Utility.startService(getActivity());
+        //Card show or hide
+        ((ContainerActivity) getActivity()).shorOrHideCard();
     }
 
     public void refreshActionBar() {

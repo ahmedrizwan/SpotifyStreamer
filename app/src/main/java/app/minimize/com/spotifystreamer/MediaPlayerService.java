@@ -4,21 +4,17 @@ import android.app.Service;
 import android.content.Intent;
 import android.os.IBinder;
 import android.support.annotation.Nullable;
-import android.util.Log;
 
-import app.minimize.com.spotifystreamer.Activities.Keys;
 import app.minimize.com.spotifystreamer.HelperClasses.MediaPlayerHandler;
-import app.minimize.com.spotifystreamer.Parcelables.TrackParcelable;
+import app.minimize.com.spotifystreamer.HelperClasses.Notifications;
 import de.greenrobot.event.EventBus;
 
 /**
  * Created by ahmedrizwan on 6/18/15.
- *
  */
 public class MediaPlayerService extends Service {
 
     private static final String TAG = "MediaPlayerService";
-    private TrackParcelable mTrackParcelable;
 
     //MediaPlayer
     private MediaPlayerHandler mMediaPlayerHandler;
@@ -31,46 +27,39 @@ public class MediaPlayerService extends Service {
 
     @Override
     public void onCreate() {
+        //Just instantiate the handler for mediaPlayer
         mMediaPlayerHandler = MediaPlayerHandler.getInstance(this);
+        EventBus.getDefault().register(this);
     }
 
     @Override
     public int onStartCommand(final Intent intent, final int flags, final int startId) {
-        if (statusReceiver(intent)) return START_STICKY;
-        if (playerReceiver(intent)) return START_STICKY;
         return START_STICKY;
     }
 
-    private boolean statusReceiver(final Intent intent) {
-        try {
-            if (intent.getBooleanExtra(Keys.KEY_GET_STATUS, false)) {
-                EventBus.getDefault().post(mTrackParcelable);
-                Log.e(TAG, "statusReceiver ");
-                return true;
+    public void onEventMainThread(MediaPlayerHandler.StoppedEvent stoppedEvent) {
+        Notifications.cancelNotification(this);
+    }
+
+    public void onEventMainThread(MediaPlayerHandler.PausedEvent pausedEvent) {
+        handleNotification();
+    }
+
+
+    public void onEventMainThread(MediaPlayerHandler.PlayingEvent playingEvent) {
+        handleNotification();
+
+    }
+    private void handleNotification() {
+        if(MyPreferenceFragment.isNotificationModeOn(this)) {
+            try {
+                int size = mMediaPlayerHandler.getTrackParcelable().albumImageUrls.size();
+                Notifications.showPlayerNotifications(this, mMediaPlayerHandler.getTrackParcelable().albumImageUrls.get(size - 2), MediaPlayerHandler.getMediaPlayerState(), mMediaPlayerHandler.getTrackParcelable().songName);
+            } catch (Exception e) {
+                Notifications.showPlayerNotifications(this, null, MediaPlayerHandler.getMediaPlayerState(), mMediaPlayerHandler.getTrackParcelable().songName);
             }
-        } catch (NullPointerException e) {
-            return false;
-        }
-        return false;
+        } else
+            Notifications.cancelNotification(this);
     }
-
-    private boolean playerReceiver(Intent intent) {
-        try {
-            //retrieve the parcelables
-            mTrackParcelable = intent.getParcelableExtra(Keys.KEY_TRACK_PARCELABLE);
-            if (mTrackParcelable != null)
-                mMediaPlayerHandler.handlePlayback(mTrackParcelable.previewUrl, mTrackParcelable.songName);
-            return true;
-        } catch (NullPointerException e) {
-            logHelper("PlayTrack Exception");
-            return false;
-        }
-    }
-
-    private void logHelper(final String message) {
-        Log.e("Service", message);
-    }
-
-
 
 }

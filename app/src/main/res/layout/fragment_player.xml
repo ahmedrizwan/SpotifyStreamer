@@ -5,6 +5,7 @@
         android:layout_width="match_parent"
         android:layout_height="match_parent"
         android:orientation="vertical"
+        android:minHeight="500dp"
         >
 
         <ImageView
@@ -19,14 +20,15 @@
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
             android:background="@android:color/white"
-            android:paddingTop="@dimen/default_margin"
-            android:paddingBottom="@dimen/default_margin">
+            android:paddingBottom="@dimen/default_margin"
+            android:paddingTop="@dimen/default_margin">
 
             <TextView
                 android:id="@+id/textViewTrackName"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
                 android:layout_centerHorizontal="true"
+                android:singleLine="true"
                 android:text="Hello"
                 android:textColor="@android:color/black"
                 android:textSize="@dimen/tv_large"/>
@@ -37,17 +39,18 @@
                 android:layout_below="@id/textViewTrackName"
                 android:layout_centerHorizontal="true"
                 android:layout_marginBottom="@dimen/default_margin"
+                android:singleLine="true"
                 android:text="Hello"
-
                 android:textColor="@android:color/black"
                 android:textSize="@dimen/tv_small"/>
+
 
             <app.minimize.com.seek_bar_compat.SeekBarCompat
                 android:id="@+id/seekBarPlayer"
                 android:layout_width="fill_parent"
                 android:layout_height="wrap_content"
-                android:maxHeight="300sp"
                 android:layout_below="@id/textViewTrackAlbum"
+                android:maxHeight="300sp"
                 />
 
             <Chronometer
@@ -76,7 +79,8 @@
                 android:layout_below="@id/chronometerStart"
                 android:gravity="center"
                 android:orientation="horizontal">
-
+                <View android:layout_width="@dimen/iv_previous_next"
+                      android:layout_height="@dimen/iv_previous_next"/>
                 <app.minimize.com.spotifystreamer.Views.PreviousButton
                     android:id="@+id/imageViewPrevious"
                     android:layout_width="@dimen/iv_previous_next"
@@ -92,6 +96,13 @@
                     android:id="@+id/imageViewNext"
                     android:layout_width="@dimen/iv_previous_next"
                     android:layout_height="@dimen/iv_previous_next"
+                    />
+
+                <ImageButton android:id="@+id/imageButtonShare"
+                             android:layout_width="@dimen/iv_previous_next"
+                             android:layout_height="@dimen/iv_previous_next"
+                             android:background="@android:color/transparent"
+                             android:src="@android:drawable/ic_menu_share"
                     />
             </LinearLayout>
 

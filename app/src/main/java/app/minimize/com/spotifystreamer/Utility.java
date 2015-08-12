@@ -2,27 +2,36 @@ package app.minimize.com.spotifystreamer;
 
 import android.annotation.TargetApi;
 import android.content.Context;
+import android.content.Intent;
 import android.content.res.TypedArray;
 import android.graphics.Color;
+import android.graphics.drawable.BitmapDrawable;
 import android.graphics.drawable.ColorDrawable;
 import android.os.Build;
 import android.support.v4.app.Fragment;
 import android.support.v4.app.FragmentTransaction;
 import android.support.v7.app.ActionBar;
 import android.support.v7.app.AppCompatActivity;
+import android.support.v7.graphics.Palette;
 import android.transition.ChangeBounds;
 import android.transition.ChangeImageTransform;
 import android.transition.ChangeTransform;
 import android.transition.TransitionSet;
 import android.util.Log;
 import android.view.View;
+import android.view.ViewTreeObserver;
 import android.view.inputmethod.InputMethodManager;
 import android.widget.ImageView;
 
 import com.squareup.picasso.Callback;
 import com.squareup.picasso.Picasso;
 
+import java.util.ArrayList;
 import java.util.concurrent.Callable;
+
+import app.minimize.com.spotifystreamer.Activities.Keys;
+import app.minimize.com.spotifystreamer.HelperClasses.CallbackAction;
+import app.minimize.com.spotifystreamer.Parcelables.TrackParcelable;
 
 /**
  * Created by ahmedrizwan on 6/9/15.
@@ -90,15 +99,19 @@ public class Utility {
                         .addToBackStack(null)
                         .commit();
             } else {
-
                 fragmentTransaction
                         .replace(container, toFragment)
-                        .addToBackStack(null)
                         .commit();
             }
 
         } else {
-            Utility.launchFragment(((AppCompatActivity) fromFragment.getActivity()), container, toFragment);
+            if (isTwoPane)
+                fromFragment.getActivity().getSupportFragmentManager()
+                        .beginTransaction()
+                        .replace(container, toFragment)
+                        .commit();
+            else
+                Utility.launchFragment(((AppCompatActivity) fromFragment.getActivity()), container, toFragment);
         }
 
     }
@@ -122,8 +135,28 @@ public class Utility {
         return primaryColor;
     }
 
+    public static void triggerMethodOnceViewIsDisplayed(final View view, final Callable<Void> method) {
+        final ViewTreeObserver observer = view.getViewTreeObserver();
+        observer.addOnGlobalLayoutListener(new ViewTreeObserver.OnGlobalLayoutListener() {
+            @Override
+            public void onGlobalLayout() {
+                if (Build.VERSION.SDK_INT < 16) {
+                    view.getViewTreeObserver()
+                            .removeGlobalOnLayoutListener(this);
+                } else view.getViewTreeObserver()
+                        .removeOnGlobalLayoutListener(this);
+                try {
+                    method.call();
+                } catch (Exception e) {
+                    Log.e("TriggerMethod", e.toString());
+                }
+            }
+        });
+    }
+
     public static void loadImage(Context context, String smallImageUrl,
-                                 String largeImageUrl, ImageView imageView, Callable<Void> onSuccess) {
+                                 String largeImageUrl, ImageView imageView,
+                                 CallbackAction<Integer> onSuccess) {
 
         Picasso.with(context)
                 .load(smallImageUrl) // thumbnail url goes here
@@ -131,24 +164,19 @@ public class Utility {
                 .into(imageView, new Callback() {
                     @Override
                     public void onSuccess() {
+                        try {
+                            int vibrantColor = Palette.from(((BitmapDrawable) imageView.getDrawable())
+                                    .getBitmap())
+                                    .generate()
+                                    .getVibrantColor(Color.BLACK);
+                            onSuccess.call(vibrantColor);
+                        } catch (Exception e) {
+                            Log.e("LoadImage", "onSuccess "+e.toString());
+                        }
                         Picasso.with(context)
                                 .load(largeImageUrl) // image url goes here
                                 .placeholder(imageView.getDrawable())
-                                .into(imageView, new Callback() {
-                                    @Override
-                                    public void onSuccess() {
-                                        try {
-                                            onSuccess.call();
-                                        } catch (Exception e) {
-                                            e.printStackTrace();
-                                        }
-                                    }
-
-                                    @Override
-                                    public void onError() {
-
-                                    }
-                                });
+                                .into(imageView);
                     }
 
                     @Override
@@ -168,10 +196,10 @@ public class Utility {
             activity.getWindow()
                     .setStatusBarColor(darkColor);
 
-            ActionBar supportActionBar = activity.getSupportActionBar();
-            if (supportActionBar != null)
-                supportActionBar.setBackgroundDrawable(new ColorDrawable(vibrantColor));
         }
+        ActionBar supportActionBar = activity.getSupportActionBar();
+        if (supportActionBar != null)
+            supportActionBar.setBackgroundDrawable(new ColorDrawable(vibrantColor));
     }
 
     public static void hideKeyboard(Context context, View view) {
@@ -180,5 +208,20 @@ public class Utility {
             InputMethodManager imm = (InputMethodManager) context.getSystemService(Context.INPUT_METHOD_SERVICE);
             imm.hideSoftInputFromWindow(view.getWindowToken(), 0);
         }
+    }
+
+    public static void saveTrackAndTrackListInService(Context context,
+                                                      TrackParcelable trackParcelable,
+                                                      ArrayList<TrackParcelable> topTracks) {
+        Intent intent = new Intent(context,
+                MediaPlayerService.class);
+        intent.putExtra(Keys.KEY_SAVE_TRACKS, true);
+        intent.putExtra(Keys.KEY_TRACK_PARCELABLE, trackParcelable);
+        intent.putExtra(Keys.KEY_TOP_TRACK_PARCELABLES, topTracks);
+        context.startService(intent);
+    }
+
+    public static void startService(final Context activity) {
+        activity.startService(new Intent(activity, MediaPlayerService.class));
     }
 }
